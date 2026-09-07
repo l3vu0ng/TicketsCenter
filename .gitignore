@@ -1,0 +1,5 @@
+# Project documentation and Sparx EA sources are intentionally version-controlled.
+
+# Local Git worktrees
+.worktrees/
+worktrees/
