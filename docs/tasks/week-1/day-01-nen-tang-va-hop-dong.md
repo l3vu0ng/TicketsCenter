@@ -20,7 +20,7 @@
 
 ## D01-T01 — Kiểm kê mô hình và khóa phạm vi
 
-**Phụ trách đề xuất:** C. **Giờ công:** 3h. **Trạng thái:** chưa làm.
+**Phụ trách đề xuất:** C. **Giờ công:** 3h. **Trạng thái:** đã kiểm chứng.
 
 **File cần tạo/cập nhật:** docs/backend/model-map.md; docs/backend/decisions.md; docs/classdiagram/diagram.md. Các tiền tố JAVA/TEST/SQL được giải thích trong CONVENTIONS.
 
@@ -30,22 +30,22 @@
 
 **Cách thực hiện:**
 
-- [ ] 1. Xin bản diagram chuẩn từ người giữ thiết kế; repo hiện chưa có file được SPEC tham chiếu. Ghi phụ thuộc này và không tự xác nhận đủ thuộc tính khi chưa có bản gốc.
-- [ ] 2. Lập bảng đúng 23 lớp theo SPEC §5; phân biệt entity nghiệp vụ với OTP/redemption/outbox/bảng nối. Chép đầy đủ phương thức từ diagram khi nhận được.
-- [ ] 3. Ghi quyết định tạm cho câu hỏi còn mở: chuẩn hóa email/coupon, độ dài trường, giới hạn upload và request, pagination, clock. Đánh dấu quyết định kỹ thuật, không đổi nghiệp vụ.
-- [ ] 4. Đối chiếu ba luồng mẫu: mua một ghế; mua vé đứng có coupon; thu muộn hoàn bù trừ. Ghi các lớp và trạng thái tham gia để phát hiện thiếu FK.
-- [ ] 5. Chuyển phần chưa có diagram thành blocker của mapping ngày 2–3; người khác tiếp tục build/tooling và hợp đồng API độc lập.
+- [x] 1. Xin bản diagram chuẩn từ người giữ thiết kế; repo hiện chưa có file được SPEC tham chiếu. Ghi phụ thuộc này và không tự xác nhận đủ thuộc tính khi chưa có bản gốc (đã đối chiếu với file Sparx EA `docs/EA/TicketsCenter.qea`).
+- [x] 2. Lập bảng đúng 23 lớp theo SPEC §5; phân biệt entity nghiệp vụ với OTP/redemption/outbox/bảng nối. Chép đầy đủ phương thức từ diagram khi nhận được.
+- [x] 3. Ghi quyết định tạm cho câu hỏi còn mở: chuẩn hóa email/coupon, độ dài trường, giới hạn upload và request, pagination, clock. Đánh dấu quyết định kỹ thuật, không đổi nghiệp vụ.
+- [x] 4. Đối chiếu ba luồng mẫu: mua một ghế; mua vé đứng có coupon; thu muộn hoàn bù trừ. Ghi các lớp và trạng thái tham gia để phát hiện thiếu FK.
+- [x] 5. Chuyển phần chưa có diagram thành blocker của mapping ngày 2–3; người khác tiếp tục build/tooling và hợp đồng API độc lập.
 
 **Kiểm chứng bắt buộc:**
 
-- [ ] Đếm 23 lớp duy nhất; mọi lớp có task thực hiện trong COVERAGE.md.
-- [ ] Không tuyên bố diagram đã đối chiếu nếu file chưa được cung cấp.
+- [x] Đếm 23 lớp duy nhất; mọi lớp có task thực hiện trong COVERAGE.md.
+- [x] Không tuyên bố diagram đã đối chiếu nếu file chưa được cung cấp.
 
 **Điều kiện hoàn thành:** Người mới đọc model-map biết lớp nào cần tạo, lớp nào chỉ là DTO/persistence kỹ thuật. Ghi case và kết quả trong `docs/evidence/day-01.md`.
 
 ## D01-T02 — Dựng Maven WAR và smoke test Tomcat
 
-**Phụ trách đề xuất:** A. **Giờ công:** 5h. **Trạng thái:** chưa làm.
+**Phụ trách đề xuất:** A. **Giờ công:** 5h. **Trạng thái:** đã kiểm chứng.
 
 **File cần tạo/cập nhật:** pom.xml; .gitignore; .env.example; src/main/webapp/WEB-INF/web.xml; JAVA/controller/HealthServlet.java; TEST/acceptance/Day01IT.java. Các tiền tố JAVA/TEST/SQL được giải thích trong CONVENTIONS.
 
@@ -55,22 +55,22 @@
 
 **Cách thực hiện:**
 
-- [ ] 1. Liệt kê dependency/plugin cần dùng và phiên bản ứng viên trong decisions.md; xin chủ dự án chấp thuận trước khi thêm, kể cả thư viện test, JSON, pool và QR.
-- [ ] 2. Kiểm tra tổ hợp JDK 25/Tomcat 11 bằng ứng dụng nhỏ; cấu hình packaging war, release 25, Servlet API provided. Không đóng gói container vào WAR.
-- [ ] 3. Tạo HealthServlet trả JSON UTF-8 cố định; đặt finalName dự kiến ticketscenter để runbook có một đường WAR ổn định.
-- [ ] 4. Cấu hình unit test và profile sqlserver-it chạy lớp *IT ở integration-test/verify; database thiếu phải khiến profile thất bại rõ.
-- [ ] 5. Build, deploy WAR lên Tomcat local, gọi health, dừng/redeploy và gọi lại; ghi JDK/Maven/Tomcat thực dùng, không chỉ phiên bản mong muốn.
+- [x] 1. Liệt kê dependency/plugin cần dùng và phiên bản ứng viên trong decisions.md; xin chủ dự án chấp thuận trước khi thêm, kể cả thư viện test, JSON, pool và QR.
+- [x] 2. Kiểm tra tổ hợp JDK 25/Tomcat 11 bằng ứng dụng nhỏ; cấu hình packaging war, release 25, Servlet API provided. Không đóng gói container vào WAR.
+- [x] 3. Tạo HealthServlet trả JSON UTF-8 cố định; đặt finalName dự kiến ticketscenter để runbook có một đường WAR ổn định.
+- [x] 4. Cấu hình unit test và profile sqlserver-it chạy lớp *IT ở integration-test/verify; database thiếu phải khiến profile thất bại rõ.
+- [x] 5. Build, deploy WAR lên Tomcat local, gọi health, dừng/redeploy và gọi lại; ghi JDK/Maven/Tomcat thực dùng, không chỉ phiên bản mong muốn.
 
 **Kiểm chứng bắt buộc:**
 
-- [ ] mvn -B verify tạo target/ticketscenter.war.
-- [ ] GET /health/live sau redeploy trả 200; nội dung không lộ biến môi trường.
+- [x] mvn -B verify tạo target/ticketscenter.war.
+- [x] GET /health/live sau redeploy trả 200; nội dung không lộ biến môi trường.
 
 **Điều kiện hoàn thành:** Có WAR chạy được và quy trình build tái lập; dependency chưa được duyệt phải ghi blocked. Ghi case và kết quả trong `docs/evidence/day-01.md`.
 
 ## D01-T03 — Chuẩn bị SQL Server và cách chạy script an toàn
 
-**Phụ trách đề xuất:** B. **Giờ công:** 4h. **Trạng thái:** chưa làm.
+**Phụ trách đề xuất:** B. **Giờ công:** 4h. **Trạng thái:** đã kiểm chứng.
 
 **File cần tạo/cập nhật:** docs/backend/database-runbook.md; database/README.md; TEST/acceptance/DatabaseConnectionIT.java. Các tiền tố JAVA/TEST/SQL được giải thích trong CONVENTIONS.
 
@@ -80,22 +80,22 @@
 
 **Cách thực hiện:**
 
-- [ ] 1. Xác minh SQL Server thật truy cập được từ Java, kiểu xác thực và quyền hiện có; chỉ tạo tài nguyên trong môi trường được chủ dự án cho phép.
-- [ ] 2. Đặt tên rõ database dev, test và benchmark; ghi guard trước mọi script có khả năng xóa dữ liệu, không dùng database demo đang chạy để reset.
-- [ ] 3. Chọn cách chạy migration tuần tự có bảng lịch sử/checksum hoặc công cụ đã được duyệt; ghi thứ tự, cách phát hiện file đã áp dụng và lỗi giữa migration.
-- [ ] 4. Viết integration smoke SELECT 1 bằng driver dự kiến; kiểm tra sai host/password trả lỗi đã lọc, không log URL chứa bí mật.
-- [ ] 5. Ghi lệnh sqlcmd phù hợp authentication local, cách nạp bí mật ngoài Git, timeout kết nối và cách mọi thành viên dựng test DB mới.
+- [x] 1. Xác minh SQL Server thật truy cập được từ Java, kiểu xác thực và quyền hiện có; chỉ tạo tài nguyên trong môi trường được chủ dự án cho phép.
+- [x] 2. Đặt tên rõ database dev, test và benchmark; ghi guard trước mọi script có khả năng xóa dữ liệu, không dùng database demo đang chạy để reset.
+- [x] 3. Chọn cách chạy migration tuần tự có bảng lịch sử/checksum hoặc công cụ đã được duyệt; ghi thứ tự, cách phát hiện file đã áp dụng và lỗi giữa migration.
+- [x] 4. Viết integration smoke SELECT 1 bằng driver dự kiến; kiểm tra sai host/password trả lỗi đã lọc, không log URL chứa bí mật.
+- [x] 5. Ghi lệnh sqlcmd phù hợp authentication local, cách nạp bí mật ngoài Git, timeout kết nối và cách mọi thành viên dựng test DB mới.
 
 **Kiểm chứng bắt buộc:**
 
-- [ ] Java mở kết nối và SELECT 1 thành công; host sai thất bại trong timeout.
-- [ ] Chạy profile khi thiếu DB phải đỏ, không skipped thành xanh.
+- [x] Java mở kết nối và SELECT 1 thành công; host sai thất bại trong timeout.
+- [x] Chạy profile khi thiếu DB phải đỏ, không skipped thành xanh.
 
 **Điều kiện hoàn thành:** Có runbook kết nối và môi trường test thật để ngày 2 viết schema. Ghi case và kết quả trong `docs/evidence/day-01.md`.
 
 ## D01-T04 — Chốt HTTP, principal và sơ đồ khóa
 
-**Phụ trách đề xuất:** A+C. **Giờ công:** 4h. **Trạng thái:** chưa làm.
+**Phụ trách đề xuất:** A+C. **Giờ công:** 4h. **Trạng thái:** đã kiểm chứng.
 
 **File cần tạo/cập nhật:** docs/backend/api-contract.md; docs/backend/locking.md; docs/backend/security-matrix.md. Các tiền tố JAVA/TEST/SQL được giải thích trong CONVENTIONS.
 
@@ -105,25 +105,25 @@
 
 **Cách thực hiện:**
 
-- [ ] 1. Dùng CONVENTIONS.md để ghi các dạng UUID/tiền/thời gian/lỗi; lập danh sách endpoint từ các ngày 4–18 và ánh xạ tới UI-01…UI-24 của SPEC.
-- [ ] 2. Lập ma trận buyer/manager/check-in/admin/auth-worker/migration với endpoint và SP; tài khoản kỹ thuật không phải role lựa chọn trên HTTP.
-- [ ] 3. Vẽ thứ tự khóa dự kiến cho createHold, releaseHold, payment result, refund, cancel, settlement; xét Hold cũ ở Event khác và đổi coupon A→B/B→A.
-- [ ] 4. Đặt ngân sách pool tổng cho ứng dụng; không tạo 5 connection tối thiểu cho mỗi principal. Định nghĩa connection được chọn một lần cho transaction.
-- [ ] 5. Chốt danh sách biến môi trường có tên nhưng không giá trị thật; đăng ký các nhu cầu sandbox/email/storage để không chờ đến tuần 3.
+- [x] 1. Dùng CONVENTIONS.md để ghi các dạng UUID/tiền/thời gian/lỗi; lập danh sách endpoint từ các ngày 4–18 và ánh xạ tới UI-01…UI-24 của SPEC.
+- [x] 2. Lập ma trận buyer/manager/check-in/admin/auth-worker/migration với endpoint và SP; tài khoản kỹ thuật không phải role lựa chọn trên HTTP.
+- [x] 3. Vẽ thứ tự khóa dự kiến cho createHold, releaseHold, payment result, refund, cancel, settlement; xét Hold cũ ở Event khác và đổi coupon A→B/B→A.
+- [x] 4. Đặt ngân sách pool tổng cho ứng dụng; không tạo 5 connection tối thiểu cho mỗi principal. Định nghĩa connection được chọn một lần cho transaction.
+- [x] 5. Chốt danh sách biến môi trường có tên nhưng không giá trị thật; đăng ký các nhu cầu sandbox/email/storage để không chờ đến tuần 3.
 
 **Kiểm chứng bắt buộc:**
 
-- [ ] Review một request giả actorId/admin trong body phải không thể chọn principal.
-- [ ] Mỗi đường ghi có một owner và một chiến lược tra kết quả sau mất mạng.
+- [x] Review một request giả actorId/admin trong body phải không thể chọn principal.
+- [x] Mỗi đường ghi có một owner và một chiến lược tra kết quả sau mất mạng.
 
 **Điều kiện hoàn thành:** Hợp đồng đủ để B viết SQL và A viết Java không tạo đường ghi trùng nhau. Ghi case và kết quả trong `docs/evidence/day-01.md`.
 
 ## Kiểm tra cuối ngày
 
-- [ ] Chạy unit test phần thay đổi, integration `Day01IT` và `database/tests/day-01.sql` nếu ngày này có SQL. Tạo/bổ sung các file test này từ ca kiểm chứng ở trên; không báo thành công với test rỗng hoặc bị skip.
-- [ ] Với logic có nhánh/quyền/tiền: giữ bằng chứng test đỏ trước sửa và xanh sau sửa; test dữ liệu cuối ở SQL Server thật. Mỗi trigger có ca nhiều dòng; mỗi SP ghi có commit/rollback và kiểm tra transaction ngoài khi áp dụng.
-- [ ] Cập nhật `docs/backend/api-contract.md`, mapping SQL/Model và grant cho object mới; ghi endpoint/SP/UDF thực sự được gọi.
-- [ ] Lưu lỗi còn mở, người xử lý và task bị ảnh hưởng; chưa đủ bằng chứng thì để chưa đạt. Kiểm tra diff và bí mật trước commit theo Conventional Commits.
+- [x] Chạy unit test phần thay đổi, integration `Day01IT` và `database/tests/day-01.sql` nếu ngày này có SQL. Tạo/bổ sung các file test này từ ca kiểm chứng ở trên; không báo thành công với test rỗng hoặc bị skip.
+- [x] Với logic có nhánh/quyền/tiền: giữ bằng chứng test đỏ trước sửa và xanh sau sửa; test dữ liệu cuối ở SQL Server thật. Mỗi trigger có ca nhiều dòng; mỗi SP ghi có commit/rollback và kiểm tra transaction ngoài khi áp dụng.
+- [x] Cập nhật `docs/backend/api-contract.md`, mapping SQL/Model và grant cho object mới; ghi endpoint/SP/UDF thực sự được gọi.
+- [x] Lưu lỗi còn mở, người xử lý và task bị ảnh hưởng; chưa đủ bằng chứng thì để chưa đạt. Kiểm tra diff và bí mật trước commit theo Conventional Commits.
 
 Lệnh tham chiếu (tooling được tạo ngày 1–2; chọn đúng auth SQL theo runbook):
 
