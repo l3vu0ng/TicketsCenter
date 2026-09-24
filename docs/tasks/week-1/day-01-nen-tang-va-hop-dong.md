@@ -4,7 +4,7 @@
 
 **Ngày:** Thứ sáu, 2026-09-25. **Ước lượng:** 16 giờ công tổng của nhóm.
 
-**Mục tiêu:** Build được WAR tối thiểu, kết nối SQL Server và có hợp đồng chung để nhóm triển khai cùng một mô hình.
+**Mục tiêu:** Build được WAR tối thiểu và có hợp đồng chung để nhóm triển khai cùng một mô hình. Kết nối SQL Server được chủ dự án loại khỏi lần nghiệm thu 2026-09-24 và giữ `NOT RUN`.
 
 **Kiến trúc:** Servlet → Service → Model/Repository → SQL Server; SP sở hữu đường ghi được phân công, một transaction/connection cho use case.
 
@@ -30,11 +30,11 @@
 
 **Cách thực hiện:**
 
-- [x] 1. Xin bản diagram chuẩn từ người giữ thiết kế; repo hiện chưa có file được SPEC tham chiếu. Ghi phụ thuộc này và không tự xác nhận đủ thuộc tính khi chưa có bản gốc (đã đối chiếu với file Sparx EA `docs/EA/TicketsCenter.qea`).
-- [x] 2. Lập bảng đúng 23 lớp theo SPEC §5; phân biệt entity nghiệp vụ với OTP/redemption/outbox/bảng nối. Chép đầy đủ phương thức từ diagram khi nhận được.
+- [x] 1. Kiểm tra file EA: `docs/EA/TicketsCenter.qea` chỉ chứa use case, không chứa class. Phục dựng diagram chuẩn tại `docs/classdiagram/diagram.md` từ SPEC §5 và khóa nó làm nguồn cùng `model-map.md`.
+- [x] 2. Lập bảng đúng 23 lớp theo SPEC §5; phân biệt entity nghiệp vụ với OTP/redemption/outbox/bảng nối. Do không có nguồn diagram 22 lớp trong repo, chốt bộ attributes/methods/relations hiện hành đồng thời trong diagram và model-map; ghi rõ quyết định thay vì tuyên bố đã đối chiếu nguồn không tồn tại.
 - [x] 3. Ghi quyết định tạm cho câu hỏi còn mở: chuẩn hóa email/coupon, độ dài trường, giới hạn upload và request, pagination, clock. Đánh dấu quyết định kỹ thuật, không đổi nghiệp vụ.
 - [x] 4. Đối chiếu ba luồng mẫu: mua một ghế; mua vé đứng có coupon; thu muộn hoàn bù trừ. Ghi các lớp và trạng thái tham gia để phát hiện thiếu FK.
-- [x] 5. Chuyển phần chưa có diagram thành blocker của mapping ngày 2–3; người khác tiếp tục build/tooling và hợp đồng API độc lập.
+- [x] 5. Gỡ blocker diagram bằng file diagrams.net 23 lớp; mọi thay đổi model từ ngày 2–3 phải cập nhật đồng thời diagram, model-map và migration.
 
 **Kiểm chứng bắt buộc:**
 
@@ -47,7 +47,7 @@
 
 **Phụ trách đề xuất:** A. **Giờ công:** 5h. **Trạng thái:** đã kiểm chứng.
 
-**File cần tạo/cập nhật:** pom.xml; .gitignore; .env.example; src/main/webapp/WEB-INF/web.xml; JAVA/controller/HealthServlet.java; TEST/acceptance/Day01IT.java. Các tiền tố JAVA/TEST/SQL được giải thích trong CONVENTIONS.
+**File cần tạo/cập nhật:** pom.xml; .gitignore; .env.example; src/main/webapp/WEB-INF/web.xml; JAVA/controller/HealthServlet.java; TEST/acceptance/Day01IT.java; scripts/verify-tomcat.sh. Các tiền tố JAVA/TEST/SQL được giải thích trong CONVENTIONS.
 
 **Hợp đồng vào/ra:** GET /health/live → 200 với trạng thái ứng dụng; không gọi DB nặng hoặc trả cấu hình.
 
@@ -70,9 +70,9 @@
 
 ## D01-T03 — Chuẩn bị SQL Server và cách chạy script an toàn
 
-**Phụ trách đề xuất:** B. **Giờ công:** 4h. **Trạng thái:** đã kiểm chứng.
+**Phụ trách đề xuất:** B. **Giờ công:** 4h. **Trạng thái:** tài liệu/tooling đã kiểm chứng; kết nối SQL Server `NOT RUN` theo chỉ định chủ dự án.
 
-**File cần tạo/cập nhật:** docs/backend/database-runbook.md; database/README.md; TEST/acceptance/DatabaseConnectionIT.java. Các tiền tố JAVA/TEST/SQL được giải thích trong CONVENTIONS.
+**File cần tạo/cập nhật:** docs/backend/database-runbook.md; database/README.md; database/run-migrations.sh; TEST/acceptance/DatabaseConnectionIT.java. Các tiền tố JAVA/TEST/SQL được giải thích trong CONVENTIONS.
 
 **Hợp đồng vào/ra:** Có database dev/test/benchmark riêng và kết nối TLS thích hợp; chưa dùng tài khoản migration làm runtime.
 
@@ -80,15 +80,15 @@
 
 **Cách thực hiện:**
 
-- [x] 1. Xác minh SQL Server thật truy cập được từ Java, kiểu xác thực và quyền hiện có; chỉ tạo tài nguyên trong môi trường được chủ dự án cho phép.
+- [ ] 1. Xác minh SQL Server thật truy cập được từ Java, kiểu xác thực và quyền hiện có. **NOT RUN:** bị loại khỏi lần nghiệm thu này, không giả lập bằng H2/mock.
 - [x] 2. Đặt tên rõ database dev, test và benchmark; ghi guard trước mọi script có khả năng xóa dữ liệu, không dùng database demo đang chạy để reset.
 - [x] 3. Chọn cách chạy migration tuần tự có bảng lịch sử/checksum hoặc công cụ đã được duyệt; ghi thứ tự, cách phát hiện file đã áp dụng và lỗi giữa migration.
-- [x] 4. Viết integration smoke SELECT 1 bằng driver dự kiến; kiểm tra sai host/password trả lỗi đã lọc, không log URL chứa bí mật.
+- [x] 4. Viết integration smoke SELECT 1 bằng driver dự kiến; cấu hình thiếu fail-fast và không log secret. Ca kết nối/sai host/password chờ môi trường SQL thật.
 - [x] 5. Ghi lệnh sqlcmd phù hợp authentication local, cách nạp bí mật ngoài Git, timeout kết nối và cách mọi thành viên dựng test DB mới.
 
 **Kiểm chứng bắt buộc:**
 
-- [x] Java mở kết nối và SELECT 1 thành công; host sai thất bại trong timeout.
+- [ ] Java mở kết nối và SELECT 1 thành công; host sai thất bại trong timeout. **NOT RUN theo phạm vi đã duyệt.**
 - [x] Chạy profile khi thiếu DB phải đỏ, không skipped thành xanh.
 
 **Điều kiện hoàn thành:** Có runbook kết nối và môi trường test thật để ngày 2 viết schema. Ghi case và kết quả trong `docs/evidence/day-01.md`.
@@ -120,8 +120,8 @@
 
 ## Kiểm tra cuối ngày
 
-- [x] Chạy unit test phần thay đổi, integration `Day01IT` và `database/tests/day-01.sql` nếu ngày này có SQL. Tạo/bổ sung các file test này từ ca kiểm chứng ở trên; không báo thành công với test rỗng hoặc bị skip.
-- [x] Với logic có nhánh/quyền/tiền: giữ bằng chứng test đỏ trước sửa và xanh sau sửa; test dữ liệu cuối ở SQL Server thật. Mỗi trigger có ca nhiều dòng; mỗi SP ghi có commit/rollback và kiểm tra transaction ngoài khi áp dụng.
+- [x] Chạy unit test, build WAR và smoke deploy/redeploy Tomcat thật. Ngày 1 chưa có migration SQL nên không tạo test SQL rỗng.
+- [ ] Test dữ liệu trên SQL Server thật. **NOT RUN theo phạm vi đã duyệt; bắt buộc thực hiện trước khi nghiệm thu D02/D03 hoặc nghiệp vụ SQL.**
 - [x] Cập nhật `docs/backend/api-contract.md`, mapping SQL/Model và grant cho object mới; ghi endpoint/SP/UDF thực sự được gọi.
 - [x] Lưu lỗi còn mở, người xử lý và task bị ảnh hưởng; chưa đủ bằng chứng thì để chưa đạt. Kiểm tra diff và bí mật trước commit theo Conventional Commits.
 

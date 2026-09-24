@@ -1,91 +1,86 @@
-# Hợp Đồng Giao Diện Lập Trình Ứng Dụng (API Contract)
+# Hợp đồng HTTP backend
 
-> Ngày cập nhật: 2026-09-24  
-> Nguồn: [CONVENTIONS](../tasks/CONVENTIONS.md) §3; [API-MAP](../tasks/API-MAP.md); [SPEC](../../references/SPEC.md)
+> Nguồn chuẩn: [CONVENTIONS](../tasks/CONVENTIONS.md) §3, [API-MAP](../tasks/API-MAP.md) và [SPEC](../references/SPEC.md) §9.
+> Tài liệu này mô tả backend dự kiến; không tuyên bố endpoint đã được cài đặt. Không có phạm vi frontend.
 
----
+## 1. Quy ước chung
 
-## 1. Cấu Trúc Envelope Chuẩn
+- Base path nằm dưới context WAR `/ticketscenter`; các route dưới đây dùng tiền tố logic `/api` khi cấu hình servlet.
+- Thành công: `{"data":{...}}`; danh sách thêm `page`, `pageSize`, `total`. Lỗi: `{"error":{"code":"...","message":"...","correlationId":"..."}}`.
+- UUID là chuỗi; VND là chuỗi số nguyên; thời gian JSON là ISO-8601 UTC. `page >= 1`, `pageSize` mặc định 20, tối đa 100.
+- `400` sai input; `401` chưa đăng nhập/session hết hiệu lực; `403` thiếu quyền; `404` không tồn tại hoặc ngoài scope; `409` xung đột trạng thái; `413` quá kích thước; `429` rate limit; `503` dependency tạm lỗi.
+- Mọi mutation từ browser dùng `POST` và CSRF. IPN là ngoại lệ public có chữ ký; return URL chỉ đọc trạng thái.
+- `POST /holds` bắt buộc header `Idempotency-Key` là UUID do client sinh cho một thao tác giữ vé. Backend lưu hash/key kỹ thuật duy nhất theo `(userId, key)`: replay cùng payload trả Hold cũ; cùng key khác payload trả 409. Key không phải lớp nghiệp vụ mới.
+- Session là nguồn `actorId`. Backend không nhận `actorId`, role, principal DB, trạng thái tài chính, server time hoặc số tiền tin cậy từ body/query.
+- ID tổ chức/đối tượng trong URL chỉ là input: Service luôn kiểm tra owner, membership đang active và phạm vi tổ chức từ database.
+- Response không chứa passwordHash, OTP/HMAC, secret provider, connection data, stack trace hoặc QR ngoài endpoint QR đã kiểm quyền.
 
-Mọi phản hồi từ backend đều sử dụng định dạng JSON UTF-8 thống nhất:
+## 2. Ánh xạ đúng UI-01…UI-24
 
-### Thành công (Single Object):
-```json
-{
-  "data": {
-    "id": "c1f29b4e-862d-4b89-a29d-43c3d526ef11",
-    "status": "UP"
-  }
-}
+| UI | Nghiệp vụ | Endpoint backend | Quyền/owner ghi |
+|---|---|---|---|
+| UI-01 | Danh sách/tìm kiếm sự kiện | `GET /events` | Public, chỉ PUBLISHED; V01 |
+| UI-02 | Chi tiết/khu/giữ vé | `GET /events/{id}`; `GET /events/{id}/zones`; `POST /holds` | Hai GET public cho Event PUBLISHED; riêng POST cần Buyer active + verified, `Idempotency-Key`; SP02 |
+| UI-03 | Auth/OTP/reset | `GET /auth/csrf`; `POST /auth/register`; `/auth/login`; `/auth/logout`; `/auth/otp/send`; `/auth/otp/verify`; `/auth/password/forgot`; `/auth/password/reset` | Auth principal tối thiểu; OTP one-use/rate-limit |
+| UI-04 | Hold/order/coupon/pay | `GET /me/hold`; `POST /holds/{id}/cancel`; `POST /orders`; `POST /orders/{id}/coupon`; `POST /orders/{id}/payments`; `GET /orders/{id}/coupon-eligibility` | Owner; SP03/SP06/SP07/SP08/SP09-zero |
+| UI-05 | Kết quả payment | `GET /payments/vnpay/return`; `GET /orders/{id}/payment-status`; `GET /payments/vnpay/ipn` | Return/status chỉ đọc; IPN worker → SP09 |
+| UI-06 | Đơn của tôi | `GET /me/orders`; `GET /orders/{id}` | Owner; V03 |
+| UI-07 | Vé/QR | `GET /me/tickets`; `GET /tickets/{id}`; `GET /tickets/{id}/qr` | Owner đúng Ticket; V06 không chứa QR |
+| UI-08 | Yêu cầu hoàn | `GET /orders/{id}/refundable-tickets`; `POST /refund-requests`; `GET /me/refund-requests`; `GET /refund-requests/{id}` | Owner; SP05/F04/V07 |
+| UI-09 | Yêu cầu tạo tổ chức | `POST /organization-requests`; `GET /me/organization-requests` | User đăng nhập; applicant từ session |
+| UI-10 | Chọn/tổng quan tổ chức | `GET /me/memberships`; `GET /organizations/{id}/overview` | Memberships: mọi user đăng nhập xem của mình; overview: Manager active đúng tổ chức; V10 |
+| UI-11 | Thành viên | `GET/POST /organizations/{id}/members`; `POST /organizations/{id}/members/{userId}/role`; `/deactivate`; `/activate` | Manager đúng tổ chức; giữ manager cuối |
+| UI-12 | Event nội bộ | `GET /organizations/{id}/events`; `GET /organizations/{id}/events/{eventId}` | Manager đúng tổ chức; draft không dùng public V01 |
+| UI-13 | Event/khu/ảnh | `POST /organizations/{id}/events`; `POST /events/{id}/edit`; `/delete`; `/submit`; `POST /events/{id}/zones`; `POST /zones/{id}/edit`; `/delete`; `POST /events/{id}/cover` | Manager; layout khóa sau publish |
+| UI-14 | Coupon | `GET/POST /organizations/{id}/coupons`; `POST /coupons/{id}/edit`; `/activate`; `/deactivate`; `/delete`; `GET /admin/coupons` | Manager own org hoặc admin; SP03 là owner apply |
+| UI-15 | Chọn Event check-in | `GET /organizations/{id}/check-in-events`; `GET /events/{id}/check-in-window` | Manager hoặc CHECK_IN_STAFF đúng tổ chức; F07 |
+| UI-16 | Quét/history | `POST /check-ins`; `GET /events/{id}/check-ins` | Manager/check-in đúng tổ chức; SP04/V05 |
+| UI-17 | Report tổ chức/CSV | `GET /organizations/{id}/reports`; `GET /reports/export` | Manager đúng tổ chức; V02–V05/V08/F05/F10 |
+| UI-18 | Tổng quan admin | `GET /admin/overview` | Platform ADMIN |
+| UI-19 | Duyệt tổ chức | `GET /admin/organization-requests`; `GET /admin/organization-requests/{id}`; `POST /admin/organization-requests/{id}/approve`; `/reject` | Admin; SP01 |
+| UI-20 | Duyệt/hủy Event | `GET /admin/events`; `GET /admin/events/{id}`; `POST /admin/events/{id}/publish`; `/reject`; `/cancel`; `GET /admin/events/{id}/cancellation-progress` | Admin; SP12/SP13, worker SP17 |
+| UI-21 | Duyệt/vận hành hoàn | `GET /admin/refund-requests`; `GET /admin/refund-requests/{id}`; `POST /admin/refund-requests/{id}/decision`; `/retry`; `POST /admin/payments/{id}/compensation/retry` | Admin quyết định SP10; worker ghi result SP09/SP11 |
+| UI-22 | Rule/settlement/payout | `GET/POST /admin/organizations/{id}/commission-rules`; `POST /admin/commission-rules/{id}/edit`; `GET /admin/events/{id}/settlement`; `/settlement-blockers`; `POST /admin/events/{id}/settlement/recalculate`; `POST /admin/settlements/{id}/confirm`; `/payouts`; `GET /admin/settlements/{id}/payouts` | Admin; SP14–SP16 |
+| UI-23 | Report/audit hệ thống | `GET /admin/reports`; `GET /reports/export`; `GET /admin/audit-logs`; `GET /admin/audit-logs/{id}` | Admin; audit append-only |
+| UI-24 | Hồ sơ | `GET /me/profile`; `GET /me/memberships`; `POST /auth/otp/send` | User của session |
+
+Danh sách endpoint chi tiết, input/output và task triển khai được duy trì một lần tại [API-MAP](../tasks/API-MAP.md). Khi thay endpoint phải sửa cả hai file trong cùng commit và giữ nguyên mã UI.
+
+## 3. Endpoint kỹ thuật ngoài UI
+
+| Đường chạy | Hợp đồng |
+|---|---|
+| `GET /health/live` | Luôn nhẹ, không gọi DB; `200 {"data":{"status":"UP"}}`; không lộ cấu hình |
+| `GET /health/ready` | Kiểm dependency với timeout hữu hạn; lỗi trả 503, không trả connection string |
+| VNPAY IPN | Xác minh signature, merchant, txnRef, amount, currency trước SP09; trả response đúng protocol, không dùng envelope chung |
+| Worker hold/payment/refund/cancel/outbox | Không public cho browser; principal kỹ thuật hẹp; idempotency và lease lưu DB |
+
+## 4. Ví dụ kiểm tra trust boundary
+
+Request sau phải bị từ chối hoặc bỏ qua các trường giả mạo; quyền vẫn lấy từ session/database:
+
+```http
+POST /api/admin/events/10000000-0000-0000-0000-000000000001/publish
+Content-Type: application/json
+X-CSRF-Token: <runtime-token>
+
+{"actorId":"admin-id","role":"PLATFORM_ADMIN","dbPrincipal":"tc_platform_admin","status":"PUBLISHED"}
 ```
 
-### Thành công (Danh sách có phân trang):
-```json
-{
-  "data": [ ... ],
-  "pagination": {
-    "page": 1,
-    "pageSize": 20,
-    "total": 150
-  }
-}
-```
+Không endpoint browser nào được tên `/mark-paid`, `/mark-refunded`, `/mark-payout-success` hoặc nhận `CAPTURED`/`SUCCEEDED` làm sự thật. Kết quả provider chỉ đi qua adapter đã xác minh và SP owner tương ứng.
 
-### Lỗi nghiệp vụ hoặc hệ thống:
-```json
-{
-  "error": {
-    "code": "HOLD_EXPIRED",
-    "message": "Lượt giữ vé đã hết hạn",
-    "correlationId": "d8205f3b-6325-4c27-99ea-bfd6c97a76e9"
-  }
-}
-```
+## 5. Idempotency và mất response
 
----
+| Ghi | Khóa tra lại trước retry |
+|---|---|
+| Duyệt tổ chức | `requestId` → organization đã tạo |
+| Giữ vé | `(userId, Idempotency-Key)` → Hold đã tạo; replay khác payload trả 409 |
+| Tạo Order | `holdId` duy nhất |
+| Coupon | `orderId` + redemption hiện hành |
+| Payment | `paymentId`/`txnRef` |
+| Check-in | Ticket + CheckIn đã ghi |
+| Refund request | request mở theo tập ticket |
+| Refund | `refundId` và providerReference |
+| Settlement/Payout | `eventId`/`settlementId`/`payoutId` |
 
-## 2. Quy Chuẩn Kiểu Dữ Liệu trên HTTP
-
-- **UUID:** Định dạng chuỗi 36 ký tự (ví dụ `"c1f29b4e-862d-4b89-a29d-43c3d526ef11"`).
-- **Tiền VND:** Định dạng chuỗi số nguyên để bảo toàn độ chính xác tuyệt đối (ví dụ `"350000"`).
-- **Thời gian:** Chuỗi ISO-8601 UTC (ví dụ `"2026-10-02T14:30:00Z"`).
-- **Số lượng (Quantity):** Số nguyên dương.
-
----
-
-## 3. Quy Tắc Bảo Mật và Phiên Làm Việc
-
-1. **Mutation:** Mọi thao tác thay đổi trạng thái (POST, PUT, DELETE) bắt buộc kèm CSRF token thông qua header `X-CSRF-Token` hoặc form field `_csrf`.
-2. **Xác thực:** Dựa vào Session Cookie (`JSESSIONID`) có cờ `HttpOnly`, `Secure` (trên production) và `SameSite=Lax`.
-3. **Principal & Actor:** Backend đọc `userId` từ session đã xác thực, tuyệt đối không tin cậy `userId`, `role` hay `organizationId` do client gửi trong request body/query params để phân quyền.
-
----
-
-## 4. Bảng Ánh Xạ Endpoint Phục Vụ 24 Màn Hình (UI-01 đến UI-24)
-
-| UI Code | Màn Hình / Nghiệp Vụ | Method | Endpoint Hợp Đồng | Trạng Thái Trả Về |
-|:---:|---|:---:|---|:---:|
-| **UI-01** | Trang chủ / Danh sách sự kiện nổi bật | `GET` | `/api/events` | 200 |
-| **UI-02** | Tìm kiếm sự kiện theo từ khóa & danh mục | `GET` | `/api/events/search` | 200 |
-| **UI-03** | Chi tiết sự kiện & sơ đồ chỗ | `GET` | `/api/events/{id}` | 200 / 404 |
-| **UI-04** | Đăng ký tài khoản người mua | `POST` | `/api/auth/register` | 201 / 400 |
-| **UI-05** | Xác thực OTP email | `POST` | `/api/auth/verify-otp` | 200 / 400 |
-| **UI-06** | Đăng nhập tài khoản | `POST` | `/api/auth/login` | 200 / 401 |
-| **UI-07** | Quên mật khẩu & gửi OTP khôi phục | `POST` | `/api/auth/forgot-password` | 200 |
-| **UI-08** | Đặt lại mật khẩu mới bằng OTP | `POST` | `/api/auth/reset-password` | 200 / 400 |
-| **UI-09** | Chọn chỗ & Thực hiện Giữ vé (Hold) | `POST` | `/api/holds` | 201 / 409 |
-| **UI-10** | Hủy lượt giữ vé hiện tại | `POST` | `/api/holds/{id}/release` | 200 |
-| **UI-11** | Tạo đơn hàng từ Hold & áp dụng Coupon | `POST` | `/api/orders` | 201 / 400 |
-| **UI-12** | Khởi tạo thanh toán VNPAY | `POST` | `/api/payments/vnpay/init` | 200 |
-| **UI-13** | Xử lý VNPAY IPN Callback (kênh ngầm) | `POST` | `/api/payments/vnpay/ipn` | 200 (VNPAY code) |
-| **UI-14** | VNPAY Return URL (hiển thị kết quả) | `GET` | `/api/payments/vnpay/return` | 200 / 302 |
-| **UI-15** | Xem vé đã mua & ảnh mã QR | `GET` | `/api/tickets/{id}` | 200 / 403 |
-| **UI-16** | Gửi yêu cầu hoàn vé | `POST` | `/api/refund-requests` | 201 / 400 |
-| **UI-17** | Ứng dụng quét mã Check-in vé | `POST` | `/api/checkin/scan` | 200 |
-| **UI-18** | Đăng ký mở Tổ chức tổ chức sự kiện | `POST` | `/api/organization-requests` | 201 / 400 |
-| **UI-19** | Quản lý thành viên & phân quyền ban tổ chức | `GET`/`POST` | `/api/organizations/{id}/members` | 200 / 403 |
-| **UI-20** | Tạo & chỉnh sửa sự kiện, cấu hình khu vé | `POST` | `/api/events/manage` | 201 / 400 |
-| **UI-21** | Gửi sự kiện yêu cầu phê duyệt | `POST` | `/api/events/{id}/submit` | 200 |
-| **UI-22** | Admin duyệt sự kiện / duyệt yêu cầu tổ chức | `POST` | `/api/admin/reviews` | 200 / 403 |
-| **UI-23** | Xem báo cáo doanh thu & đối soát kỳ | `GET` | `/api/reports/settlement` | 200 / 403 |
-| **UI-24** | Xuất báo cáo CSV & kiểm toán Audit Log | `GET` | `/api/reports/export.csv` | 200 / 403 |
+Timeout sau commit không được diễn giải là thất bại. Caller đọc trạng thái đã lưu rồi mới quyết định trả kết quả hoặc retry hữu hạn.

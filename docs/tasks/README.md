@@ -33,9 +33,9 @@ Giữ **23 lớp nghiệp vụ**, **20 nhóm constraint**, **10 View**, **17 SP*
 
 | Điều kiện còn thiếu/chưa xác minh | Xử lý ở task | Ảnh hưởng nếu chưa có |
 |---|---|---|
-| Diagram chuẩn `docs/classdiagram/diagram.md` chưa có trong repo | D01-T01 lấy bản đã chốt; D02/D03 đối chiếu | Không nghiệm thu đầy đủ thuộc tính/phương thức 23 lớp; tooling/API planning vẫn tiếp tục |
+| Diagram chuẩn `docs/classdiagram/diagram.md` | Đã phục dựng ở D01-T01 từ SPEC §5; D02/D03 tiếp tục đối chiếu | Khi đổi model phải cập nhật diagram + model-map + migration cùng lúc |
 | Phiên bản/dependency Java, JSON, pool, test, QR chưa chốt | D01-T02 kiểm tương thích và xin chủ dự án duyệt trước thêm | Build/implementation phụ thuộc thư viện bị chặn tương ứng |
-| SQL Server và quyền tạo DB test chưa xác minh | D01-T03 | Integration/concurrency cần SQL Server thật; mock không thay bằng chứng |
+| SQL Server và quyền tạo DB test chưa xác minh | D01-T03 tài liệu đã xong; connection `NOT RUN` theo chỉ định chủ dự án | Integration/concurrency cần SQL Server thật; mock không thay bằng chứng |
 | Email sender và storage chưa chọn | D05-T03, đăng ký nhu cầu từ D01-T04 | OTP/mail/upload thật chưa nghiệm thu; vẫn test được logic qua adapter kiểm thử |
 | VNPAY credential/callback HTTPS | D01-T04, D10-T04 | Signature/transaction tests chạy được; sandbox thực giữ blocked |
 | Azure/Render account, quota và quyền publish | D01-T04 kiểm nhu cầu; D20-T02 thực hiện nếu được cấp | Docker/local vẫn hoàn tất; không tuyên bố online đã chạy |
@@ -57,7 +57,7 @@ Không yêu cầu người nhận đoán phần thiếu. Ghi tên người xử 
 
 | Ngày | Lịch | Công việc chính | Giờ công | Mã task | Trạng thái |
 |---|---|---|---:|---|:---:|
-| [D01](week-1/day-01-nen-tang-va-hop-dong.md) | 2026-09-25 | Chốt nền tảng, mô hình và hợp đồng backend | 16 | D01-T01…T04 | ✅ ĐÃ HOÀN THÀNH |
+| [D01](week-1/day-01-nen-tang-va-hop-dong.md) | 2026-09-25 | Chốt nền tảng, mô hình và hợp đồng backend | 16 | D01-T01…T04 | Hoàn thành trừ SQL connection (`NOT RUN`) |
 | [D02](week-1/day-02-schema-va-rang-buoc.md) | 2026-09-26 | Thiết kế và dựng toàn bộ schema SQL Server | 17 | D02-T01…T04 | Chưa làm |
 | [D03](week-1/day-03-model-jpa-transaction.md) | 2026-09-27 | Model nền, JPA và transaction theo principal | 18 | D03-T01…T04 | Chưa làm |
 | [D04](week-1/day-04-tai-khoan-session-phan-quyen.md) | 2026-09-28 | Đăng ký, đăng nhập, phiên và bảo vệ HTTP | 15 | D04-T01…T04 | Chưa làm |

@@ -16,7 +16,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@DisplayName("Day 01 Acceptance Tests — Health & Tooling Verification")
+@DisplayName("Day 01 Servlet Contract Test — container deployment is verified by scripts/verify-tomcat.sh")
 public class Day01IT {
 
     @Test
@@ -62,7 +62,6 @@ public class Day01IT {
                 }
         );
 
-        // Invoke servlet doGet via reflection or method call
         java.lang.reflect.Method doGetMethod = HealthServlet.class.getDeclaredMethod("doGet", HttpServletRequest.class, HttpServletResponse.class);
         doGetMethod.setAccessible(true);
         doGetMethod.invoke(servlet, request, response);

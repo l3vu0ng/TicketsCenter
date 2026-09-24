@@ -7,7 +7,7 @@ Khi một ô ghi `POST /auth/register,/auth/login`, hiểu là các endpoint POS
 | UI | Nghiệp vụ | Endpoint dự kiến | Đầu vào/đầu ra chính | Quyền/bất biến | Task |
 |---|---|---|---|---|---|
 | UI-01 | Danh sách/tìm kiếm | GET /events | keyword, categoryId, from/to, sort, page/pageSize → event cards/minPrice/status; V01 | Public chỉ PUBLISHED, filter bind/order allowlist | D07-T04 |
-| UI-02 | Event/khu/giữ vé | GET /events/{id}; GET /events/{id}/zones; POST /holds | Event/Zone availability qua V01/V02/F03; hold nhận eventId + selections(zoneId,seatId?,quantity) | Giữ cần ACTIVE+verified; 1–8 vé cùng Event, server price/time | D07-T04; D08-T02/T03 |
+| UI-02 | Event/khu/giữ vé | GET /events/{id}; GET /events/{id}/zones; POST /holds | Event/Zone availability qua V01/V02/F03; hold nhận `Idempotency-Key` UUID + eventId + selections(zoneId,seatId?,quantity) | GET public; giữ cần ACTIVE+verified; replay cùng key/payload trả Hold cũ, khác payload 409; 1–8 vé cùng Event, server price/time | D07-T04; D08-T02/T03 |
 | UI-03 | Auth/OTP/reset | GET /auth/csrf; POST /auth/register,/auth/login,/auth/logout,/auth/otp/send,/auth/otp/verify,/auth/password/reset; POST /auth/password/forgot | email/password theo luồng; OTP/purpose → verification/reset grant; forgot dùng phản hồi hạn chế dò account | CSRF phù hợp từng phiên; one-use OTP/reset, rate limit, không trả secret | D04-T01…T04; D05-T01/T02/T04 |
 | UI-04 | Hold/Order/coupon/pay | GET /me/hold; POST /holds/{id}/cancel; POST /orders; POST /orders/{id}/coupon; POST /orders/{id}/payments; GET /orders/{id}/coupon-eligibility | holdId → Order; couponCode hoặc null → breakdown; pay → URL hoặc completed zero; preview F08 | Owner, Hold còn hạn, không đổi coupon khi payment PENDING/UNKNOWN | D08-T03; D09-T01…T03; D10-T03; D11-T02 |
 | UI-05 | Trạng thái payment | GET /payments/vnpay/return; GET /orders/{id}/payment-status; GET /payments/vnpay/ipn | Return/status → confirmed/pending/failed/compensation; IPN → protocol response | Return không mutate; status owner; IPN signature verified, principal technical | D10-T02/T03; D11-T02/T04; D12-T02 |
@@ -50,6 +50,7 @@ Khi một ô ghi `POST /auth/register,/auth/login`, hiểu là các endpoint POS
 POST /holds
 Content-Type: application/json
 X-CSRF-Token: <token của phiên kiểm thử, không lưu vào Git>
+Idempotency-Key: 50000000-0000-0000-0000-000000000001
 
 {"eventId":"10000000-0000-0000-0000-000000000001","selections":[{"zoneId":"20000000-0000-0000-0000-000000000001","seatId":"30000000-0000-0000-0000-000000000001","quantity":1},{"zoneId":"20000000-0000-0000-0000-000000000002","quantity":2}]}
 ```
