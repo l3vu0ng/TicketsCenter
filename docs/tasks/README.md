@@ -55,39 +55,39 @@ Không yêu cầu người nhận đoán phần thiếu. Ghi tên người xử 
 
 ### Tuần 1 — Nền tảng, danh tính và sự kiện (115 giờ công)
 
-| Ngày | Lịch | Công việc chính | Giờ công | Mã task |
-|---|---|---|---:|---|
-| [D01](week-1/day-01-nen-tang-va-hop-dong.md) | 2026-09-25 | Chốt nền tảng, mô hình và hợp đồng backend | 16 | D01-T01…T04 |
-| [D02](week-1/day-02-schema-va-rang-buoc.md) | 2026-09-26 | Thiết kế và dựng toàn bộ schema SQL Server | 17 | D02-T01…T04 |
-| [D03](week-1/day-03-model-jpa-transaction.md) | 2026-09-27 | Model nền, JPA và transaction theo principal | 18 | D03-T01…T04 |
-| [D04](week-1/day-04-tai-khoan-session-phan-quyen.md) | 2026-09-28 | Đăng ký, đăng nhập, phiên và bảo vệ HTTP | 15 | D04-T01…T04 |
-| [D05](week-1/day-05-otp-email-khoi-phuc-mat-khau.md) | 2026-09-29 | OTP email, đặt lại mật khẩu và nhà cung cấp tích hợp | 15 | D05-T01…T04 |
-| [D06](week-1/day-06-to-chuc-thanh-vien-hoa-hong.md) | 2026-09-30 | Tổ chức, thành viên và chính sách hoa hồng | 16 | D06-T01…T04 |
-| [D07](week-1/day-07-su-kien-khu-ghe-anh.md) | 2026-10-01 | Sự kiện, khu/ghế, ảnh bìa và công khai | 18 | D07-T01…T04 |
+| Ngày | Lịch | Công việc chính | Giờ công | Mã task | Trạng thái |
+|---|---|---|---:|---|:---:|
+| [D01](week-1/day-01-nen-tang-va-hop-dong.md) | 2026-09-25 | Chốt nền tảng, mô hình và hợp đồng backend | 16 | D01-T01…T04 | ✅ ĐÃ HOÀN THÀNH |
+| [D02](week-1/day-02-schema-va-rang-buoc.md) | 2026-09-26 | Thiết kế và dựng toàn bộ schema SQL Server | 17 | D02-T01…T04 | Chưa làm |
+| [D03](week-1/day-03-model-jpa-transaction.md) | 2026-09-27 | Model nền, JPA và transaction theo principal | 18 | D03-T01…T04 | Chưa làm |
+| [D04](week-1/day-04-tai-khoan-session-phan-quyen.md) | 2026-09-28 | Đăng ký, đăng nhập, phiên và bảo vệ HTTP | 15 | D04-T01…T04 | Chưa làm |
+| [D05](week-1/day-05-otp-email-khoi-phuc-mat-khau.md) | 2026-09-29 | OTP email, đặt lại mật khẩu và nhà cung cấp tích hợp | 15 | D05-T01…T04 | Chưa làm |
+| [D06](week-1/day-06-to-chuc-thanh-vien-hoa-hong.md) | 2026-09-30 | Tổ chức, thành viên và chính sách hoa hồng | 16 | D06-T01…T04 | Chưa làm |
+| [D07](week-1/day-07-su-kien-khu-ghe-anh.md) | 2026-10-01 | Sự kiện, khu/ghế, ảnh bìa và công khai | 18 | D07-T01…T04 | Chưa làm |
 
 ### Tuần 2 — Bán vé, thanh toán và check-in (117 giờ công)
 
-| Ngày | Lịch | Công việc chính | Giờ công | Mã task |
-|---|---|---|---:|---|
-| [D08](week-2/day-08-giu-ve-va-giai-phong.md) | 2026-10-02 | Giữ vé nguyên tử và giải phóng khi hủy/hết hạn | 17 | D08-T01…T04 |
-| [D09](week-2/day-09-don-hang-coupon.md) | 2026-10-03 | Tạo đơn từ Hold và quản lý coupon | 17 | D09-T01…T04 |
-| [D10](week-2/day-10-vnpay-khoi-tao-xac-thuc.md) | 2026-10-04 | Khởi tạo VNPAY và xác thực kết quả cổng | 16 | D10-T01…T04 |
-| [D11](week-2/day-11-ghi-nhan-thanh-toan-phat-hanh-ve.md) | 2026-10-05 | Ghi nhận thu tiền, phát hành vé và QR | 19 | D11-T01…T04 |
-| [D12](week-2/day-12-outbox-worker-doi-soat-thanh-toan-email.md) | 2026-10-06 | Worker, đối chiếu thanh toán và email bền vững | 15 | D12-T01…T04 |
-| [D13](week-2/day-13-check-in-qr.md) | 2026-10-07 | Check-in vé và lịch sử quét theo tổ chức | 15 | D13-T01…T04 |
-| [D14](week-2/day-14-yeu-cau-va-duyet-hoan.md) | 2026-10-08 | Yêu cầu hoàn vé và quyết định của admin | 18 | D14-T01…T04 |
+| Ngày | Lịch | Công việc chính | Giờ công | Mã task | Trạng thái |
+|---|---|---|---:|---|:---:|
+| [D08](week-2/day-08-giu-ve-va-giai-phong.md) | 2026-10-02 | Giữ vé nguyên tử và giải phóng khi hủy/hết hạn | 17 | D08-T01…T04 | Chưa làm |
+| [D09](week-2/day-09-don-hang-coupon.md) | 2026-10-03 | Tạo đơn từ Hold và quản lý coupon | 17 | D09-T01…T04 | Chưa làm |
+| [D10](week-2/day-10-vnpay-khoi-tao-xac-thuc.md) | 2026-10-04 | Khởi tạo VNPAY và xác thực kết quả cổng | 16 | D10-T01…T04 | Chưa làm |
+| [D11](week-2/day-11-ghi-nhan-thanh-toan-phat-hanh-ve.md) | 2026-10-05 | Ghi nhận thu tiền, phát hành vé và QR | 19 | D11-T01…T04 | Chưa làm |
+| [D12](week-2/day-12-outbox-worker-doi-soat-thanh-toan-email.md) | 2026-10-06 | Worker, đối chiếu thanh toán và email bền vững | 15 | D12-T01…T04 | Chưa làm |
+| [D13](week-2/day-13-check-in-qr.md) | 2026-10-07 | Check-in vé và lịch sử quét theo tổ chức | 15 | D13-T01…T04 | Chưa làm |
+| [D14](week-2/day-14-yeu-cau-va-duyet-hoan.md) | 2026-10-08 | Yêu cầu hoàn vé và quyết định của admin | 18 | D14-T01…T04 | Chưa làm |
 
 ### Tuần 3 — Hoàn tiền, tài chính và nghiệm thu (119 giờ công)
 
-| Ngày | Lịch | Công việc chính | Giờ công | Mã task |
-|---|---|---|---:|---|
-| [D15](week-3/day-15-hoan-tien-va-bu-tru.md) | 2026-10-09 | Hoàn tiền mô phỏng, bù trừ và xử lý lần thử | 16 | D15-T01…T04 |
-| [D16](week-3/day-16-huy-su-kien-theo-lo.md) | 2026-10-10 | Hủy sự kiện, hoàn tự động và tiếp tục sau restart | 18 | D16-T01…T04 |
-| [D17](week-3/day-17-doi-soat-va-chi-tra.md) | 2026-10-11 | Đối soát, đóng băng số liệu và chi trả mô phỏng | 20 | D17-T01…T04 |
-| [D18](week-3/day-18-bao-cao-csv-audit.md) | 2026-10-12 | Báo cáo, CSV và nhật ký quản trị | 16 | D18-T01…T04 |
-| [D19](week-3/day-19-bao-mat-db-va-benchmark.md) | 2026-10-13 | Rà quyền toàn hệ thống và chuẩn bị benchmark index | 16 | D19-T01…T04 |
-| [D20](week-3/day-20-hieu-nang-docker-azure-khoi-phuc.md) | 2026-10-14 | Index, đóng gói Docker và diễn tập phục hồi | 17 | D20-T01…T04 |
-| [D21](week-3/day-21-nghiem-thu-va-ban-giao.md) | 2026-10-15 | Nghiệm thu backend toàn luồng và bàn giao tái lập | 16 | D21-T01…T04 |
+| Ngày | Lịch | Công việc chính | Giờ công | Mã task | Trạng thái |
+|---|---|---|---:|---|:---:|
+| [D15](week-3/day-15-hoan-tien-va-bu-tru.md) | 2026-10-09 | Hoàn tiền mô phỏng, bù trừ và xử lý lần thử | 16 | D15-T01…T04 | Chưa làm |
+| [D16](week-3/day-16-huy-su-kien-theo-lo.md) | 2026-10-10 | Hủy sự kiện, hoàn tự động và tiếp tục sau restart | 18 | D16-T01…T04 | Chưa làm |
+| [D17](week-3/day-17-doi-soat-va-chi-tra.md) | 2026-10-11 | Đối soát, đóng băng số liệu và chi trả mô phỏng | 20 | D17-T01…T04 | Chưa làm |
+| [D18](week-3/day-18-bao-cao-csv-audit.md) | 2026-10-12 | Báo cáo, CSV và nhật ký quản trị | 16 | D18-T01…T04 | Chưa làm |
+| [D19](week-3/day-19-bao-mat-db-va-benchmark.md) | 2026-10-13 | Rà quyền toàn hệ thống và chuẩn bị benchmark index | 16 | D19-T01…T04 | Chưa làm |
+| [D20](week-3/day-20-hieu-nang-docker-azure-khoi-phuc.md) | 2026-10-14 | Index, đóng gói Docker và diễn tập phục hồi | 17 | D20-T01…T04 | Chưa làm |
+| [D21](week-3/day-21-nghiem-thu-va-ban-giao.md) | 2026-10-15 | Nghiệm thu backend toàn luồng và bàn giao tái lập | 16 | D21-T01…T04 | Chưa làm |
 
 ## 6. Phụ thuộc và mốc kiểm tra
 
