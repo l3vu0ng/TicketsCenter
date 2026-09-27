@@ -7,28 +7,70 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Quản lý nạp cấu hình tập trung và điều phối truy cập cấu hình hệ thống.
- * Hỗ trợ nạp cấu hình từ nhiều file riêng biệt (database.properties, server.properties, vnpay.properties, mail.properties)
- * hoặc file gộp application.properties.
+ * Quản lý nạp cấu hình tập trung từ 1 file duy nhất (application.properties / application.properties.example)
+ * và tổng hợp toàn bộ các khóa cấu hình (keys) của toàn hệ thống trong một file duy nhất.
  *
  * Thứ tự ưu tiên giải quyết giá trị:
  * 1. System Properties (-Dkey=value)
  * 2. Environment Variables (VD: TC_SQL_HOST, DB_HOST)
- * 3. Properties files trong classpath
+ * 3. File application.properties trong classpath
  */
 public final class AppConfig {
 
     private static final Logger LOGGER = Logger.getLogger(AppConfig.class.getName());
-
-    private static final String[] CONFIG_FILES = {
-            "application.properties",
-            "database.properties",
-            "server.properties",
-            "vnpay.properties",
-            "mail.properties"
-    };
+    private static final String PROPERTIES_FILE = "application.properties";
+    private static final String PROPERTIES_EXAMPLE_FILE = "application.properties.example";
 
     private static final Properties PROPERTIES = new Properties();
+
+    /**
+     * Tập trung toàn bộ key cấu hình của hệ thống vào 1 nơi duy nhất để tiện quản lý và tra cứu.
+     */
+    public static final class Keys {
+        // 1. Cơ sở dữ liệu Microsoft SQL Server
+        public static final String DB_HOST = "db.host";
+        public static final String DB_PORT = "db.port";
+        public static final String DB_NAME = "db.name";
+        public static final String DB_USER = "db.user";
+        public static final String DB_PASSWORD = "db.password";
+        public static final String DB_ENCRYPT = "db.encrypt";
+        public static final String DB_TRUST_CERT = "db.trustServerCertificate";
+        public static final String DB_TIMEOUT = "db.loginTimeout";
+        public static final String DB_URL = "db.url";
+
+        // Aliases TC_SQL_*
+        public static final String TC_SQL_HOST = "TC_SQL_HOST";
+        public static final String TC_SQL_PORT = "TC_SQL_PORT";
+        public static final String TC_SQL_DEV_DB = "TC_SQL_DEV_DB";
+        public static final String TC_SQL_TEST_DB = "TC_SQL_TEST_DB";
+        public static final String TC_SQL_BENCH_DB = "TC_SQL_BENCH_DB";
+        public static final String TC_SQL_LOGIN = "TC_SQL_LOGIN";
+        public static final String TC_SQL_PASSWORD = "TC_SQL_PASSWORD";
+        public static final String TC_SQL_ENCRYPT = "TC_SQL_ENCRYPT";
+        public static final String TC_SQL_TRUST_SERVER_CERT = "TC_SQL_TRUST_SERVER_CERT";
+        public static final String TC_SQL_CONNECT_TIMEOUT_SEC = "TC_SQL_CONNECT_TIMEOUT_SEC";
+
+        // 2. Cấu hình Ứng dụng Web
+        public static final String APP_BASE_URL = "app.base.url";
+        public static final String APP_ENV = "app.env";
+        public static final String APP_SECRET_KEY = "app.secret.key";
+
+        // 3. Cổng Thanh Toán VNPAY Sandbox
+        public static final String VNPAY_TMN_CODE = "vnpay.tmn.code";
+        public static final String VNPAY_HASH_SECRET = "vnpay.hash.secret";
+        public static final String VNPAY_PAY_URL = "vnpay.pay.url";
+        public static final String VNPAY_RETURN_URL = "vnpay.return.url";
+
+        // 4. Dịch vụ Gửi Email (SMTP)
+        public static final String MAIL_HOST = "mail.smtp.host";
+        public static final String MAIL_PORT = "mail.smtp.port";
+        public static final String MAIL_USER = "mail.smtp.user";
+        public static final String MAIL_PASSWORD = "mail.smtp.password";
+
+        private Keys() {
+            // Không cho phép khởi tạo hằng số keys
+        }
+    }
 
     static {
         loadProperties();
@@ -39,33 +81,28 @@ public final class AppConfig {
     }
 
     private static void loadProperties() {
-        boolean loadedAny = false;
         ClassLoader classLoader = AppConfig.class.getClassLoader();
 
-        for (String file : CONFIG_FILES) {
-            try (InputStream is = classLoader.getResourceAsStream(file)) {
-                if (is != null) {
-                    PROPERTIES.load(is);
-                    loadedAny = true;
-                }
-            } catch (IOException e) {
-                LOGGER.log(Level.SEVERE, "Lỗi khi đọc file cấu hình " + file, e);
+        // 1. Thử nạp từ file cấu hình chính application.properties
+        try (InputStream is = classLoader.getResourceAsStream(PROPERTIES_FILE)) {
+            if (is != null) {
+                PROPERTIES.load(is);
+                return;
             }
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "Lỗi khi đọc file " + PROPERTIES_FILE, e);
         }
 
-        // Fallback nạp các file *.example nếu môi trường chưa tạo file thực tế (CI / Test runner)
-        if (!loadedAny) {
-            for (String file : CONFIG_FILES) {
-                String exampleFile = file + ".example";
-                try (InputStream is = classLoader.getResourceAsStream(exampleFile)) {
-                    if (is != null) {
-                        PROPERTIES.load(is);
-                        loadedAny = true;
-                    }
-                } catch (IOException e) {
-                    LOGGER.log(Level.SEVERE, "Lỗi khi đọc file cấu hình dự phòng " + exampleFile, e);
-                }
+        // 2. Fallback nạp từ application.properties.example nếu chưa có file cấu hình cục bộ (dành cho CI và Test runner)
+        try (InputStream is = classLoader.getResourceAsStream(PROPERTIES_EXAMPLE_FILE)) {
+            if (is != null) {
+                PROPERTIES.load(is);
+            } else {
+                LOGGER.log(Level.WARNING, "Không tìm thấy file {0} hoặc {1} trong classpath",
+                        new Object[]{PROPERTIES_FILE, PROPERTIES_EXAMPLE_FILE});
             }
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "Lỗi khi đọc file " + PROPERTIES_EXAMPLE_FILE, e);
         }
     }
 
@@ -152,22 +189,22 @@ public final class AppConfig {
 
     private static String resolveMappedKey(String key) {
         return switch (key) {
-            case "TC_SQL_HOST" -> "db.host";
-            case "TC_SQL_PORT" -> "db.port";
-            case "TC_SQL_DEV_DB", "TC_SQL_TEST_DB", "TC_SQL_BENCH_DB" -> "db.name";
-            case "TC_SQL_LOGIN" -> "db.user";
-            case "TC_SQL_PASSWORD" -> "db.password";
-            case "TC_SQL_ENCRYPT" -> "db.encrypt";
-            case "TC_SQL_TRUST_SERVER_CERT" -> "db.trustServerCertificate";
-            case "TC_SQL_CONNECT_TIMEOUT_SEC" -> "db.loginTimeout";
-            case "db.host" -> "TC_SQL_HOST";
-            case "db.port" -> "TC_SQL_PORT";
-            case "db.name" -> "TC_SQL_TEST_DB";
-            case "db.user" -> "TC_SQL_LOGIN";
-            case "db.password" -> "TC_SQL_PASSWORD";
-            case "db.encrypt" -> "TC_SQL_ENCRYPT";
-            case "db.trustServerCertificate" -> "TC_SQL_TRUST_SERVER_CERT";
-            case "db.loginTimeout" -> "TC_SQL_CONNECT_TIMEOUT_SEC";
+            case "TC_SQL_HOST" -> Keys.DB_HOST;
+            case "TC_SQL_PORT" -> Keys.DB_PORT;
+            case "TC_SQL_DEV_DB", "TC_SQL_TEST_DB", "TC_SQL_BENCH_DB" -> Keys.DB_NAME;
+            case "TC_SQL_LOGIN" -> Keys.DB_USER;
+            case "TC_SQL_PASSWORD" -> Keys.DB_PASSWORD;
+            case "TC_SQL_ENCRYPT" -> Keys.DB_ENCRYPT;
+            case "TC_SQL_TRUST_SERVER_CERT" -> Keys.DB_TRUST_CERT;
+            case "TC_SQL_CONNECT_TIMEOUT_SEC" -> Keys.DB_TIMEOUT;
+            case "db.host" -> Keys.TC_SQL_HOST;
+            case "db.port" -> Keys.TC_SQL_PORT;
+            case "db.name" -> Keys.TC_SQL_TEST_DB;
+            case "db.user" -> Keys.TC_SQL_LOGIN;
+            case "db.password" -> Keys.TC_SQL_PASSWORD;
+            case "db.encrypt" -> Keys.TC_SQL_ENCRYPT;
+            case "db.trustServerCertificate" -> Keys.TC_SQL_TRUST_SERVER_CERT;
+            case "db.loginTimeout" -> Keys.TC_SQL_CONNECT_TIMEOUT_SEC;
             default -> null;
         };
     }

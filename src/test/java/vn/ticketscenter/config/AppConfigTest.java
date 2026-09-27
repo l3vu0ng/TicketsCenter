@@ -40,4 +40,13 @@ public class AppConfigTest {
         String defaultVal = AppConfig.get("non.existent.key", "default123");
         assertEquals("default123", defaultVal);
     }
+
+    @Test
+    @DisplayName("AppConfig.Keys tập trung đầy đủ các hằng số key cấu hình trong 1 file")
+    public void testKeysConstants() {
+        assertEquals("db.host", AppConfig.Keys.DB_HOST);
+        assertEquals("app.base.url", AppConfig.Keys.APP_BASE_URL);
+        assertEquals("vnpay.tmn.code", AppConfig.Keys.VNPAY_TMN_CODE);
+        assertEquals("mail.smtp.host", AppConfig.Keys.MAIL_HOST);
+    }
 }
