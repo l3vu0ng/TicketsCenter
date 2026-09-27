@@ -1,7 +1,7 @@
 package vn.ticketscenter.identity;
 
 import org.junit.jupiter.api.Test;
-import vn.ticketscenter.service.identity.PasswordHasher;
+import vn.ticketscenter.identity.service.PasswordHasher;
 
 import static org.junit.jupiter.api.Assertions.*;
 

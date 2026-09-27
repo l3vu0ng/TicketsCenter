@@ -3,7 +3,7 @@ package vn.ticketscenter.acceptance;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
-import vn.ticketscenter.controller.ReadinessServlet;
+import vn.ticketscenter.config.web.ReadinessServlet;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;

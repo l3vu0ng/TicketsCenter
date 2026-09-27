@@ -1,11 +1,11 @@
 package vn.ticketscenter.config;
 
-import vn.ticketscenter.model.identity.User;
-import vn.ticketscenter.repository.identity.UserRepository;
-import vn.ticketscenter.service.identity.AccountService;
-import vn.ticketscenter.service.identity.PasswordHasher;
-import vn.ticketscenter.transaction.DatabasePrincipal;
-import vn.ticketscenter.transaction.TransactionManager;
+import vn.ticketscenter.identity.model.User;
+import vn.ticketscenter.identity.repository.UserRepository;
+import vn.ticketscenter.identity.service.AccountService;
+import vn.ticketscenter.identity.service.PasswordHasher;
+import vn.ticketscenter.config.persistence.DatabasePrincipal;
+import vn.ticketscenter.config.persistence.TransactionManager;
 
 import java.time.Clock;
 

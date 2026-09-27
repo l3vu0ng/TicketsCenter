@@ -5,7 +5,7 @@ import jakarta.servlet.WriteListener;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
-import vn.ticketscenter.controller.OpenApiServlet;
+import vn.ticketscenter.config.web.OpenApiServlet;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

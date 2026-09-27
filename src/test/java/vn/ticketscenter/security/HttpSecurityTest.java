@@ -4,8 +4,8 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
-import vn.ticketscenter.filter.CsrfFilter;
-import vn.ticketscenter.filter.RequestValidationFilter;
+import vn.ticketscenter.identity.filter.CsrfFilter;
+import vn.ticketscenter.config.web.RequestValidationFilter;
 
 import java.lang.reflect.Proxy;
 import java.io.PrintWriter;

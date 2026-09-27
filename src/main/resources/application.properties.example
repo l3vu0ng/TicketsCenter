@@ -60,6 +60,7 @@ vnpay.tmn.code=<sandbox_code>
 vnpay.hash.secret=<your_vnpay_hash_secret>
 vnpay.pay.url=https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
 vnpay.return.url=http://localhost:8080/ticketscenter/api/payments/vnpay/return
+vnpay.api.url=https://sandbox.vnpayment.vn/merchant_webapi/api/transaction
 
 # 4. Cấu hình Dịch vụ Gửi Email (SMTP)
 mail.smtp.host=smtp.gmail.com

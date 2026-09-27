@@ -60,6 +60,7 @@ public final class AppConfig {
         public static final String VNPAY_HASH_SECRET = "vnpay.hash.secret";
         public static final String VNPAY_PAY_URL = "vnpay.pay.url";
         public static final String VNPAY_RETURN_URL = "vnpay.return.url";
+        public static final String VNPAY_API_URL = "vnpay.api.url";
 
         // 4. Dịch vụ Gửi Email (SMTP)
         public static final String MAIL_HOST = "mail.smtp.host";

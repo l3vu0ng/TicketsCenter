@@ -1,6 +1,6 @@
 package vn.ticketscenter.config;
 
-import vn.ticketscenter.transaction.DatabasePrincipal;
+import vn.ticketscenter.config.persistence.DatabasePrincipal;
 
 /**
  * Cấu hình kết nối cơ sở dữ liệu Microsoft SQL Server (Azure SQL / Local).

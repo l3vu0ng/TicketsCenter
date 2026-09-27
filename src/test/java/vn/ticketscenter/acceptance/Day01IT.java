@@ -2,7 +2,7 @@ package vn.ticketscenter.acceptance;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import vn.ticketscenter.controller.HealthServlet;
+import vn.ticketscenter.config.web.HealthServlet;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

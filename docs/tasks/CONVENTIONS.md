@@ -7,7 +7,7 @@ Tài liệu này đi cùng mọi task ngày. Nguồn nghiệp vụ: [SPEC](../re
 - Một ứng dụng Maven WAR, JDK 25, Tomcat 11.0.25, Servlet 6.1, namespace `jakarta.*`, JPA resource-local/Hibernate, SQL Server. Không thêm Spring. Khóa phiên bản dependency sau kiểm tra tích hợp và sự chấp thuận của chủ dự án.
 - Backend trả JSON, CSV hoặc ảnh QR. Không có task xây JSP, Bootstrap, CSS, camera hay màn hình. Session, CSRF, upload, HTTP controller và mọi nghiệp vụ phục vụ 24 màn hình vẫn nằm trong phạm vi.
 - Giữ đúng 23 lớp nghiệp vụ và toàn bộ phương thức/quan hệ của diagram. OTP, redemption, outbox, quyền nền tảng và bảng nối là persistence kỹ thuật. DTO/enum/lớp tích hợp không tính thành lớp nghiệp vụ mới.
-- Luồng: Filter → Servlet → Service → Model/Repository → SQL. Nhóm lớp theo nghiệp vụ trong từng tầng như SPEC §3. Chỉ tạo Service/Repository khi có use case cần; không tạo một bộ ba lớp cho từng bảng/SP.
+- Luồng: Filter → Servlet → Service → Model/Repository → SQL. Dự án tổ chức theo kiến trúc Package-by-Feature (admin, identity, event, ticketing, order, payment, fulfillment, settlement, audit); gom toàn bộ Entity, Repository, Service và Controller của từng nghiệp vụ vào cùng gói tương ứng. Chỉ tạo Service/Repository khi có use case cần; không tạo một bộ ba lớp cho từng bảng/SP.
 - SP01–SP17 sở hữu đường ghi tương ứng. Java không dirty-write entity rồi gọi SP để lặp cùng thay đổi. Repository dùng `StoredProcedureQuery`, truy vấn View/UDF có bind parameters; clear/refresh persistence context sau SP.
 - SQL Server thật là môi trường integration/concurrency. H2 hoặc mock không chứng minh được khóa, kiểu dữ liệu, filtered index, transaction hay quyền của SQL Server.
 

@@ -3,7 +3,7 @@ package vn.ticketscenter.identity;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.junit.jupiter.api.Test;
-import vn.ticketscenter.service.identity.SessionService;
+import vn.ticketscenter.identity.service.SessionService;
 
 import java.lang.reflect.Proxy;
 import java.util.HashMap;

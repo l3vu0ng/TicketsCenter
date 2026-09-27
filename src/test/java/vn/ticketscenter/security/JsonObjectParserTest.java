@@ -1,7 +1,7 @@
 package vn.ticketscenter.security;
 
 import org.junit.jupiter.api.Test;
-import vn.ticketscenter.util.JsonObjectParser;
+import vn.ticketscenter.config.web.JsonObjectParser;
 
 import java.io.StringReader;
 

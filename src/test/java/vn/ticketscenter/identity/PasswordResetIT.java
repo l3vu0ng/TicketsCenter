@@ -5,16 +5,16 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.TypedQuery;
 import org.junit.jupiter.api.Test;
-import vn.ticketscenter.integration.mail.ConfiguredMailGateway;
-import vn.ticketscenter.model.identity.Otp;
-import vn.ticketscenter.model.identity.OtpPurpose;
-import vn.ticketscenter.model.identity.User;
-import vn.ticketscenter.service.identity.AccountService;
-import vn.ticketscenter.service.identity.OtpService;
-import vn.ticketscenter.service.identity.PasswordHasher;
-import vn.ticketscenter.service.identity.PasswordResetService;
-import vn.ticketscenter.transaction.DatabasePrincipal;
-import vn.ticketscenter.transaction.TransactionManager;
+import vn.ticketscenter.identity.integration.mail.ConfiguredMailGateway;
+import vn.ticketscenter.identity.model.Otp;
+import vn.ticketscenter.identity.model.OtpPurpose;
+import vn.ticketscenter.identity.model.User;
+import vn.ticketscenter.identity.service.AccountService;
+import vn.ticketscenter.identity.service.OtpService;
+import vn.ticketscenter.identity.service.PasswordHasher;
+import vn.ticketscenter.identity.service.PasswordResetService;
+import vn.ticketscenter.config.persistence.DatabasePrincipal;
+import vn.ticketscenter.config.persistence.TransactionManager;
 
 import java.lang.reflect.Proxy;
 import java.nio.charset.StandardCharsets;
@@ -215,7 +215,7 @@ public class PasswordResetIT {
 
         UUID suspendedId = UUID.randomUUID();
         User suspendedUser = new User(suspendedId, "suspended@example.com", "suspended@example.com", hasher.hash("OldPassword1234"), "Suspended", clock.instant());
-        suspendedUser.setStatus(vn.ticketscenter.model.ModelEnums.UserStatus.DISABLED);
+        suspendedUser.setStatus(vn.ticketscenter.identity.model.IdentityEnums.UserStatus.DISABLED);
         persistence.users.put(suspendedId, suspendedUser);
 
         OtpService otpService = new OtpService(persistence.manager(), mail, clock, TEST_SECRET, () -> "444555");
@@ -232,7 +232,7 @@ public class PasswordResetIT {
         var verifyResult = resetService.verifyResetOtp("victim_active@example.com", "444555");
         assertTrue(verifyResult.successful());
 
-        victimUser.setStatus(vn.ticketscenter.model.ModelEnums.UserStatus.DISABLED);
+        victimUser.setStatus(vn.ticketscenter.identity.model.IdentityEnums.UserStatus.DISABLED);
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
                 () -> resetService.resetPassword(verifyResult.token(), "NewPassword1234"));

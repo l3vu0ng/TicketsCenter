@@ -5,30 +5,30 @@
              version="3.1">
     <persistence-unit name="ticketscenter" transaction-type="RESOURCE_LOCAL">
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
-        <class>vn.ticketscenter.model.identity.User</class>
-        <class>vn.ticketscenter.model.identity.Otp</class>
-        <class>vn.ticketscenter.model.identity.Organization</class>
-        <class>vn.ticketscenter.model.identity.OrganizationMembership</class>
-        <class>vn.ticketscenter.model.identity.OrganizationRequest</class>
-        <class>vn.ticketscenter.model.event.EventCategory</class>
-        <class>vn.ticketscenter.model.event.Event</class>
-        <class>vn.ticketscenter.model.event.Zone</class>
-        <class>vn.ticketscenter.model.event.Seat</class>
-        <class>vn.ticketscenter.model.ticketing.TicketHold</class>
-        <class>vn.ticketscenter.model.ticketing.TicketHoldItem</class>
-        <class>vn.ticketscenter.model.order.Order</class>
-        <class>vn.ticketscenter.model.order.OrderItem</class>
-        <class>vn.ticketscenter.model.order.Payment</class>
-        <class>vn.ticketscenter.model.order.Coupon</class>
-        <class>vn.ticketscenter.model.fulfillment.Ticket</class>
-        <class>vn.ticketscenter.model.fulfillment.CheckIn</class>
-        <class>vn.ticketscenter.model.fulfillment.RefundRequest</class>
-        <class>vn.ticketscenter.model.fulfillment.Refund</class>
-        <class>vn.ticketscenter.model.settlement.CommissionRule</class>
-        <class>vn.ticketscenter.model.settlement.Settlement</class>
-        <class>vn.ticketscenter.model.settlement.SettlementItem</class>
-        <class>vn.ticketscenter.model.settlement.Payout</class>
-        <class>vn.ticketscenter.model.audit.AuditLog</class>
+        <class>vn.ticketscenter.identity.model.User</class>
+        <class>vn.ticketscenter.identity.model.Otp</class>
+        <class>vn.ticketscenter.identity.model.Organization</class>
+        <class>vn.ticketscenter.identity.model.OrganizationMembership</class>
+        <class>vn.ticketscenter.identity.model.OrganizationRequest</class>
+        <class>vn.ticketscenter.event.model.EventCategory</class>
+        <class>vn.ticketscenter.event.model.Event</class>
+        <class>vn.ticketscenter.event.model.Zone</class>
+        <class>vn.ticketscenter.event.model.Seat</class>
+        <class>vn.ticketscenter.ticketing.model.TicketHold</class>
+        <class>vn.ticketscenter.ticketing.model.TicketHoldItem</class>
+        <class>vn.ticketscenter.order.model.Order</class>
+        <class>vn.ticketscenter.order.model.OrderItem</class>
+        <class>vn.ticketscenter.order.model.Payment</class>
+        <class>vn.ticketscenter.order.model.Coupon</class>
+        <class>vn.ticketscenter.fulfillment.model.Ticket</class>
+        <class>vn.ticketscenter.fulfillment.model.CheckIn</class>
+        <class>vn.ticketscenter.fulfillment.model.RefundRequest</class>
+        <class>vn.ticketscenter.fulfillment.model.Refund</class>
+        <class>vn.ticketscenter.settlement.model.CommissionRule</class>
+        <class>vn.ticketscenter.settlement.model.Settlement</class>
+        <class>vn.ticketscenter.settlement.model.SettlementItem</class>
+        <class>vn.ticketscenter.settlement.model.Payout</class>
+        <class>vn.ticketscenter.audit.model.AuditLog</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>
             <property name="hibernate.hbm2ddl.auto" value="validate"/>

@@ -1,8 +1,8 @@
 package vn.ticketscenter.security;
 
 import org.junit.jupiter.api.Test;
-import vn.ticketscenter.service.identity.AccountService;
-import vn.ticketscenter.service.identity.AuthorizationService;
+import vn.ticketscenter.identity.service.AccountService;
+import vn.ticketscenter.identity.service.AuthorizationService;
 
 import java.util.UUID;
 

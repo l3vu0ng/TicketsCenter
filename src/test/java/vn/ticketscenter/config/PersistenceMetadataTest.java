@@ -22,6 +22,7 @@ class PersistenceMetadataTest {
             classes.add(classNodes.item(index).getTextContent().trim());
         }
 
+        assertEquals(classNodes.getLength(), classes.size(), "JPA entity classes must be unique");
         assertEquals(Set.of(
                 "vn.ticketscenter.identity.model.User",
                 "vn.ticketscenter.identity.model.Otp",

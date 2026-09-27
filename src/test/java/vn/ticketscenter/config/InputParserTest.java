@@ -1,7 +1,7 @@
 package vn.ticketscenter.config;
 
 import org.junit.jupiter.api.Test;
-import vn.ticketscenter.util.InputParser;
+import vn.ticketscenter.config.util.InputParser;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;

@@ -7,7 +7,7 @@ import jakarta.servlet.annotation.WebListener;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.time.Clock;
-import vn.ticketscenter.service.identity.PasswordHasher;
+import vn.ticketscenter.identity.service.PasswordHasher;
 
 @WebListener
 public final class PersistenceListener implements ServletContextListener {

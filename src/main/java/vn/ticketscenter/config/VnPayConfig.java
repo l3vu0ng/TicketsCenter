@@ -24,4 +24,8 @@ public final class VnPayConfig {
     public static String getReturnUrl() {
         return AppConfig.get("vnpay.return.url", "http://localhost:8080/ticketscenter/api/payments/vnpay/return");
     }
+
+    public static String getApiUrl() {
+        return AppConfig.get("vnpay.api.url", "https://sandbox.vnpayment.vn/merchant_webapi/api/transaction");
+    }
 }

@@ -1,7 +1,7 @@
 package vn.ticketscenter.identity;
 
 import org.junit.jupiter.api.Test;
-import vn.ticketscenter.service.identity.AccountService;
+import vn.ticketscenter.identity.service.AccountService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;

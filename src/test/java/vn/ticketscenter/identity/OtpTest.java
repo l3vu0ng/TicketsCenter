@@ -5,12 +5,12 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.TypedQuery;
 import org.junit.jupiter.api.Test;
-import vn.ticketscenter.integration.mail.ConfiguredMailGateway;
-import vn.ticketscenter.model.identity.Otp;
-import vn.ticketscenter.model.identity.OtpPurpose;
-import vn.ticketscenter.service.identity.OtpService;
-import vn.ticketscenter.transaction.DatabasePrincipal;
-import vn.ticketscenter.transaction.TransactionManager;
+import vn.ticketscenter.identity.integration.mail.ConfiguredMailGateway;
+import vn.ticketscenter.identity.model.Otp;
+import vn.ticketscenter.identity.model.OtpPurpose;
+import vn.ticketscenter.identity.service.OtpService;
+import vn.ticketscenter.config.persistence.DatabasePrincipal;
+import vn.ticketscenter.config.persistence.TransactionManager;
 
 import java.lang.reflect.Proxy;
 import java.nio.charset.StandardCharsets;

@@ -4,8 +4,8 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
-import vn.ticketscenter.transaction.DatabasePrincipal;
-import vn.ticketscenter.transaction.TransactionManager;
+import vn.ticketscenter.config.persistence.DatabasePrincipal;
+import vn.ticketscenter.config.persistence.TransactionManager;
 
 import java.util.EnumMap;
 import java.util.Map;

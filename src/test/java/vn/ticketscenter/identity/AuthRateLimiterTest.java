@@ -8,9 +8,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import vn.ticketscenter.config.PersistenceListener;
 import vn.ticketscenter.config.PersistenceRegistry;
-import vn.ticketscenter.controller.identity.AuthServlet;
-import vn.ticketscenter.service.identity.AuthRateLimiter;
-import vn.ticketscenter.transaction.DatabasePrincipal;
+import vn.ticketscenter.identity.controller.AuthServlet;
+import vn.ticketscenter.identity.service.AuthRateLimiter;
+import vn.ticketscenter.config.persistence.DatabasePrincipal;
 
 import java.io.BufferedReader;
 import java.io.PrintWriter;
