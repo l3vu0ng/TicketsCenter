@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi" data-bs-theme="dark">
+<html lang="vi" data-bs-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,17 +15,19 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         :root {
-            --tc-primary: #6366f1;
-            --tc-primary-rgb: 99, 102, 241;
-            --tc-accent: #06b6d4;
-            --tc-bg: #090d16;
-            --tc-surface: #111827;
-            --tc-border: rgba(255, 255, 255, 0.08);
+            --tc-primary: #4f46e5;
+            --tc-primary-rgb: 79, 70, 229;
+            --tc-accent: #0284c7;
+            --tc-bg: #f8fafc;
+            --tc-surface: #ffffff;
+            --tc-border: #e2e8f0;
+            --tc-text: #0f172a;
+            --tc-muted: #475569;
         }
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: var(--tc-bg);
-            color: #f3f4f6;
+            color: var(--tc-text);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -38,34 +40,34 @@
             letter-spacing: -0.5px;
         }
         .hero-section {
-            padding: 4.5rem 0 3rem 0;
-            background: radial-gradient(circle at 50% 10%, rgba(99, 102, 241, 0.15) 0%, transparent 60%);
+            padding: 4.5rem 0 3.5rem 0;
+            background: radial-gradient(circle at 50% 0%, rgba(79, 70, 229, 0.08) 0%, transparent 65%);
         }
         .card-custom {
-            background: rgba(17, 24, 39, 0.85);
-            backdrop-filter: blur(12px);
+            background: var(--tc-surface);
             border: 1px solid var(--tc-border);
             border-radius: 1rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.02);
             transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
         }
         .card-custom:hover {
             transform: translateY(-3px);
-            border-color: rgba(99, 102, 241, 0.4);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+            border-color: rgba(79, 70, 229, 0.3);
+            box-shadow: 0 12px 24px -6px rgba(79, 70, 229, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
         }
         .pulse-indicator {
             display: inline-block;
             width: 10px;
             height: 10px;
             border-radius: 50%;
-            background-color: #22c55e;
-            box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+            background-color: #16a34a;
+            box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.6);
             animation: pulse-green 2s infinite;
         }
         @keyframes pulse-green {
-            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
-            70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
-            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.6); }
+            70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(22, 163, 74, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(22, 163, 74, 0); }
         }
         .status-badge {
             font-size: 0.85rem;
@@ -78,7 +80,7 @@
 <body>
 
     <!-- Header / Navbar -->
-    <nav class="navbar navbar-expand-lg border-bottom border-dark-subtle sticky-top bg-body-tertiary bg-opacity-75 backdrop-blur">
+    <nav class="navbar navbar-expand-lg border-bottom bg-white sticky-top shadow-sm py-2">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center gap-2" href="#">
                 <i class="bi bi-ticket-perforated-fill fs-4 text-primary"></i>
@@ -89,11 +91,11 @@
                     <span class="pulse-indicator"></span>
                     <span id="system-status-text">Đang kết nối...</span>
                 </span>
-                <a href="swagger/" class="btn btn-sm btn-outline-info d-flex align-items-center gap-1">
+                <a href="swagger/" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1 fw-semibold">
                     <i class="bi bi-file-earmark-code"></i>
                     <span>Swagger API</span>
                 </a>
-                <a href="https://github.com" target="_blank" class="btn btn-sm btn-outline-light d-flex align-items-center gap-1">
+                <a href="https://github.com" target="_blank" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1">
                     <i class="bi bi-github"></i>
                     <span>GitHub</span>
                 </a>
@@ -105,15 +107,15 @@
     <main class="flex-grow-1">
         <section class="hero-section text-center">
             <div class="container">
-                <div class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 rounded-pill mb-3">
-                    <i class="bi bi-rocket-takeoff-fill me-1"></i> Java 25 &bull; Jakarta Servlet 6.1 &bull; Tomcat 11
+                <div class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 rounded-pill mb-3 fw-semibold">
+                    <i class="bi bi-rocket-takeoff-fill me-1"></i> Java 25 &bull; Jakarta Servlet 6.1 &bull; Tomcat 11 / Jetty
                 </div>
-                <h1 class="display-4 fw-bold mb-3">Hệ Thống Quản Lý Sự Kiện &amp; Vé Trực Tuyến</h1>
-                <p class="lead text-secondary mx-auto mb-4" style="max-width: 700px;">
+                <h1 class="display-4 fw-bold mb-3 text-dark">Hệ Thống Quản Lý Sự Kiện &amp; Vé Trực Tuyến</h1>
+                <p class="lead text-secondary mx-auto mb-4" style="max-width: 700px; font-weight: 400;">
                     Nền tảng thương mại điện tử chuyên nghiệp phục vụ quản lý sự kiện, phân hạng chỗ ngồi, đặt chỗ thời gian thực, cổng thanh toán VNPAY và phát hành vé QR bảo mật.
                 </p>
-                <div class="d-flex justify-content-center gap-3">
-                    <a href="swagger/" class="btn btn-primary px-4 py-2 fw-semibold d-flex align-items-center gap-2">
+                <div class="d-flex justify-content-center gap-3 flex-wrap">
+                    <a href="swagger/" class="btn btn-primary px-4 py-2 fw-semibold d-flex align-items-center gap-2 shadow-sm">
                         <i class="bi bi-code-slash"></i>
                         <span>Swagger API Explorer</span>
                     </a>
@@ -137,7 +139,7 @@
                             <div class="p-2 rounded bg-primary bg-opacity-10 text-primary fs-4">
                                 <i class="bi bi-database-fill-gear"></i>
                             </div>
-                            <h2 class="h5 mb-0 fw-bold">Azure SQL Database</h2>
+                            <h2 class="h5 mb-0 fw-bold text-dark">Azure SQL Database</h2>
                         </div>
                         <p class="text-secondary small mb-3">
                             Tích hợp Microsoft SQL Server trên Azure với kết nối mã hóa TLS, quản lý Transaction và Stored Procedures chống over-selling vé.
@@ -154,7 +156,7 @@
                             <div class="p-2 rounded bg-info bg-opacity-10 text-info fs-4">
                                 <i class="bi bi-credit-card-2-front-fill"></i>
                             </div>
-                            <h2 class="h5 mb-0 fw-bold">Thanh Toán &amp; Phát Hành Vé</h2>
+                            <h2 class="h5 mb-0 fw-bold text-dark">Thanh Toán &amp; Phát Hành Vé</h2>
                         </div>
                         <p class="text-secondary small mb-3">
                             Tích hợp cổng VNPAY Sandbox, cơ chế Outbox Pattern đảm bảo tính toàn vẹn khi gửi email vé điện tử kèm mã QR tham dự.
@@ -171,7 +173,7 @@
                             <div class="p-2 rounded bg-warning bg-opacity-10 text-warning fs-4">
                                 <i class="bi bi-cpu-fill"></i>
                             </div>
-                            <h2 class="h5 mb-0 fw-bold">Tomcat 11 Container</h2>
+                            <h2 class="h5 mb-0 fw-bold text-dark">Tomcat 11 / Jetty Container</h2>
                         </div>
                         <p class="text-secondary small mb-3">
                             Đóng gói chuẩn WAR (ticketscenter.war) tối ưu hóa tài nguyên, hỗ trợ quy trình CI/CD tự động kiểm thử và deploy trên Render/Docker.
@@ -186,7 +188,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="mt-auto py-3 border-top border-dark-subtle text-center text-secondary small">
+    <footer class="mt-auto py-3 border-top bg-white text-center text-secondary small">
         <div class="container">
             &copy; 2026 TicketsCenter. Xây dựng với Java Servlet, Bootstrap 5 &amp; Azure SQL Database.
         </div>
@@ -225,7 +227,6 @@
                 checkHealth();
             });
 
-            // Tự động kiểm tra khi load trang
             checkHealth();
         });
     </script>

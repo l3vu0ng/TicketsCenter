@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi" data-bs-theme="dark">
+<html lang="vi" data-bs-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,17 +11,17 @@
     <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css">
     <style>
         :root {
-            --tc-bg: #090d16;
-            --tc-surface: #111827;
-            --tc-border: rgba(255, 255, 255, 0.08);
-            --tc-primary: #6366f1;
-            --tc-accent: #06b6d4;
+            --tc-bg: #ffffff;
+            --tc-surface: #f8fafc;
+            --tc-border: #e2e8f0;
+            --tc-primary: #4f46e5;
+            --tc-accent: #0284c7;
         }
         body {
             margin: 0;
             padding: 0;
             background-color: var(--tc-bg);
-            color: #f3f4f6;
+            color: #0f172a;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         }
         .header-bar {
@@ -29,9 +29,9 @@
             align-items: center;
             justify-content: space-between;
             padding: 0.85rem 2rem;
-            background: rgba(17, 24, 39, 0.95);
-            backdrop-filter: blur(12px);
+            background: #ffffff;
             border-bottom: 1px solid var(--tc-border);
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04);
             position: sticky;
             top: 0;
             z-index: 1000;
@@ -41,7 +41,7 @@
             align-items: center;
             gap: 0.75rem;
             text-decoration: none;
-            color: #fff;
+            color: #0f172a;
         }
         .brand-name {
             font-size: 1.25rem;
@@ -59,14 +59,14 @@
             border-radius: 9999px;
             font-size: 0.8rem;
             font-weight: 600;
-            background: rgba(34, 197, 94, 0.12);
-            color: #4ade80;
-            border: 1px solid rgba(34, 197, 94, 0.25);
+            background: #ecfdf5;
+            color: #059669;
+            border: 1px solid #a7f3d0;
         }
         .csrf-badge.loading {
-            background: rgba(234, 179, 8, 0.12);
-            color: #facc15;
-            border-color: rgba(234, 179, 8, 0.25);
+            background: #fefce8;
+            color: #ca8a04;
+            border-color: #fde047;
         }
         .btn-action {
             display: inline-flex;
@@ -77,59 +77,28 @@
             font-size: 0.85rem;
             font-weight: 500;
             text-decoration: none;
-            border: 1px solid var(--tc-border);
-            background: rgba(255, 255, 255, 0.05);
-            color: #e5e7eb;
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            color: #334155;
             cursor: pointer;
             transition: all 0.15s ease-in-out;
         }
         .btn-action:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: #fff;
-            border-color: rgba(255, 255, 255, 0.2);
+            background: #f8fafc;
+            color: var(--tc-primary);
+            border-color: var(--tc-primary);
         }
-        /* Swagger UI Dark Mode Adjustments */
         .swagger-ui {
             font-family: inherit;
         }
         .swagger-ui .topbar { display: none; }
         .swagger-ui .info { margin: 2rem 0; }
-        .swagger-ui .info .title { color: #f3f4f6; }
-        .swagger-ui .info p, .swagger-ui .info li { color: #9ca3af; font-size: 0.95rem; }
+        .swagger-ui .info .title { color: #0f172a; }
         .swagger-ui .scheme-container {
-            background: var(--tc-surface);
+            background: #f8fafc;
             box-shadow: none;
             border-bottom: 1px solid var(--tc-border);
             padding: 1rem 0;
-        }
-        .swagger-ui .opblock {
-            border-radius: 0.75rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
-            border-color: var(--tc-border);
-        }
-        .swagger-ui .opblock .opblock-summary {
-            padding: 0.65rem 1rem;
-        }
-        .swagger-ui .opblock-tag {
-            color: #f3f4f6;
-            font-size: 1.25rem;
-            border-bottom: 1px solid var(--tc-border);
-        }
-        .swagger-ui .opblock-tag small { color: #9ca3af; }
-        .swagger-ui input[type=text], .swagger-ui textarea {
-            background: #1f2937;
-            color: #f3f4f6;
-            border: 1px solid #374151;
-            border-radius: 0.375rem;
-        }
-        .swagger-ui .btn {
-            border-radius: 0.375rem;
-        }
-        .swagger-ui table thead tr th {
-            color: #d1d5db;
-        }
-        .swagger-ui .response-col_status {
-            color: #f3f4f6;
         }
     </style>
 </head>
@@ -138,9 +107,9 @@
     <header class="header-bar">
         <a href="../" class="brand-container">
             <span class="brand-name">TicketsCenter</span>
-            <span style="font-size: 0.85rem; color: #9ca3af; font-weight: 500;">API Explorer</span>
+            <span style="font-size: 0.85rem; color: #64748b; font-weight: 500;">API Explorer</span>
         </a>
-        <div style="display: flex; align-items: center; gap: 1rem;">
+        <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
             <div id="csrf-status" class="csrf-badge loading">
                 <span>CSRF: Đang tải...</span>
             </div>
