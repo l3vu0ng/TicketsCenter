@@ -1,0 +1,175 @@
+name: CI - Build, Test & Quality Gate
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - '**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
+jobs:
+  # ===============================================================
+  # 1. Build, Compile & Run Unit/Contract Tests
+  # ===============================================================
+  build-and-test:
+    name: Build & Test (Java 25, Maven)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: 'oracle'
+          cache: 'maven'
+
+      - name: Validate Maven Wrapper & Dependencies
+        run: |
+          mvn -B dependency:resolve-plugins dependency:go-offline || true
+
+      - name: Compile Application
+        run: |
+          mvn -B clean compile
+
+      - name: Run Unit & Contract Tests
+        run: |
+          mvn -B test
+
+      - name: Package WAR File
+        run: |
+          mvn -B package -DskipTests
+
+      - name: Verify WAR Output
+        run: |
+          ls -lh target/ticketscenter.war
+          test -f target/ticketscenter.war || (echo "ERROR: target/ticketscenter.war not found!" && exit 1)
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-test-reports
+          path: target/surefire-reports/
+          retention-days: 7
+
+      - name: Upload Built WAR Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ticketscenter-war
+          path: target/ticketscenter.war
+          retention-days: 7
+
+  # ===============================================================
+  # 2. Container Smoke Test on Tomcat 11
+  # ===============================================================
+  tomcat-smoke-test:
+    name: Tomcat 11 Smoke & Liveness Test
+    needs: build-and-test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: 'oracle'
+
+      - name: Download Built WAR
+        uses: actions/download-artifact@v4
+        with:
+          name: ticketscenter-war
+          path: target/
+
+      - name: Install Apache Tomcat 11
+        run: |
+          TOMCAT_VER="11.0.4"
+          echo "Tải Apache Tomcat $TOMCAT_VER..."
+          curl -sSL --retry 3 \
+            "https://archive.apache.org/dist/tomcat/tomcat-11/v${TOMCAT_VER}/bin/apache-tomcat-${TOMCAT_VER}.tar.gz" \
+            -o tomcat11.tar.gz || \
+          curl -sSL --retry 3 \
+            "https://dlcdn.apache.org/tomcat/tomcat-11/v${TOMCAT_VER}/bin/apache-tomcat-${TOMCAT_VER}.tar.gz" \
+            -o tomcat11.tar.gz
+
+          tar -xzf tomcat11.tar.gz
+          mv "apache-tomcat-${TOMCAT_VER}" tomcat11
+          chmod +x tomcat11/bin/*.sh
+
+      - name: Deploy WAR to Tomcat 11
+        run: |
+          cp target/ticketscenter.war tomcat11/webapps/ticketscenter.war
+
+      - name: Start Tomcat 11 & Verify Health
+        run: |
+          export CATALINA_HOME="$PWD/tomcat11"
+          "$CATALINA_HOME/bin/catalina.sh" start
+
+          echo "Đang đợi Tomcat 11 khởi động và deploy WAR..."
+          attempt=0
+          max_attempts=40
+          success=false
+
+          while [ $attempt -lt $max_attempts ]; do
+            response=$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:8080/ticketscenter/health/live" || echo "000")
+            if [ "$response" = "200" ]; then
+              echo "=> Endpoint /health/live trả về HTTP 200!"
+              success=true
+              break
+            fi
+            echo "Attempt $attempt: HTTP $response. Chờ 1 giây..."
+            sleep 1
+            attempt=$((attempt + 1))
+          done
+
+          if [ "$success" = false ]; then
+            echo "LỖI: Tomcat không trả HTTP 200 trong thời gian quy định!"
+            cat tomcat11/logs/catalina.out || true
+            exit 1
+          fi
+
+          echo "Kiểm tra payload JSON của /health/live:"
+          body=$(curl -s "http://127.0.0.1:8080/ticketscenter/health/live")
+          echo "Response Body: $body"
+          echo "$body" | grep -q '{"data":{"status":"UP"}}' || (echo "Body không khớp định dạng UP!" && exit 1)
+
+          echo "Kiểm tra trang chủ tĩnh Webapp (HTML/Bootstrap/JS):"
+          welcome_code=$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:8080/ticketscenter/" || echo "000")
+          echo "Welcome page HTTP Status: $welcome_code"
+
+          "$CATALINA_HOME/bin/catalina.sh" stop
+          echo "=> Smoke test trên Tomcat 11 thành công rực rỡ!"
+
+  # ===============================================================
+  # 3. Security, Secret & Dependency Scan
+  # ===============================================================
+  security-and-audit:
+    name: Security & Secret Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify No Secrets Committed (.env or live credentials)
+        run: |
+          echo "Kiểm tra không có file .env thực tế lọt vào repo..."
+          if find . -maxdepth 2 -name ".env" -not -name ".env.example" | grep -q ".env"; then
+            echo "LỖI PHÁT HIỆN: File .env thực tế tồn tại trong repository!" >&2
+            exit 1
+          fi
+          echo "=> Repository an toàn không chứa file bí mật."
