@@ -23,7 +23,13 @@ Các mutation nhận tối đa 64 KiB. Hệ thống chỉ chấp nhận JSON ho�
 - Hash dùng PBKDF2-HMAC-SHA256 với salt ngẫu nhiên 16 byte và 210.000 vòng lặp.
 - Login sai mật khẩu hoặc user không tồn tại cùng trả mã lỗi `INVALID_CREDENTIALS`.
 - Mỗi request có auth đọc lại User ACTIVE và `authVersion`. Đổi version làm session cũ mất hiệu lực ngay lập tức.
-- Cookie session có cờ HttpOnly và SameSite=Lax.
+- Cookie session có cờ HttpOnly và SameSite=Lax. Tomcat thêm Secure khi request chạy qua HTTPS/proxy được cấu hình đúng.
+
+## Admin seed và phân quyền nền
+
+- Seed chỉ chạy khi `admin.seed.enabled=true`. Admin được verified ngay, có role `ADMIN`, và chạy lại không đổi hash.
+- Môi trường production từ chối khởi động nếu thiếu mật khẩu admin hoặc dùng giá trị demo `admin`. Không có endpoint HTTP cấp role admin.
+- `AuthorizationService` kiểm owner/admin trực tiếp và đọc membership ACTIVE hiện tại từ database. Endpoint phải trả `403` khi thiếu quyền và `404` cho ID ngoài scope.
 
 ## Cơ chế OTP và khôi phục mật khẩu
 

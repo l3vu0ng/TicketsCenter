@@ -25,6 +25,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class Day04IT {
 
+    private static final String HTTP_TEST_EMAIL = "day04-http@tests.invalid";
+
     private HikariDataSource dataSource;
     private EntityManagerFactory factory;
     private TransactionManager transactions;
@@ -43,7 +45,8 @@ class Day04IT {
     }
 
     @AfterEach
-    void tearDown() {
+    void tearDown() throws Exception {
+        deleteUser(HTTP_TEST_EMAIL);
         factory.close();
         dataSource.close();
         System.clearProperty("admin.seed.enabled");
