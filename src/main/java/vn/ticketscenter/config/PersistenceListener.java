@@ -17,6 +17,7 @@ public final class PersistenceListener implements ServletContextListener {
 
     @Override
     public void contextInitialized(ServletContextEvent event) {
+        AdminSeeder.validateProductionSecret(ServerConfig.getEnv(), AppConfig.get("admin.password"));
         PersistenceRegistry registry = new PersistenceRegistry();
         try {
             registry.initialize();

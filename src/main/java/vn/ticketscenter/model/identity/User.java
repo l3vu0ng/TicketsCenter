@@ -57,6 +57,11 @@ public class User {
     }
 
     public User(String email, String normalizedEmail, String passwordHash, String fullName, Instant createdAt) {
+        this(null, email, normalizedEmail, passwordHash, fullName, createdAt);
+    }
+
+    public User(UUID id, String email, String normalizedEmail, String passwordHash, String fullName, Instant createdAt) {
+        this.id = id;
         this.email = java.util.Objects.requireNonNull(email);
         this.normalizedEmail = java.util.Objects.requireNonNull(normalizedEmail);
         this.passwordHash = java.util.Objects.requireNonNull(passwordHash);
@@ -80,4 +85,11 @@ public class User {
     public boolean hasPlatformRole(String role) { return platformRoles.contains(role); }
     public void grantPlatformRole(String role) { platformRoles.add(java.util.Objects.requireNonNull(role)); }
     public void verifyEmail(Instant verifiedAt) { this.emailVerifiedAt = java.util.Objects.requireNonNull(verifiedAt); }
+    public void updatePassword(String newPasswordHash) {
+        this.passwordHash = java.util.Objects.requireNonNull(newPasswordHash);
+        this.authVersion++;
+    }
+    public void setStatus(ModelEnums.UserStatus status) {
+        this.status = java.util.Objects.requireNonNull(status);
+    }
 }

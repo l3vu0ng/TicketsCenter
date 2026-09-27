@@ -23,6 +23,7 @@ public final class PersistenceRegistry implements AutoCloseable {
 
             HikariConfig pool = new HikariConfig();
             pool.setPoolName("ticketscenter-" + principal.name().toLowerCase());
+            pool.setDriverClassName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
             pool.setJdbcUrl(DatabaseConfig.getJdbcUrl());
             pool.setUsername(user);
             pool.setPassword(password);

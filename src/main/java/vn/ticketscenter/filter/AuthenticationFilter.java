@@ -22,7 +22,14 @@ public final class AuthenticationFilter implements Filter {
 
     public static final String ACCOUNT_ATTRIBUTE = "ticketscenter.account";
     private static final Set<String> PUBLIC_PATHS = Set.of(
-            "/api/auth/csrf", "/api/auth/register", "/api/auth/login");
+            "/api/auth/csrf",
+            "/api/auth/register",
+            "/api/auth/login",
+            "/api/auth/otp/send",
+            "/api/auth/otp/verify",
+            "/api/auth/password/forgot",
+            "/api/auth/password/reset"
+    );
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
@@ -31,6 +38,7 @@ public final class AuthenticationFilter implements Filter {
         HttpServletResponse httpResponse = (HttpServletResponse) response;
         String path = httpRequest.getRequestURI().substring(httpRequest.getContextPath().length());
         if (PUBLIC_PATHS.contains(path) || ("GET".equals(httpRequest.getMethod()) && path.startsWith("/api/events"))) {
+            attachAccountIfSessionPresent(httpRequest);
             chain.doFilter(request, response);
             return;
         }
@@ -55,6 +63,23 @@ public final class AuthenticationFilter implements Filter {
         }
         httpRequest.setAttribute(ACCOUNT_ATTRIBUTE, account);
         chain.doFilter(request, response);
+    }
+
+    private void attachAccountIfSessionPresent(HttpServletRequest httpRequest) {
+        HttpSession session = httpRequest.getSession(false);
+        if (session == null || !(session.getAttribute(SessionService.USER_ID) instanceof UUID userId)
+                || !(session.getAttribute(SessionService.AUTH_VERSION) instanceof Integer sessionVersion)) {
+            return;
+        }
+        Object configured = httpRequest.getServletContext().getAttribute(PersistenceListener.REGISTRY_ATTRIBUTE);
+        if (!(configured instanceof PersistenceRegistry registry)) {
+            return;
+        }
+        AccountService.AuthenticatedAccount account = new AccountService(
+                registry.transactionManager(), new PasswordHasher(), Clock.systemUTC()).current(userId).orElse(null);
+        if (account != null && account.authVersion() == sessionVersion) {
+            httpRequest.setAttribute(ACCOUNT_ATTRIBUTE, account);
+        }
     }
 
     private void unauthorized(HttpServletResponse response) throws IOException {

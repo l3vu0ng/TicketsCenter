@@ -1,7 +1,7 @@
 # Hợp đồng HTTP backend
 
 > Nguồn chuẩn: [CONVENTIONS](../tasks/CONVENTIONS.md) §3, [API-MAP](../tasks/API-MAP.md) và [SPEC](../references/SPEC.md) §9.
-> Tài liệu này mô tả backend dự kiến; không tuyên bố endpoint đã được cài đặt. Không có phạm vi frontend.
+> Tài liệu này mô tả hợp đồng backend. Các endpoint được ghi rõ là “đã triển khai”; phần còn lại vẫn là kế hoạch. Không có phạm vi frontend.
 
 ## 1. Quy ước chung
 
@@ -14,6 +14,18 @@
 - Session là nguồn `actorId`. Backend không nhận `actorId`, role, principal DB, trạng thái tài chính, server time hoặc số tiền tin cậy từ body/query.
 - ID tổ chức/đối tượng trong URL chỉ là input: Service luôn kiểm tra owner, membership đang active và phạm vi tổ chức từ database.
 - Response không chứa passwordHash, OTP/HMAC, secret provider, connection data, stack trace hoặc QR ngoài endpoint QR đã kiểm quyền.
+
+### Auth đã triển khai ngày 4 và ngày 5
+
+- `GET /auth/csrf` trả `{"data":{"token":"..."}}` và tạo session nếu cần.
+- `POST /auth/register` nhận `{email,password}`, trả `{"data":{"accepted":true}}`; không cho biết email đã tồn tại.
+- `POST /auth/login` nhận `{email,password}`, trả `authenticated=true` hoặc lỗi `INVALID_CREDENTIALS` chung.
+- `POST /auth/logout` vô hiệu session hiện tại; `GET /me` trả `id`, `email`, `admin` của session hợp lệ.
+- `POST /auth/otp/send` nhận `{purpose, email}`, phát mã OTP 6 chữ số qua MailGateway, áp dụng cooldown 60 giây và hạn 5 phút.
+- `POST /auth/otp/verify` nhận `{purpose, email, code}`, khóa dòng và so khớp HMAC; thành công với VERIFY_EMAIL cập nhật `emailVerifiedAt`, với RESET_PASSWORD trả `resetToken`.
+- `POST /auth/password/forgot` nhận `{email}`, khởi tạo OTP đặt lại mật khẩu với thông điệp trả về nhất quán.
+- `POST /auth/password/reset` nhận `{resetToken, newPassword}`, cập nhật hash mật khẩu mới, hủy resetToken và tăng `authVersion`.
+- Các mutation POST yêu cầu `X-CSRF-Token`; body tối đa 64 KiB và là `application/json` hoặc `application/x-www-form-urlencoded`.
 
 ## 2. Ánh xạ đúng UI-01…UI-24
 

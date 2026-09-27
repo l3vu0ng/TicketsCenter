@@ -13,7 +13,7 @@ class PersistenceMetadataTest {
         var resource = getClass().getResourceAsStream("/META-INF/persistence.xml");
         var document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(resource);
 
-        assertEquals(23, document.getElementsByTagName("class").getLength());
+        assertEquals(24, document.getElementsByTagName("class").getLength());
         assertEquals("validate", property(document, "hibernate.hbm2ddl.auto"));
         assertEquals("none", property(document, "jakarta.persistence.schema-generation.database.action"));
         assertEquals("UTC", property(document, "hibernate.jdbc.time_zone"));

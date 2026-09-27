@@ -89,6 +89,8 @@
                     <includes>
                         <include>**/*Test.java</include>
                         <include>**/Day01IT.java</include>
+                        <include>**/Day05IT.java</include>
+                        <include>**/PasswordResetIT.java</include>
                     </includes>
                 </configuration>
             </plugin>
