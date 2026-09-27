@@ -3,6 +3,11 @@ package vn.ticketscenter.model.identity;
 import jakarta.persistence.*;
 import vn.ticketscenter.model.ModelEnums;
 
+import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+
 @Entity
 @Table(name = "tc_users", schema = "dbo")
 public class User {
@@ -43,10 +48,36 @@ public class User {
     @Column(name = "created_at", nullable = false)
     private java.time.Instant createdAt;
 
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "tc_user_platform_roles", schema = "dbo", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "role", nullable = false, length = 30)
+    private Set<String> platformRoles = new HashSet<>();
+
     protected User() {
     }
 
-    public java.util.UUID getId() {
+    public User(String email, String normalizedEmail, String passwordHash, String fullName, Instant createdAt) {
+        this.email = java.util.Objects.requireNonNull(email);
+        this.normalizedEmail = java.util.Objects.requireNonNull(normalizedEmail);
+        this.passwordHash = java.util.Objects.requireNonNull(passwordHash);
+        this.fullName = java.util.Objects.requireNonNull(fullName);
+        this.status = ModelEnums.UserStatus.ACTIVE;
+        this.createdAt = java.util.Objects.requireNonNull(createdAt);
+    }
+
+    public UUID getId() {
         return id;
     }
+
+    public String getEmail() { return email; }
+    public String getNormalizedEmail() { return normalizedEmail; }
+    public String getPasswordHash() { return passwordHash; }
+    public String getFullName() { return fullName; }
+    public ModelEnums.UserStatus getStatus() { return status; }
+    public int getAuthVersion() { return authVersion; }
+    public Instant getEmailVerifiedAt() { return emailVerifiedAt; }
+    public boolean isActive() { return status == ModelEnums.UserStatus.ACTIVE; }
+    public boolean hasPlatformRole(String role) { return platformRoles.contains(role); }
+    public void grantPlatformRole(String role) { platformRoles.add(java.util.Objects.requireNonNull(role)); }
+    public void verifyEmail(Instant verifiedAt) { this.emailVerifiedAt = java.util.Objects.requireNonNull(verifiedAt); }
 }

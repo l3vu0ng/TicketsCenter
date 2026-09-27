@@ -50,6 +50,11 @@ app.base.url=http://localhost:8080/ticketscenter
 app.env=development
 app.secret.key=<your_secret_key_here>
 
+# Demo admin seed. Keep disabled unless explicitly needed.
+admin.seed.enabled=false
+admin.email=admin@ticketscenter.local
+admin.password=<your_non_demo_admin_password>
+
 # 3. Cấu hình Cổng Thanh Toán VNPAY Sandbox
 vnpay.tmn.code=<sandbox_code>
 vnpay.hash.secret=<your_vnpay_hash_secret>

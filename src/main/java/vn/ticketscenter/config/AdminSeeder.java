@@ -1,0 +1,52 @@
+package vn.ticketscenter.config;
+
+import vn.ticketscenter.model.identity.User;
+import vn.ticketscenter.repository.identity.UserRepository;
+import vn.ticketscenter.service.identity.AccountService;
+import vn.ticketscenter.service.identity.PasswordHasher;
+import vn.ticketscenter.transaction.DatabasePrincipal;
+import vn.ticketscenter.transaction.TransactionManager;
+
+import java.time.Clock;
+
+public final class AdminSeeder {
+
+    private final PasswordHasher passwords;
+    private final Clock clock;
+
+    public AdminSeeder(PasswordHasher passwords, Clock clock) {
+        this.passwords = passwords;
+        this.clock = clock;
+    }
+
+    public void seed(TransactionManager transactions) {
+        String password = AppConfig.get("admin.password");
+        validateProductionSecret(ServerConfig.getEnv(), password);
+        if (!AppConfig.getBoolean("admin.seed.enabled", false)) return;
+        if (password == null || password.isBlank()) throw new IllegalStateException("Admin seed password is required");
+        String email = AppConfig.get("admin.email", "admin@ticketscenter.local");
+        String normalizedEmail = AccountService.normalizeEmail(email);
+        transactions.execute(DatabasePrincipal.AUTH, entityManager -> {
+            UserRepository users = new UserRepository(entityManager);
+            User existing = users.findByNormalizedEmail(normalizedEmail).orElse(null);
+            if (existing != null) {
+                if (!existing.hasPlatformRole("ADMIN")) {
+                    throw new IllegalStateException("Admin seed email already belongs to a non-admin account");
+                }
+                return null;
+            }
+            User admin = new User(email, normalizedEmail, passwords.hash(password), "Administrator", clock.instant());
+            admin.verifyEmail(clock.instant());
+            admin.grantPlatformRole("ADMIN");
+            users.save(admin);
+            return null;
+        });
+    }
+
+    static void validateProductionSecret(String environment, String password) {
+        if ("production".equalsIgnoreCase(environment)
+                && (password == null || password.isBlank() || "admin".equals(password))) {
+            throw new IllegalStateException("A non-demo admin password is required in production");
+        }
+    }
+}

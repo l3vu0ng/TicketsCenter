@@ -6,6 +6,8 @@ import jakarta.servlet.annotation.WebListener;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.time.Clock;
+import vn.ticketscenter.service.identity.PasswordHasher;
 
 @WebListener
 public final class PersistenceListener implements ServletContextListener {
@@ -18,6 +20,7 @@ public final class PersistenceListener implements ServletContextListener {
         PersistenceRegistry registry = new PersistenceRegistry();
         try {
             registry.initialize();
+            new AdminSeeder(new PasswordHasher(), Clock.systemUTC()).seed(registry.transactionManager());
         } catch (RuntimeException exception) {
             LOGGER.log(Level.SEVERE, "Database persistence initialization failed", exception);
         }
