@@ -22,7 +22,7 @@ Tài liệu này đi cùng mọi task ngày. Nguồn nghiệp vụ: [SPEC](../re
 | `SEED/` | `database/seeds/` |
 | `EVIDENCE/` | `docs/evidence/` |
 
-Đánh số migration tăng dần theo ngày và thứ tự: `D02_01_tables.sql`, `D02_02_constraints.sql`, `D06_01_organization.sql`. Mỗi ngày có thể nhiều file nếu phụ thuộc đòi hỏi; bảng → constraint/index → UDF/View theo phụ thuộc → SP/trigger → quyền → seed/test. Quyền của object mới được thêm cùng ngày tạo object. Không chỉnh migration đã áp dụng chung: tạo migration tiếp theo. File test ngày: `SQLTEST/day-NN.sql`, `TEST/acceptance/DayNNIT.java`; unit test đặt cạnh nhóm model/service tương ứng và kết thúc `Test`.
+Đánh số migration tăng dần và đặt tên theo chức năng, ví dụ `001_create_ticketing_schema.sql`, `002_add_ticketing_constraints.sql`. Thứ tự theo phụ thuộc: bảng → constraint/index → UDF/View → SP/trigger → quyền → seed/test. Quyền của object mới được thêm cùng migration chức năng liên quan. Không chỉnh migration đã áp dụng chung: tạo migration tiếp theo. SQL test và integration test cũng đặt theo hành vi, ví dụ `SQLTEST/ticketing-schema-constraints.sql`, `TEST/acceptance/SchemaConstraintsIT.java`.
 
 `docs/backend/` lưu quyết định mapping, API, khóa, cấu hình và runbook; `EVIDENCE/day-NN.md` lưu bằng chứng từng ngày. Không copy bí mật, cookie, OTP, QR hoặc connection string có password vào bằng chứng.
 

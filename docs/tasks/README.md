@@ -58,7 +58,7 @@ Không yêu cầu người nhận đoán phần thiếu. Ghi tên người xử 
 | Ngày | Lịch | Công việc chính | Giờ công | Mã task | Trạng thái |
 |---|---|---|---:|---|:---:|
 | [D01](week-1/day-01-nen-tang-va-hop-dong.md) | 2026-09-25 | Chốt nền tảng, mô hình và hợp đồng backend | 16 | D01-T01…T04 | Hoàn thành trừ SQL connection (`NOT RUN`) |
-| [D02](week-1/day-02-schema-va-rang-buoc.md) | 2026-09-26 | Thiết kế và dựng toàn bộ schema SQL Server | 17 | D02-T01…T04 | Chưa làm |
+| [D02](week-1/day-02-schema-va-rang-buoc.md) | 2026-09-26 | Thiết kế và dựng toàn bộ schema SQL Server | 17 | D02-T01…T04 | Đã kiểm chứng |
 | [D03](week-1/day-03-model-jpa-transaction.md) | 2026-09-27 | Model nền, JPA và transaction theo principal | 18 | D03-T01…T04 | Chưa làm |
 | [D04](week-1/day-04-tai-khoan-session-phan-quyen.md) | 2026-09-28 | Đăng ký, đăng nhập, phiên và bảo vệ HTTP | 15 | D04-T01…T04 | Chưa làm |
 | [D05](week-1/day-05-otp-email-khoi-phuc-mat-khau.md) | 2026-09-29 | OTP email, đặt lại mật khẩu và nhà cung cấp tích hợp | 15 | D05-T01…T04 | Chưa làm |

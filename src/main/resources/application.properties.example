@@ -1,0 +1,49 @@
+# ===================================================================
+# TicketsCenter — application.properties.example
+# File mẫu cấu hình hệ thống TicketsCenter (Không chứa mật khẩu thật)
+# Copy file này thành application.properties và điền thông tin thực tế
+# ===================================================================
+
+# 1. Cơ sở dữ liệu Microsoft SQL Server (Azure SQL / Local)
+db.host=devonxjz.database.windows.net
+db.port=1433
+db.name=TicketCenterticke
+db.user=adminTicket@devonxjz
+db.password=<your_password_here>
+db.encrypt=true
+db.trustServerCertificate=false
+db.loginTimeout=30
+
+# URL kết nối JDBC trực tiếp
+db.url=jdbc:sqlserver://devonxjz.database.windows.net:1433;database=TicketCenterticke;user=adminTicket@devonxjz;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;
+
+# Tương thích với các biến TC_SQL_*
+TC_SQL_HOST=devonxjz.database.windows.net
+TC_SQL_PORT=1433
+TC_SQL_DEV_DB=TicketCenterticke
+TC_SQL_TEST_DB=TicketCenterticke
+TC_SQL_BENCH_DB=TicketCenterticke
+TC_SQL_LOGIN=adminTicket@devonxjz
+TC_SQL_PASSWORD=<your_password_here>
+TC_SQL_MIGRATION_LOGIN=adminTicket@devonxjz
+TC_SQL_MIGRATION_PASSWORD=<your_password_here>
+TC_SQL_ENCRYPT=true
+TC_SQL_TRUST_SERVER_CERT=false
+TC_SQL_CONNECT_TIMEOUT_SEC=30
+
+# 2. Cấu hình Ứng dụng Web
+app.base.url=http://localhost:8080/ticketscenter
+app.env=development
+app.secret.key=<your_secret_key_here>
+
+# 3. Cấu hình Cổng Thanh Toán VNPAY Sandbox
+vnpay.tmn.code=<sandbox_code>
+vnpay.hash.secret=<your_vnpay_hash_secret>
+vnpay.pay.url=https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+vnpay.return.url=http://localhost:8080/ticketscenter/api/payments/vnpay/return
+
+# 4. Cấu hình Dịch vụ Gửi Email (SMTP)
+mail.smtp.host=smtp.gmail.com
+mail.smtp.port=587
+mail.smtp.user=no-reply@ticketscenter.vn
+mail.smtp.password=<your_smtp_password>

@@ -28,8 +28,20 @@ done
 
 $plan_only && exit 0
 
+app_props="$repo_root/src/main/resources/application.properties"
+if [[ -f "$app_props" ]]; then
+    while IFS='=' read -r key val || [[ -n "$key" ]]; do
+        key=$(echo "$key" | tr -d '[:space:]')
+        val=$(echo "$val" | tr -d '\r' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+        [[ -z "$key" || "$key" =~ ^# ]] && continue
+        if [[ $key =~ ^TC_SQL_[A-Z0-9_]+$ ]] && [[ -z "${!key:-}" ]]; then
+            export "$key=$val"
+        fi
+    done < "$app_props"
+fi
+
 : "${TC_SQL_HOST:?Thiếu TC_SQL_HOST}"
-: "${TC_SQL_TARGET_DB:?Thiếu TC_SQL_TARGET_DB}"
+TC_SQL_TARGET_DB="${TC_SQL_TARGET_DB:-${TC_SQL_TEST_DB:-${TC_SQL_DEV_DB:-TicketsCenter_Dev}}}"
 : "${TC_SQL_MIGRATION_LOGIN:?Thiếu TC_SQL_MIGRATION_LOGIN}"
 : "${TC_SQL_MIGRATION_PASSWORD:?Thiếu TC_SQL_MIGRATION_PASSWORD}"
 
@@ -37,6 +49,18 @@ case "$TC_SQL_TARGET_DB" in
     "${TC_SQL_DEV_DB:-TicketsCenter_Dev}"|"${TC_SQL_TEST_DB:-TicketsCenter_Test}"|"${TC_SQL_BENCH_DB:-TicketsCenter_Bench}") ;;
     *) echo "Database target không nằm trong allowlist: $TC_SQL_TARGET_DB" >&2; exit 1 ;;
 esac
+
+export TC_SQL_TARGET_DB
+
+if ! command -v sqlcmd >/dev/null 2>&1; then
+    driver_version=$(sed -n 's:.*<mssql.jdbc.version>\([^<]*\)</mssql.jdbc.version>.*:\1:p' "$repo_root/pom.xml")
+    driver_jar="${HOME}/.m2/repository/com/microsoft/sqlserver/mssql-jdbc/$driver_version/mssql-jdbc-$driver_version.jar"
+    [[ -f "$driver_jar" ]] || {
+        echo "Không tìm thấy sqlcmd hoặc Microsoft JDBC driver trong Maven cache" >&2
+        exit 1
+    }
+    exec java --class-path "$driver_jar" "$repo_root/database/JdbcMigrationRunner.java" "$migration_dir"
+fi
 
 wrapper=$(mktemp "${TMPDIR:-/tmp}/ticketscenter-migrations.XXXXXX.sql")
 trap 'rm -f -- "$wrapper"' EXIT

@@ -84,3 +84,6 @@ Không endpoint browser nào được tên `/mark-paid`, `/mark-refunded`, `/mar
 | Settlement/Payout | `eventId`/`settlementId`/`payoutId` |
 
 Timeout sau commit không được diễn giải là thất bại. Caller đọc trạng thái đã lưu rồi mới quyết định trả kết quả hoặc retry hữu hạn.
+# Ghi nhận schema nền
+
+Migration schema/constraint không tạo endpoint, Stored Procedure hoặc UDF mới. Các Servlet/Service sau chỉ được gọi object SQL khi object đó xuất hiện trong migration chức năng và được bổ sung vào hợp đồng này; không tạo API giả chỉ để kiểm kê bảng.

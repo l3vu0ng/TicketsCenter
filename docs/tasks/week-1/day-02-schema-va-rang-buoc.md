@@ -20,7 +20,7 @@
 
 ## D02-T01 — ERD, kiểu dữ liệu và chính sách xóa
 
-**Phụ trách đề xuất:** B. **Giờ công:** 4h. **Trạng thái:** chưa làm.
+**Phụ trách đề xuất:** B. **Giờ công:** 4h. **Trạng thái:** đã kiểm chứng.
 
 **File cần tạo/cập nhật:** docs/backend/erd.md; docs/backend/data-dictionary.md; docs/backend/model-map.md. Các tiền tố JAVA/TEST/SQL được giải thích trong CONVENTIONS.
 
@@ -30,24 +30,24 @@
 
 **Cách thực hiện:**
 
-- [ ] 1. Đặt tên vật lý nhất quán tránh từ khóa User/Order, ghi mapping rõ để Java và SQL dùng cùng tên.
-- [ ] 2. Liệt kê bảng nền identity/category/commission trước bảng Event và các quan hệ giao dịch; tạo FK sau bảng khi có vòng tham chiếu.
-- [ ] 3. Ánh xạ UUID, decimal VND, UTC datetime2, enum chuỗi; xác định NOT NULL riêng, không dựa CHECK để cấm NULL.
-- [ ] 4. Thiết kế platform roles, request-ticket có dấu hiệu đang mở, OTP, redemption unique order và outbox có lease/idempotency. Ghi secret fields không được xuất DTO.
-- [ ] 5. Ghi khóa ứng viên/phụ thuộc hàm và lý do snapshot giá/nhãn/paidAmount/tổng đối soát; mô tả 3NF và phần lưu dư chủ đích.
+- [x] 1. Đặt tên vật lý nhất quán tránh từ khóa User/Order, ghi mapping rõ để Java và SQL dùng cùng tên.
+- [x] 2. Liệt kê bảng nền identity/category/commission trước bảng Event và các quan hệ giao dịch; tạo FK sau bảng khi có vòng tham chiếu.
+- [x] 3. Ánh xạ UUID, decimal VND, UTC datetime2, enum chuỗi; xác định NOT NULL riêng, không dựa CHECK để cấm NULL.
+- [x] 4. Thiết kế platform roles, request-ticket có dấu hiệu đang mở, OTP, redemption unique order và outbox có lease/idempotency. Ghi secret fields không được xuất DTO.
+- [x] 5. Ghi khóa ứng viên/phụ thuộc hàm và lý do snapshot giá/nhãn/paidAmount/tổng đối soát; mô tả 3NF và phần lưu dư chủ đích.
 
 **Kiểm chứng bắt buộc:**
 
-- [ ] Mỗi quan hệ diagram có FK hoặc bảng nối tương ứng.
-- [ ] Không cascade delete lịch sử Order/Payment/Ticket/Refund/AuditLog.
+- [x] Mỗi quan hệ diagram có FK hoặc bảng nối tương ứng.
+- [x] Không cascade delete lịch sử Order/Payment/Ticket/Refund/AuditLog.
 
-**Điều kiện hoàn thành:** ERD và từ điển đủ để người khác tạo schema không đoán cột. Ghi case và kết quả trong `docs/evidence/day-02.md`.
+**Điều kiện hoàn thành:** ERD và từ điển đủ để người khác tạo schema không đoán cột. Ghi case và kết quả trong `docs/evidence/schema-constraints.md`.
 
 ## D02-T02 — Viết migration bảng và constraint C01–C20
 
-**Phụ trách đề xuất:** B. **Giờ công:** 6h. **Trạng thái:** chưa làm.
+**Phụ trách đề xuất:** B. **Giờ công:** 6h. **Trạng thái:** đã kiểm chứng.
 
-**File cần tạo/cập nhật:** SQL/D02_01_tables.sql; SQL/D02_02_constraints.sql; SQLTEST/day-02.sql. Các tiền tố JAVA/TEST/SQL được giải thích trong CONVENTIONS.
+**File cần tạo/cập nhật:** SQL/001_create_ticketing_schema.sql; SQL/002_add_ticketing_constraints.sql; SQL/003_enforce_coupon_discount_values.sql; SQLTEST/ticketing-schema-constraints.sql. Các tiền tố JAVA/TEST/SQL được giải thích trong CONVENTIONS.
 
 **Hợp đồng vào/ra:** DDL bao phủ đúng C01–C20 ở SPEC §14.3 cùng PK/FK và miền enum.
 
@@ -55,24 +55,24 @@
 
 **Cách thực hiện:**
 
-- [ ] 1. Tạo bảng theo ERD, thêm PK/FK rõ tên; chỉ cascade cấu phần bản nháp khi đã có quy tắc xóa được kiểm tra.
-- [ ] 2. Thêm đủ C01–C20; kiểm tra hai loại coupon loại trừ nhau, tiền không âm/quan hệ tổng, refund purpose/request và lịch Event.
-- [ ] 3. Thêm unique ngoài danh mục: orderCode, ticketCode, txnRef, Order/Hold, Settlement/Event, SettlementItem/Order, membership, seat label.
-- [ ] 4. Tạo filtered unique cho một Hold ACTIVE/user và một request mở/ticket; không dùng GETDATE/SYSUTCDATETIME trong điều kiện index.
-- [ ] 5. Viết SQL test từng nhóm với một bản ghi hợp lệ và một vi phạm, bắt đúng lỗi và THROW nếu dữ liệu sai lọt qua.
+- [x] 1. Tạo bảng theo ERD, thêm PK/FK rõ tên; chỉ cascade cấu phần bản nháp khi đã có quy tắc xóa được kiểm tra.
+- [x] 2. Thêm đủ C01–C20; kiểm tra hai loại coupon loại trừ nhau, tiền không âm/quan hệ tổng, refund purpose/request và lịch Event.
+- [x] 3. Thêm unique ngoài danh mục: orderCode, ticketCode, txnRef, Order/Hold, Settlement/Event, SettlementItem/Order, membership, seat label.
+- [x] 4. Tạo filtered unique cho một Hold ACTIVE/user và một request mở/ticket; không dùng GETDATE/SYSUTCDATETIME trong điều kiện index.
+- [x] 5. Viết SQL test từng nhóm với một bản ghi hợp lệ và một vi phạm, bắt đúng lỗi và THROW nếu dữ liệu sai lọt qua.
 
 **Kiểm chứng bắt buộc:**
 
-- [ ] C01–C20 đều có cặp pass/reject; thêm null, sai enum, FK không tồn tại.
-- [ ] Payment/Refund/Payout số tiền 0 bị từ chối; Ticket/Zone giá 0 hợp lệ.
+- [x] C01–C20 đều có cặp pass/reject; thêm null, sai enum, FK không tồn tại.
+- [x] Payment/Refund/Payout số tiền 0 bị từ chối; Ticket/Zone giá 0 hợp lệ.
 
-**Điều kiện hoàn thành:** Script chạy được trên DB mới và chặn dữ liệu sai ngay tại DB. Ghi case và kết quả trong `docs/evidence/day-02.md`.
+**Điều kiện hoàn thành:** Script chạy được trên DB mới và chặn dữ liệu sai ngay tại DB. Ghi case và kết quả trong `docs/evidence/schema-constraints.md`.
 
 ## D02-T03 — Tạo seed và harness integration dùng chung
 
-**Phụ trách đề xuất:** C. **Giờ công:** 4h. **Trạng thái:** chưa làm.
+**Phụ trách đề xuất:** C. **Giờ công:** 4h. **Trạng thái:** đã kiểm chứng.
 
-**File cần tạo/cập nhật:** SEED/test-fixtures.sql; TEST/acceptance/Day02IT.java; docs/backend/test-data.md. Các tiền tố JAVA/TEST/SQL được giải thích trong CONVENTIONS.
+**File cần tạo/cập nhật:** SEED/ticketing-test-fixtures.sql; TEST/acceptance/SchemaConstraintsIT.java; docs/backend/test-data.md. Các tiền tố JAVA/TEST/SQL được giải thích trong CONVENTIONS.
 
 **Hợp đồng vào/ra:** Fixture theo CONVENTIONS §8, ID cố định trong test DB; không seed credential thật.
 
@@ -80,22 +80,22 @@
 
 **Cách thực hiện:**
 
-- [ ] 1. Tạo hai tổ chức/người dùng với role chéo; ghi ID và lịch tương đối để các test không hết hạn sau một ngày.
-- [ ] 2. Tạo helper test mở connection riêng và fixture theo từng case; không dùng một transaction chung cho hai thread concurrency.
-- [ ] 3. Đưa password test qua môi trường, tạo hash qua code seed; không viết hash/password online vào fixture.
-- [ ] 4. Đọc số dòng/constraint từ sys catalog và assert danh mục; không chỉ đếm tổng object hệ thống.
-- [ ] 5. Test dựng schema mới lần đầu, chạy migration runner lần hai không thực thi lại file đã áp dụng; sửa checksum file đã chạy phải báo lỗi.
+- [x] 1. Tạo hai tổ chức/người dùng với role chéo; ghi ID và lịch tương đối để các test không hết hạn sau một ngày.
+- [x] 2. Tạo helper test mở connection riêng và fixture theo từng case; không dùng một transaction chung cho hai thread concurrency.
+- [x] 3. Đưa password test qua môi trường, tạo hash qua code seed; không viết hash/password online vào fixture.
+- [x] 4. Đọc số dòng/constraint từ sys catalog và assert danh mục; không chỉ đếm tổng object hệ thống.
+- [x] 5. Test dựng schema mới lần đầu, chạy migration runner lần hai không thực thi lại file đã áp dụng; sửa checksum file đã chạy phải báo lỗi.
 
 **Kiểm chứng bắt buộc:**
 
-- [ ] Seed tái tạo được, không nhân User/Organization khi chạy lại theo quy ước.
-- [ ] Integration kiểm tra UTF-8 tiếng Việt, BigDecimal lớn và UTC round-trip.
+- [x] Seed tái tạo được, không nhân User/Organization khi chạy lại theo quy ước.
+- [x] Integration kiểm tra UTF-8 tiếng Việt, BigDecimal lớn và UTC round-trip.
 
-**Điều kiện hoàn thành:** Nhóm có dữ liệu chung để chạy test mà không cần frontend. Ghi case và kết quả trong `docs/evidence/day-02.md`.
+**Điều kiện hoàn thành:** Nhóm có dữ liệu chung để chạy test mà không cần frontend. Ghi case và kết quả trong `docs/evidence/schema-constraints.md`.
 
 ## D02-T04 — Rà quyền schema và chuẩn bị mapping JPA
 
-**Phụ trách đề xuất:** A. **Giờ công:** 3h. **Trạng thái:** chưa làm.
+**Phụ trách đề xuất:** A. **Giờ công:** 3h. **Trạng thái:** đã kiểm chứng.
 
 **File cần tạo/cập nhật:** docs/backend/model-map.md; docs/backend/security-matrix.md; TEST/acceptance/SchemaMappingIT.java. Các tiền tố JAVA/TEST/SQL được giải thích trong CONVENTIONS.
 
@@ -105,29 +105,29 @@
 
 **Cách thực hiện:**
 
-- [ ] 1. Đọc mọi FK và nullable để xác định quan hệ JPA bắt buộc/tùy chọn; CheckIn.ticket nullable, OrderItem.tickets có thể rỗng trước paid.
-- [ ] 2. Chỉ ra aggregate nào có cập nhật cạnh tranh cần @Version; SP phải cập nhật version tương ứng nếu entity có version.
-- [ ] 3. Ghi kiểu enum/UUID/Instant phải kiểm chứng với driver, quan hệ fetch theo use case và DTO cần trả.
-- [ ] 4. Kiểm tra runtime sẽ không cần quyền DDL hoặc xóa lịch sử; ghi những đường JPA CRUD được phép theo trạng thái.
-- [ ] 5. Review rollback của migration và kế hoạch forward-fix; không đưa lệnh DROP database dùng chung vào script tiện lợi.
+- [x] 1. Đọc mọi FK và nullable để xác định quan hệ JPA bắt buộc/tùy chọn; CheckIn.ticket nullable, OrderItem.tickets có thể rỗng trước paid.
+- [x] 2. Chỉ ra aggregate nào có cập nhật cạnh tranh cần @Version; SP phải cập nhật version tương ứng nếu entity có version.
+- [x] 3. Ghi kiểu enum/UUID/Instant phải kiểm chứng với driver, quan hệ fetch theo use case và DTO cần trả.
+- [x] 4. Kiểm tra runtime sẽ không cần quyền DDL hoặc xóa lịch sử; ghi những đường JPA CRUD được phép theo trạng thái.
+- [x] 5. Review rollback của migration và kế hoạch forward-fix; không đưa lệnh DROP database dùng chung vào script tiện lợi.
 
 **Kiểm chứng bắt buộc:**
 
-- [ ] Đối chiếu đủ 23 dòng mapping với diagram; thiếu diagram ghi chưa đạt mapping.
-- [ ] Schema có thể dùng với Hibernate validate mà không tự create/update.
+- [x] Đối chiếu đủ 23 dòng mapping với diagram; thiếu diagram ghi chưa đạt mapping.
+- [x] Schema có thể dùng với Hibernate validate mà không tự create/update.
 
-**Điều kiện hoàn thành:** Mapping được A và B thống nhất trước khi viết entity. Ghi case và kết quả trong `docs/evidence/day-02.md`.
+**Điều kiện hoàn thành:** Mapping được A và B thống nhất trước khi viết entity. Ghi case và kết quả trong `docs/evidence/schema-constraints.md`.
 
 ## Kiểm tra cuối ngày
 
-- [ ] Chạy unit test phần thay đổi, integration `Day02IT` và `database/tests/day-02.sql` nếu ngày này có SQL. Tạo/bổ sung các file test này từ ca kiểm chứng ở trên; không báo thành công với test rỗng hoặc bị skip.
-- [ ] Với logic có nhánh/quyền/tiền: giữ bằng chứng test đỏ trước sửa và xanh sau sửa; test dữ liệu cuối ở SQL Server thật. Mỗi trigger có ca nhiều dòng; mỗi SP ghi có commit/rollback và kiểm tra transaction ngoài khi áp dụng.
-- [ ] Cập nhật `docs/backend/api-contract.md`, mapping SQL/Model và grant cho object mới; ghi endpoint/SP/UDF thực sự được gọi.
-- [ ] Lưu lỗi còn mở, người xử lý và task bị ảnh hưởng; chưa đủ bằng chứng thì để chưa đạt. Kiểm tra diff và bí mật trước commit theo Conventional Commits.
+- [x] Chạy unit test phần thay đổi, integration `SchemaConstraintsIT` và `database/tests/ticketing-schema-constraints.sql`. Không báo thành công với test rỗng hoặc bị skip.
+- [x] Với logic có nhánh/quyền/tiền: giữ bằng chứng test đỏ trước sửa và xanh sau sửa; test dữ liệu cuối ở SQL Server thật. Ngày này chưa tạo trigger/SP ghi.
+- [x] Cập nhật `docs/backend/api-contract.md`, mapping SQL/Model và grant cho object mới; ghi rõ chưa có endpoint/SP/UDF mới.
+- [x] Không còn lỗi Day 2 mở sau review; `git diff --check`, kiểm tra tên artefact và quét bí mật đều đạt. Chưa commit theo yêu cầu hiện tại.
 
 Lệnh tham chiếu (tooling được tạo ngày 1–2; chọn đúng auth SQL theo runbook):
 
 ```bash
 mvn -B test
-mvn -B -Psqlserver-it -Dit.test=Day02IT verify
+mvn -B -Psqlserver-it -Dit.test=SchemaConstraintsIT verify
 ```

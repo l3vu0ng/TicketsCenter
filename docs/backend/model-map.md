@@ -79,3 +79,16 @@ Không cascade-delete `Order`, `Payment`, `Ticket`, `Refund` hoặc `AuditLog` �
 ## 5. Ranh giới kỹ thuật
 
 Các bảng `tc_otps`, `tc_coupon_redemptions`, `tc_refund_request_tickets`, `tc_outbox`, session/role mapping và migration history là persistence kỹ thuật. Chúng không làm tăng số lớp nghiệp vụ. Repository/Service chỉ tạo khi use case cần; không tạo một bộ Controller–Service–Repository cho từng bảng.
+
+## 6. Quy ước mapping schema nền
+
+- Tên vật lý của 23 entity là tên ở cột “Bảng dự kiến”; chi tiết cột/FK/nullability nằm trong [data dictionary](data-dictionary.md).
+- `uniqueidentifier ↔ UUID`, `decimal(19,0) ↔ BigDecimal`, `datetime2(3) UTC ↔ Instant`, enum lưu bằng `EnumType.STRING`; tuyệt đối không dùng ordinal hoặc `double` cho tiền.
+- `CheckIn.ticket`, reviewer, commission rule của Event draft, coupon/seat tùy loại và RefundRequest của payment compensation là optional; các FK còn lại là bắt buộc theo từ điển.
+- Quan hệ collection mặc định lazy; projection/DTO tải đúng dữ liệu use case. Không serialize entity graph hoặc các cột hash/secret.
+- Dùng optimistic `version` cho aggregate có cập nhật cạnh tranh: membership, request tổ chức, Event/Zone/Seat, Hold/Order/Payment, Coupon/Ticket, refund workflow, Settlement/Payout. SP cập nhật cùng cột version khi thay đổi trạng thái.
+- Hibernate online chỉ `validate`; schema được sở hữu bởi migration, không dùng `create`, `drop` hoặc `update`.
+
+## 7. Chính sách ghi và xóa
+
+Schema nền chỉ chốt cấu trúc và mapping; chưa tạo một Repository cho từng bảng. Các đường ghi về sau đi qua Service/SP của use case. Runtime không có DDL, không hard-delete lịch sử tài chính/audit và không đổi principal giữa transaction. Migration lỗi được rollback toàn batch; schema đã dùng chung chỉ sửa bằng migration forward-fix mới.

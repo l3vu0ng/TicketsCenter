@@ -79,3 +79,17 @@ Các principal kỹ thuật không phải role HTTP, không xuất hiện trong 
 - Check-in principal bị DENY dữ liệu tài chính kể cả gọi View/bảng trực tiếp.
 - Worker chỉ chạy SP được cấp; migration principal không được dùng cho HTTP runtime.
 - REVOKE được thử khi không còn nguồn grant khác; DENY tài chính check-in được thử riêng bằng `EXECUTE AS USER`/`REVERT`.
+
+## 8. Ranh giới schema đã chốt
+
+| Principal | Đường dữ liệu cần có | Không cấp |
+|---|---|---|
+| `tc_auth` | User, OTP và session khi cơ chế session được tạo | Event, Order, Payment, Refund, DDL |
+| `tc_buyer` | Đọc dữ liệu own/scoped và EXECUTE SP mua vé khi SP tồn tại | DML bảng tài chính trực tiếp, DDL, DELETE lịch sử |
+| `tc_manager` | Draft Event/Zone/Seat/Coupon và EXECUTE SP scoped | Dữ liệu tổ chức khác, settlement/payout admin, DDL |
+| `tc_checkin` | Event tối thiểu, Ticket status và EXECUTE check-in | Order/Payment/Refund/Settlement/Payout, DDL |
+| `tc_platform_admin` | Đọc báo cáo/audit và EXECUTE SP duyệt/đối soát | `db_owner`, `sysadmin`, DDL runtime, DELETE lịch sử |
+| `tc_worker` | Outbox lease và EXECUTE SP worker | DDL, UI/admin mutation tùy ý |
+| `tc_migration` | DDL và `tc_schema_migrations` trong process migration | HTTP/runtime pool |
+
+Schema nền không grant CRUD rộng trực tiếp để “làm cho chạy”. Grant cho View/SP được thêm cùng object ở migration chức năng tương ứng. Hibernate online dùng `validate`; mọi sửa schema đi qua migration principal. FK `NO ACTION` chỉ chặn xóa parent còn được tham chiếu; chính sách append-only và cấm xóa trực tiếp bản ghi lịch sử phải được khóa bằng quyền không cấp `DELETE` và đường ghi qua SP khi các principal/SP được tạo.

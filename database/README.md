@@ -11,7 +11,7 @@ database/
 └── tests/          # Assertion SQL bằng THROW
 ```
 
-Tên migration: `D<ngày>_<thứ-tự>_<mô-tả>.sql`, ví dụ `D02_01_tables.sql`. Thứ tự trong ngày: bảng → constraint/index → UDF/View → SP/trigger → grant. Không sửa migration đã áp dụng; tạo migration mới để sửa.
+Tên migration: `<thứ-tự>_<chức-năng>.sql`, ví dụ `001_create_ticketing_schema.sql`. Thứ tự: bảng → constraint/index → UDF/View → SP/trigger → grant. Không sửa migration đã áp dụng; tạo migration mới để sửa.
 
 ## 2. Lịch sử và checksum
 
