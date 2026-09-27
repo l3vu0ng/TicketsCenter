@@ -17,6 +17,8 @@
         <mssql.jdbc.version>12.8.1.jre11</mssql.jdbc.version>
         <hibernate.version>6.6.9.Final</hibernate.version>
         <hikari.version>6.2.1</hikari.version>
+        <jetty.version>12.1.13</jetty.version>
+        <jetty.port>8081</jetty.port>
     </properties>
 
     <dependencies>
@@ -100,6 +102,22 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <version>3.5.2</version>
+            </plugin>
+
+            <!-- Eclipse Jetty EE10 Plugin for Rapid Local Development -->
+            <plugin>
+                <groupId>org.eclipse.jetty.ee10</groupId>
+                <artifactId>jetty-ee10-maven-plugin</artifactId>
+                <version>${jetty.version}</version>
+                <configuration>
+                    <httpConnector>
+                        <port>${jetty.port}</port>
+                    </httpConnector>
+                    <webApp>
+                        <contextPath>/</contextPath>
+                    </webApp>
+                    <scan>1</scan>
+                </configuration>
             </plugin>
         </plugins>
     </build>
