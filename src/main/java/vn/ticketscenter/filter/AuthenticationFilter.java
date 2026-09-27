@@ -28,7 +28,8 @@ public final class AuthenticationFilter implements Filter {
             "/api/auth/otp/send",
             "/api/auth/otp/verify",
             "/api/auth/password/forgot",
-            "/api/auth/password/reset"
+            "/api/auth/password/reset",
+            "/api/openapi.json"
     );
 
     @Override

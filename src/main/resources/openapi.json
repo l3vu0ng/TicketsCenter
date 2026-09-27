@@ -1,0 +1,598 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "TicketsCenter API",
+    "description": "API tài liệu và thử nghiệm cho hệ thống bán vé TicketsCenter (Java 25, Jakarta Servlet 6.1, SQL Server). Hỗ trợ xác thực session cookie, CSRF token, OTP email và khôi phục mật khẩu.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "/",
+      "description": "Local & Current Server Context"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Health",
+      "description": "Kiểm tra trạng thái liveness và readiness của hệ thống"
+    },
+    {
+      "name": "Authentication",
+      "description": "Đăng ký, đăng nhập, CSRF token và quản lý phiên"
+    },
+    {
+      "name": "OTP & Password Reset",
+      "description": "Phát hành mã OTP, xác thực email và khôi phục mật khẩu"
+    }
+  ],
+  "paths": {
+    "/health/live": {
+      "get": {
+        "tags": ["Health"],
+        "summary": "Liveness Probe",
+        "description": "Xác nhận container Tomcat đang chạy và phản hồi HTTP.",
+        "responses": {
+          "200": {
+            "description": "Ứng dụng hoạt động bình thường",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "status": { "type": "string", "example": "UP" },
+                        "timestamp": { "type": "string", "example": "2026-09-27T10:00:00Z" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health/ready": {
+      "get": {
+        "tags": ["Health"],
+        "summary": "Readiness Probe",
+        "description": "Kiểm tra kết nối tới cơ sở dữ liệu SQL Server và trạng thái khởi tạo EntityManagerFactory.",
+        "responses": {
+          "200": {
+            "description": "Cơ sở dữ liệu sẵn sàng",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "status": { "type": "string", "example": "READY" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Cơ sở dữ liệu không khả dụng",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/csrf": {
+      "get": {
+        "tags": ["Authentication"],
+        "summary": "Lấy CSRF Token",
+        "description": "Sinh hoặc đọc token CSRF gắn với session hiện tại. Bắt buộc gửi token này qua header `X-CSRF-Token` trên tất cả các request POST, PUT, DELETE.",
+        "responses": {
+          "200": {
+            "description": "CSRF token hợp lệ",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "token": { "type": "string", "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/register": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Đăng ký tài khoản",
+        "description": "Tạo tài khoản mới. Email được chuẩn hóa (chữ thường, cắt khoảng trắng). Mật khẩu được băm bằng PBKDF2-HMAC-SHA256 với salt 16 byte và 210.000 vòng lặp.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/RegisterRequest" }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": { "$ref": "#/components/schemas/RegisterRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Đăng ký thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "registered": { "type": "boolean", "example": true }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dữ liệu không hợp lệ (mật khẩu dưới 12 ký tự hoặc email sai)",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Đăng nhập",
+        "description": "Xác thực danh tính bằng email (hoặc alias `admin`) và mật khẩu. Cấp mới Session ID trong cookie `JSESSIONID` để ngăn ngừa session fixation.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LoginRequest" }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": { "$ref": "#/components/schemas/LoginRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Đăng nhập thành công",
+            "headers": {
+              "Set-Cookie": {
+                "description": "Cookie phiên JSESSIONID (HttpOnly, SameSite=Lax)",
+                "schema": { "type": "string", "example": "JSESSIONID=E524BA4E181DA...; Path=/; HttpOnly; SameSite=Lax" }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "authenticated": { "type": "boolean", "example": true }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sai thông tin đăng nhập hoặc tài khoản bị khóa",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Đăng xuất",
+        "description": "Hủy toàn bộ phiên làm việc hiện tại trên máy chủ.",
+        "responses": {
+          "200": {
+            "description": "Đã đăng xuất",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "loggedOut": { "type": "boolean", "example": true }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/me": {
+      "get": {
+        "tags": ["Authentication"],
+        "summary": "Thông tin tài khoản hiện tại",
+        "description": "Lấy thông tin người dùng đang đăng nhập dựa trên phiên cookie.",
+        "security": [{ "cookieAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Thông tin người dùng",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "string", "format": "uuid", "example": "f47ac10b-58cc-4372-a567-0e02b2c3d479" },
+                        "email": { "type": "string", "example": "user@example.com" },
+                        "admin": { "type": "boolean", "example": false }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa đăng nhập hoặc session đã hết hạn / thu hồi",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/otp/send": {
+      "post": {
+        "tags": ["OTP & Password Reset"],
+        "summary": "Gửi mã OTP qua Email",
+        "description": "Sinh mã OTP 6 chữ số ngẫu nhiên, lưu hash HMAC-SHA256, áp dụng cooldown 60 giây và giới hạn sliding window 15 phút.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/OtpSendRequest" }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": { "$ref": "#/components/schemas/OtpSendRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Mã OTP đã được gửi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "sent": { "type": "boolean", "example": true }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dữ liệu yêu cầu không hợp lệ",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "429": {
+            "description": "Vượt quá tần suất gửi (cooldown 60s hoặc rate limit)",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/otp/verify": {
+      "post": {
+        "tags": ["OTP & Password Reset"],
+        "summary": "Xác thực mã OTP",
+        "description": "Kiểm tra mã OTP (tối đa 5 lần thử sai, TTL 5 phút). Nếu purpose là RESET_PASSWORD, trả về `resetToken` dùng 1 lần để đổi mật khẩu.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/OtpVerifyRequest" }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": { "$ref": "#/components/schemas/OtpVerifyRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Xác thực thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "verified": { "type": "boolean", "example": true },
+                        "resetToken": { "type": "string", "nullable": true, "example": "d290f1ee-6c54-4b01-90e6-d701748f0851.1790500000000.vO9z..." }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Mã OTP sai, hết hạn hoặc vượt quá số lần thử",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/password/forgot": {
+      "post": {
+        "tags": ["OTP & Password Reset"],
+        "summary": "Yêu cầu khôi phục mật khẩu",
+        "description": "Gửi OTP đặt lại mật khẩu đến email. Không để lộ việc tài khoản có tồn tại hay không trong hệ thống (chống timing attack và user enumeration).",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ForgotPasswordRequest" }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": { "$ref": "#/components/schemas/ForgotPasswordRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Yêu cầu được tiếp nhận",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "accepted": { "type": "boolean", "example": true },
+                        "message": { "type": "string", "example": "If the email exists, a reset code has been sent." }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/password/reset": {
+      "post": {
+        "tags": ["OTP & Password Reset"],
+        "summary": "Đặt lại mật khẩu mới",
+        "description": "Sử dụng `resetToken` nhận được từ bước verify OTP để đặt mật khẩu mới (12-256 ký tự). Tự động vô hiệu hóa token (stateless qua HMAC chữ ký mật khẩu cũ) và tăng `authVersion` để thu hồi toàn bộ session trên tất cả thiết bị.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ResetPasswordRequest" }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": { "$ref": "#/components/schemas/ResetPasswordRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Mật khẩu đã được đặt lại thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "reset": { "type": "boolean", "example": true }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Token không hợp lệ, đã sử dụng hoặc mật khẩu không đủ tiêu chuẩn",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "cookieAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "JSESSIONID",
+        "description": "Session cookie được cấp tự động sau khi gọi POST /api/auth/login"
+      },
+      "csrfToken": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-CSRF-Token",
+        "description": "CSRF token lấy từ GET /api/auth/csrf"
+      }
+    },
+    "schemas": {
+      "RegisterRequest": {
+        "type": "object",
+        "required": ["email", "password"],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "newuser@example.com"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 12,
+            "maxLength": 256,
+            "example": "SecurePassword123!"
+          }
+        }
+      },
+      "LoginRequest": {
+        "type": "object",
+        "required": ["identifier", "password"],
+        "properties": {
+          "identifier": {
+            "type": "string",
+            "example": "newuser@example.com",
+            "description": "Địa chỉ email hoặc tài khoản 'admin'"
+          },
+          "password": {
+            "type": "string",
+            "example": "SecurePassword123!"
+          }
+        }
+      },
+      "OtpSendRequest": {
+        "type": "object",
+        "required": ["email", "purpose"],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "newuser@example.com"
+          },
+          "purpose": {
+            "type": "string",
+            "enum": ["VERIFY_EMAIL", "RESET_PASSWORD"],
+            "example": "VERIFY_EMAIL"
+          }
+        }
+      },
+      "OtpVerifyRequest": {
+        "type": "object",
+        "required": ["email", "code", "purpose"],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "newuser@example.com"
+          },
+          "code": {
+            "type": "string",
+            "minLength": 6,
+            "maxLength": 6,
+            "example": "123456"
+          },
+          "purpose": {
+            "type": "string",
+            "enum": ["VERIFY_EMAIL", "RESET_PASSWORD"],
+            "example": "VERIFY_EMAIL"
+          }
+        }
+      },
+      "ForgotPasswordRequest": {
+        "type": "object",
+        "required": ["email"],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "user@example.com"
+          }
+        }
+      },
+      "ResetPasswordRequest": {
+        "type": "object",
+        "required": ["resetToken", "newPassword"],
+        "properties": {
+          "resetToken": {
+            "type": "string",
+            "example": "d290f1ee-6c54-4b01-90e6-d701748f0851.1790500000000.vO9zM4...",
+            "description": "Token nhận được từ API /api/auth/otp/verify khi purpose=RESET_PASSWORD"
+          },
+          "newPassword": {
+            "type": "string",
+            "minLength": 12,
+            "maxLength": 256,
+            "example": "BrandNewPassword123!"
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "object",
+            "properties": {
+              "code": { "type": "string", "example": "VALIDATION_FAILED" },
+              "message": { "type": "string", "example": "Detailed error message" },
+              "timestamp": { "type": "string", "format": "date-time", "example": "2026-09-27T10:00:00Z" }
+            }
+          }
+        }
+      }
+    }
+  }
+}
