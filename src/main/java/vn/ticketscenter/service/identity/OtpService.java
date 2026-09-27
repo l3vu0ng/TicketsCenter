@@ -20,6 +20,8 @@ import java.security.SecureRandom;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -32,13 +34,16 @@ public final class OtpService {
     public static final Duration COOLDOWN = Duration.ofSeconds(60);
     public static final Duration TTL = Duration.ofMinutes(5);
     public static final int MAX_FAILED_ATTEMPTS = 5;
+    public static final int MAX_SENDS_PER_ACCOUNT_WINDOW = 5;
+    public static final int MAX_SENDS_PER_IP_WINDOW = 10;
+    public static final Duration RATE_LIMIT_WINDOW = Duration.ofMinutes(15);
 
     private final TransactionManager transactions;
     private final MailGateway mailGateway;
     private final Clock clock;
     private final byte[] secretKey;
     private final Supplier<String> codeGenerator;
-    private final Map<String, Instant> rateLimitTracker = new ConcurrentHashMap<>();
+    private final Map<String, List<Instant>> sendHistory = new ConcurrentHashMap<>();
 
     public record VerifyResult(boolean successful, UUID userId, String error) {
         public static VerifyResult success(UUID userId) {
@@ -64,9 +69,15 @@ public final class OtpService {
     }
 
     public void sendOtp(UUID userId, String rawEmail, OtpPurpose purpose) {
+        sendOtp(userId, rawEmail, purpose, null);
+    }
+
+    public void sendOtp(UUID userId, String rawEmail, OtpPurpose purpose, String clientIp) {
         Objects.requireNonNull(purpose, "purpose is required");
         String normalizedEmail = AccountService.normalizeEmail(rawEmail);
         Instant now = clock.instant();
+
+        checkRateLimits(normalizedEmail, clientIp, now);
 
         String code = transactions.execute(DatabasePrincipal.AUTH, entityManager -> {
             OtpRepository repository = new OtpRepository(entityManager);
@@ -89,7 +100,43 @@ public final class OtpService {
             return generatedCode;
         });
 
+        recordSendHistory(normalizedEmail, clientIp, now);
         mailGateway.sendOtp(rawEmail.trim(), code, purpose);
+    }
+
+    private void checkRateLimits(String normalizedEmail, String clientIp, Instant now) {
+        Instant windowStart = now.minus(RATE_LIMIT_WINDOW);
+        if (clientIp != null && !clientIp.isBlank()) {
+            List<Instant> ipHistory = sendHistory.getOrDefault("ip:" + clientIp, List.of());
+            long ipCount = ipHistory.stream().filter(t -> t.isAfter(windowStart)).count();
+            if (ipCount >= MAX_SENDS_PER_IP_WINDOW) {
+                throw new IllegalStateException("IP rate limit exceeded. Please wait before requesting another OTP.");
+            }
+        }
+
+        List<Instant> accountHistory = sendHistory.getOrDefault("email:" + normalizedEmail, List.of());
+        long accountCount = accountHistory.stream().filter(t -> t.isAfter(windowStart)).count();
+        if (accountCount >= MAX_SENDS_PER_ACCOUNT_WINDOW) {
+            throw new IllegalStateException("Account rate limit exceeded. Please wait before requesting another OTP.");
+        }
+    }
+
+    private void recordSendHistory(String normalizedEmail, String clientIp, Instant now) {
+        Instant windowStart = now.minus(RATE_LIMIT_WINDOW);
+        sendHistory.compute("email:" + normalizedEmail, (key, list) -> {
+            List<Instant> updated = list == null ? new ArrayList<>() : new ArrayList<>(list);
+            updated.removeIf(t -> !t.isAfter(windowStart));
+            updated.add(now);
+            return updated;
+        });
+        if (clientIp != null && !clientIp.isBlank()) {
+            sendHistory.compute("ip:" + clientIp, (key, list) -> {
+                List<Instant> updated = list == null ? new ArrayList<>() : new ArrayList<>(list);
+                updated.removeIf(t -> !t.isAfter(windowStart));
+                updated.add(now);
+                return updated;
+            });
+        }
     }
 
     public VerifyResult verifyOtp(String rawEmail, String code, OtpPurpose purpose) {

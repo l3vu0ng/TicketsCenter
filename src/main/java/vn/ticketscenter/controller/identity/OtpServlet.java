@@ -63,7 +63,7 @@ public final class OtpServlet extends HttpServlet {
             }
 
             if (path.endsWith("/auth/password/forgot")) {
-                handleForgotPassword(response, body, resetService);
+                handleForgotPassword(request, response, body, resetService);
                 return;
             }
 
@@ -102,7 +102,8 @@ public final class OtpServlet extends HttpServlet {
             throw new IllegalArgumentException("email is required");
         }
 
-        otpService.sendOtp(userId, email, purpose);
+        String clientIp = resolveClientIp(request);
+        otpService.sendOtp(userId, email, purpose, clientIp);
         HttpResponses.data(response, "{\"sent\":true}");
     }
 
@@ -135,11 +136,23 @@ public final class OtpServlet extends HttpServlet {
         HttpResponses.data(response, "{\"verified\":true}");
     }
 
-    private void handleForgotPassword(HttpServletResponse response, Map<String, String> body,
-                                       PasswordResetService resetService) throws IOException {
+    private void handleForgotPassword(HttpServletRequest request, HttpServletResponse response,
+                                       Map<String, String> body, PasswordResetService resetService) throws IOException {
         String email = value(body.get("email"), "email is required");
-        resetService.requestReset(email);
+        String clientIp = resolveClientIp(request);
+        resetService.requestReset(email, clientIp);
         HttpResponses.data(response, "{\"accepted\":true,\"message\":\"If the email exists, a reset code has been sent.\"}");
+    }
+
+    public static String resolveClientIp(HttpServletRequest request) {
+        boolean trustedProxy = vn.ticketscenter.config.AppConfig.getBoolean("app.proxy.trusted", false);
+        if (trustedProxy) {
+            String forwarded = request.getHeader("X-Forwarded-For");
+            if (forwarded != null && !forwarded.isBlank()) {
+                return forwarded.split(",")[0].trim();
+            }
+        }
+        return request.getRemoteAddr();
     }
 
     private void handlePasswordReset(HttpServletResponse response, Map<String, String> body,

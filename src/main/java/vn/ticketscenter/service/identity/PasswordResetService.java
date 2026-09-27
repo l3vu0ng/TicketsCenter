@@ -56,13 +56,17 @@ public final class PasswordResetService {
     }
 
     public void requestReset(String rawEmail) {
+        requestReset(rawEmail, null);
+    }
+
+    public void requestReset(String rawEmail, String clientIp) {
         String normalized = AccountService.normalizeEmail(rawEmail);
         Optional<User> userOpt = transactions.execute(DatabasePrincipal.AUTH, entityManager ->
                 new UserRepository(entityManager).findByNormalizedEmail(normalized).filter(User::isActive));
 
         if (userOpt.isPresent()) {
             User user = userOpt.get();
-            otpService.sendOtp(user.getId(), rawEmail, OtpPurpose.RESET_PASSWORD);
+            otpService.sendOtp(user.getId(), rawEmail, OtpPurpose.RESET_PASSWORD, clientIp);
         }
     }
 

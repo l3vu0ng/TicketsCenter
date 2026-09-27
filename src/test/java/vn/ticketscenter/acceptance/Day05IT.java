@@ -1,5 +1,6 @@
 package vn.ticketscenter.acceptance;
 
+import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -21,10 +22,12 @@ import vn.ticketscenter.service.identity.AccountService;
 import vn.ticketscenter.service.identity.OtpService;
 import vn.ticketscenter.service.identity.PasswordHasher;
 import vn.ticketscenter.service.identity.PasswordResetService;
+import vn.ticketscenter.service.identity.SessionService;
 import vn.ticketscenter.transaction.DatabasePrincipal;
 import vn.ticketscenter.transaction.TransactionManager;
 
 import java.io.*;
+import java.lang.reflect.Field;
 import java.lang.reflect.Proxy;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
@@ -156,6 +159,186 @@ public class Day05IT {
         filter.doFilter(request, response, (req, res) -> fail("Filter chain should not be called"));
         assertEquals(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE, status[0]);
         assertTrue(writer.toString().contains("PAYLOAD_TOO_LARGE"));
+    }
+
+    @Test
+    void untrustedProxyDoesNotSpoofIpRateLimiter() {
+        HttpServletRequest request = (HttpServletRequest) Proxy.newProxyInstance(
+                getClass().getClassLoader(), new Class<?>[]{HttpServletRequest.class},
+                (proxy, method, args) -> switch (method.getName()) {
+                    case "getHeader" -> {
+                        if ("X-Forwarded-For".equalsIgnoreCase((String) args[0])) {
+                            yield "203.0.113.195, 10.0.0.1";
+                        }
+                        yield null;
+                    }
+                    case "getRemoteAddr" -> "192.168.1.50";
+                    default -> null;
+                });
+
+        String untrustedResult = OtpServlet.resolveClientIp(request);
+        assertEquals("192.168.1.50", untrustedResult);
+
+        try {
+            System.setProperty("app.proxy.trusted", "true");
+            String trustedResult = OtpServlet.resolveClientIp(request);
+            assertEquals("203.0.113.195", trustedResult);
+        } finally {
+            System.clearProperty("app.proxy.trusted");
+        }
+    }
+
+    @Test
+    void otpServletRejectsInvalidParametersWithBadRequest() throws Exception {
+        InMemoryPersistence persistence = new InMemoryPersistence();
+        PersistenceRegistry registry = createTestRegistry(persistence);
+        ConfiguredMailGateway mail = new ConfiguredMailGateway();
+        MutableClock clock = new MutableClock(Instant.parse("2026-09-27T08:00:00Z"));
+
+        OtpServlet servlet = new OtpServlet();
+
+        List<String> invalidEndpointsAndBodies = List.of(
+                "/api/auth/otp/send|{}",
+                "/api/auth/otp/send|{\"purpose\":\"NON_EXISTENT_PURPOSE\"}",
+                "/api/auth/otp/send|{\"purpose\":\"VERIFY_EMAIL\"}",
+                "/api/auth/otp/verify|{\"email\":\"test@example.com\"}",
+                "/api/auth/password/reset|{\"resetToken\":\"valid-format\"}"
+        );
+
+        for (String item : invalidEndpointsAndBodies) {
+            String[] parts = item.split("\\|");
+            String uri = parts[0];
+            String jsonBody = parts[1];
+
+            final int[] status = new int[]{200};
+            final StringWriter writer = new StringWriter();
+
+            ServletContext servletContext = (ServletContext) Proxy.newProxyInstance(
+                    getClass().getClassLoader(), new Class<?>[]{ServletContext.class},
+                    (proxy, method, args) -> switch (method.getName()) {
+                        case "getAttribute" -> {
+                            if (PersistenceListener.REGISTRY_ATTRIBUTE.equals(args[0])) yield registry;
+                            if (OtpServlet.MAIL_GATEWAY_ATTRIBUTE.equals(args[0])) yield mail;
+                            if (OtpServlet.CLOCK_ATTRIBUTE.equals(args[0])) yield clock;
+                            yield null;
+                        }
+                        default -> null;
+                    });
+
+            HttpServletRequest request = (HttpServletRequest) Proxy.newProxyInstance(
+                    getClass().getClassLoader(), new Class<?>[]{HttpServletRequest.class},
+                    (proxy, method, args) -> switch (method.getName()) {
+                        case "getMethod" -> "POST";
+                        case "getRequestURI" -> uri;
+                        case "getServletContext" -> servletContext;
+                        case "getContentType" -> "application/json";
+                        case "getReader" -> new BufferedReader(new StringReader(jsonBody));
+                        case "getRemoteAddr" -> "127.0.0.1";
+                        case "getAttribute" -> null;
+                        default -> null;
+                    });
+
+            HttpServletResponse response = (HttpServletResponse) Proxy.newProxyInstance(
+                    getClass().getClassLoader(), new Class<?>[]{HttpServletResponse.class},
+                    (proxy, method, args) -> switch (method.getName()) {
+                        case "setStatus" -> { status[0] = (int) args[0]; yield null; }
+                        case "setHeader", "setContentType", "setCharacterEncoding" -> null;
+                        case "getWriter" -> new PrintWriter(writer);
+                        default -> null;
+                    });
+
+            servlet.service(request, response);
+            assertEquals(HttpServletResponse.SC_BAD_REQUEST, status[0], "Failed on " + uri + " with " + jsonBody);
+            assertTrue(writer.toString().contains("VALIDATION_FAILED") || writer.toString().contains("error"),
+                    "Response did not contain error details: " + writer);
+        }
+    }
+
+    @Test
+    void authenticationFilterRevokesSessionWhenAuthVersionMismatched() throws Exception {
+        MutableClock clock = new MutableClock(Instant.parse("2026-09-27T08:00:00Z"));
+        PasswordHasher hasher = new PasswordHasher();
+        InMemoryPersistence persistence = new InMemoryPersistence();
+
+        UUID userId = UUID.randomUUID();
+        User user = new User(userId, "auth_check@example.com", "auth_check@example.com", hasher.hash("SecurePassword1234"), "AuthCheck", clock.instant());
+        user.updatePassword(hasher.hash("BrandNewPassword1234"));
+        assertEquals(1, user.getAuthVersion());
+        persistence.users.put(userId, user);
+
+        PersistenceRegistry registry = createTestRegistry(persistence);
+        AuthenticationFilter filter = new AuthenticationFilter();
+
+        final boolean[] sessionInvalidated = new boolean[]{false};
+        HttpSession session = (HttpSession) Proxy.newProxyInstance(
+                getClass().getClassLoader(), new Class<?>[]{HttpSession.class},
+                (proxy, method, args) -> switch (method.getName()) {
+                    case "getAttribute" -> {
+                        if (SessionService.USER_ID.equals(args[0])) yield userId;
+                        if (SessionService.AUTH_VERSION.equals(args[0])) yield 0;
+                        yield null;
+                    }
+                    case "invalidate" -> {
+                        sessionInvalidated[0] = true;
+                        yield null;
+                    }
+                    default -> null;
+                });
+
+        ServletContext servletContext = (ServletContext) Proxy.newProxyInstance(
+                getClass().getClassLoader(), new Class<?>[]{ServletContext.class},
+                (proxy, method, args) -> switch (method.getName()) {
+                    case "getAttribute" -> {
+                        if (PersistenceListener.REGISTRY_ATTRIBUTE.equals(args[0])) yield registry;
+                        yield null;
+                    }
+                    default -> null;
+                });
+
+        HttpServletRequest request = (HttpServletRequest) Proxy.newProxyInstance(
+                getClass().getClassLoader(), new Class<?>[]{HttpServletRequest.class},
+                (proxy, method, args) -> switch (method.getName()) {
+                    case "getRequestURI" -> "/context/api/tickets/my-purchases";
+                    case "getContextPath" -> "/context";
+                    case "getMethod" -> "GET";
+                    case "getSession" -> Boolean.FALSE.equals(args[0]) ? session : null;
+                    case "getServletContext" -> servletContext;
+                    default -> null;
+                });
+
+        final int[] status = new int[]{200};
+        final StringWriter writer = new StringWriter();
+        HttpServletResponse response = (HttpServletResponse) Proxy.newProxyInstance(
+                getClass().getClassLoader(), new Class<?>[]{HttpServletResponse.class},
+                (proxy, method, args) -> switch (method.getName()) {
+                    case "setStatus" -> { status[0] = (int) args[0]; yield null; }
+                    case "setHeader", "setContentType", "setCharacterEncoding" -> null;
+                    case "getWriter" -> new PrintWriter(writer);
+                    default -> null;
+                });
+
+        filter.doFilter(request, response, (req, res) -> fail("Filter chain must not proceed when authVersion is mismatched"));
+
+        assertEquals(HttpServletResponse.SC_UNAUTHORIZED, status[0]);
+        assertTrue(sessionInvalidated[0], "Stale session must be invalidated");
+        assertTrue(writer.toString().contains("AUTHENTICATION_REQUIRED"));
+    }
+
+    private PersistenceRegistry createTestRegistry(InMemoryPersistence persistence) throws Exception {
+        PersistenceRegistry registry = new PersistenceRegistry();
+        Field field = PersistenceRegistry.class.getDeclaredField("factories");
+        field.setAccessible(true);
+        @SuppressWarnings("unchecked")
+        Map<DatabasePrincipal, jakarta.persistence.EntityManagerFactory> map =
+                (Map<DatabasePrincipal, jakarta.persistence.EntityManagerFactory>) field.get(registry);
+        jakarta.persistence.EntityManagerFactory factory = (jakarta.persistence.EntityManagerFactory) Proxy.newProxyInstance(
+                getClass().getClassLoader(), new Class<?>[]{jakarta.persistence.EntityManagerFactory.class},
+                (proxy, method, args) -> switch (method.getName()) {
+                    case "createEntityManager" -> persistence.mockEntityManager();
+                    default -> null;
+                });
+        map.put(DatabasePrincipal.AUTH, factory);
+        return registry;
     }
 
     private static final class MutableClock extends Clock {
