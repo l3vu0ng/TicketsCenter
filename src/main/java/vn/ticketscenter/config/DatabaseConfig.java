@@ -1,5 +1,7 @@
 package vn.ticketscenter.config;
 
+import vn.ticketscenter.transaction.DatabasePrincipal;
+
 /**
  * Cấu hình kết nối cơ sở dữ liệu Microsoft SQL Server (Azure SQL / Local).
  * Tách biệt các thiết lập về máy chủ, cổng, tên database, thông tin xác thực và timeout.
@@ -40,6 +42,14 @@ public final class DatabaseConfig {
     public static String getPassword() {
         String pass = AppConfig.get("db.password");
         return (pass != null && !pass.isBlank()) ? pass : AppConfig.get("TC_SQL_PASSWORD", "");
+    }
+
+    public static String getPrincipalUser(DatabasePrincipal principal) {
+        return AppConfig.get("db." + principal.name().toLowerCase() + ".user");
+    }
+
+    public static String getPrincipalPassword(DatabasePrincipal principal) {
+        return AppConfig.get("db." + principal.name().toLowerCase() + ".password");
     }
 
     public static boolean isEncrypt() {

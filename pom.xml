@@ -15,6 +15,8 @@
         <junit.version>5.12.0</junit.version>
         <jakarta.servlet.version>6.1.0</jakarta.servlet.version>
         <mssql.jdbc.version>12.8.1.jre11</mssql.jdbc.version>
+        <hibernate.version>6.6.9.Final</hibernate.version>
+        <hikari.version>6.2.1</hikari.version>
     </properties>
 
     <dependencies>
@@ -34,12 +36,24 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Microsoft SQL Server JDBC Driver (Test / Integration) -->
+        <!-- JPA provider and bounded connection pool -->
+        <dependency>
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>${hibernate.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+            <version>${hikari.version}</version>
+        </dependency>
+
+        <!-- Microsoft SQL Server JDBC Driver -->
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
             <artifactId>mssql-jdbc</artifactId>
             <version>${mssql.jdbc.version}</version>
-            <scope>test</scope>
+            <scope>runtime</scope>
         </dependency>
     </dependencies>
 

@@ -24,16 +24,16 @@
 
 ## 2. Dependency hiện có và ứng viên chưa duyệt
 
-Không thêm hoặc nâng dependency trong lần sửa tài liệu này. Ba mục đánh dấu **hiện có** đã nằm trong `pom.xml`; các mục còn lại chỉ là ứng viên và không được thêm trước khi chủ dự án duyệt.
+Servlet, JUnit, MSSQL JDBC, Hibernate và HikariCP đã được duyệt và nằm trong `pom.xml`. JSON Processor và QR Code vẫn chỉ là ứng viên, không được thêm trước khi chủ dự án duyệt.
 
 | Thư viện / Plugin | GroupId:ArtifactId | Phiên bản ứng viên | Phạm vi (Scope) | Mục đích sử dụng |
 |---|---|:---:|:---:|---|
 | **Servlet API — hiện có** | `jakarta.servlet:jakarta.servlet-api` | `6.1.0` | `provided` | Chuẩn Servlet 6.1 cho Tomcat 11 |
 | **JUnit 5 — hiện có** | `org.junit.jupiter:junit-jupiter` | `5.12.0` | `test` | Kiểm thử đơn vị (Unit Test) |
-| **MSSQL JDBC — hiện có** | `com.microsoft.sqlserver:mssql-jdbc` | `12.8.1.jre11` | `test` | Chỉ dùng profile integration; chưa chứng minh kết nối thật |
+| **MSSQL JDBC — hiện có** | `com.microsoft.sqlserver:mssql-jdbc` | `12.8.1.jre11` | `runtime` | JDBC driver cho Hibernate/runtime và integration SQL Server |
 | **JSON Processor** | `com.fasterxml.jackson.core:jackson-databind` | `2.18.2` | `compile` | Serialize/deserialize JSON UTF-8 an toàn |
-| **Connection Pool** | `com.zaxxer:HikariCP` | `6.2.1` | `compile` | Pool kết nối hiệu năng cao cho Servlet/JPA |
-| **Hibernate Core** | `org.hibernate.orm:hibernate-core` | `6.6.9.Final` | `compile` | JPA Provider theo kiến trúc resource-local |
+| **Connection Pool — hiện có** | `com.zaxxer:HikariCP` | `6.2.1` | `compile` | Pool kết nối hiệu năng cao cho Servlet/JPA |
+| **Hibernate Core — hiện có** | `org.hibernate.orm:hibernate-core` | `6.6.9.Final` | `compile` | JPA Provider theo kiến trúc resource-local |
 | **QR Code** | `com.google.zxing:core` | `3.5.3` | `compile` | Sinh mã QR vé tham dự |
 
 ### Plugin Maven Build:

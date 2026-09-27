@@ -31,6 +31,20 @@ TC_SQL_ENCRYPT=true
 TC_SQL_TRUST_SERVER_CERT=false
 TC_SQL_CONNECT_TIMEOUT_SEC=30
 
+# Runtime principals. Provision users with database/security scripts.
+db.buyer.user=tc_buyer_login
+db.buyer.password=<your_buyer_db_password>
+db.manager.user=tc_manager_login
+db.manager.password=<your_manager_db_password>
+db.check_in.user=tc_checkin_login
+db.check_in.password=<your_checkin_db_password>
+db.admin.user=tc_admin_login
+db.admin.password=<your_admin_db_password>
+db.auth.user=tc_auth_login
+db.auth.password=<your_auth_db_password>
+db.worker.user=tc_worker_login
+db.worker.password=<your_worker_db_password>
+
 # 2. Cấu hình Ứng dụng Web
 app.base.url=http://localhost:8080/ticketscenter
 app.env=development
