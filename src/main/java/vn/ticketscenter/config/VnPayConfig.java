@@ -10,22 +10,18 @@ public final class VnPayConfig {
     }
 
     public static String getTmnCode() {
-        String code = AppConfig.get("vnpay.tmn.code");
-        return (code != null && !code.isBlank()) ? code : AppConfig.get("VNPAY_TMN_CODE", "");
+        return AppConfig.get("vnpay.tmn.code", "");
     }
 
     public static String getHashSecret() {
-        String secret = AppConfig.get("vnpay.hash.secret");
-        return (secret != null && !secret.isBlank()) ? secret : AppConfig.get("VNPAY_HASH_SECRET", "");
+        return AppConfig.get("vnpay.hash.secret", "");
     }
 
     public static String getPayUrl() {
-        String url = AppConfig.get("vnpay.pay.url");
-        return (url != null && !url.isBlank()) ? url : AppConfig.get("VNPAY_PAY_URL", "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html");
+        return AppConfig.get("vnpay.pay.url", "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html");
     }
 
     public static String getReturnUrl() {
-        String url = AppConfig.get("vnpay.return.url");
-        return (url != null && !url.isBlank()) ? url : AppConfig.get("VNPAY_RETURN_URL", "http://localhost:8080/ticketscenter/api/payments/vnpay/return");
+        return AppConfig.get("vnpay.return.url", "http://localhost:8080/ticketscenter/api/payments/vnpay/return");
     }
 }

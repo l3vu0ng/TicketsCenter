@@ -10,18 +10,15 @@ public final class ServerConfig {
     }
 
     public static String getBaseUrl() {
-        String url = AppConfig.get("app.base.url");
-        return (url != null && !url.isBlank()) ? url : AppConfig.get("APP_BASE_URL", "http://localhost:8080/ticketscenter");
+        return AppConfig.get("app.base.url", "http://localhost:8080/ticketscenter");
     }
 
     public static String getEnv() {
-        String env = AppConfig.get("app.env");
-        return (env != null && !env.isBlank()) ? env : AppConfig.get("APP_ENV", "development");
+        return AppConfig.get("app.env", "development");
     }
 
     public static String getSecretKey() {
-        String secret = AppConfig.get("app.secret.key");
-        return (secret != null && !secret.isBlank()) ? secret : AppConfig.get("APP_SECRET_KEY", "");
+        return AppConfig.get("app.secret.key", "");
     }
 
     public static boolean isDevelopment() {
