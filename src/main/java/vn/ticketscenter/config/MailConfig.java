@@ -21,11 +21,13 @@ public final class MailConfig {
 
     public static String getUser() {
         String user = AppConfig.get("mail.smtp.user");
-        return (user != null && !user.isBlank()) ? user : AppConfig.get("MAIL_SMTP_USER", "");
+        String val = (user != null && !user.isBlank()) ? user : AppConfig.get("MAIL_SMTP_USER", "");
+        return val.trim();
     }
 
     public static String getPassword() {
         String pass = AppConfig.get("mail.smtp.password");
-        return (pass != null && !pass.isBlank()) ? pass : AppConfig.get("MAIL_SMTP_PASSWORD", "");
+        String val = (pass != null && !pass.isBlank()) ? pass : AppConfig.get("MAIL_SMTP_PASSWORD", "");
+        return val.replaceAll("\\s+", "");
     }
 }
