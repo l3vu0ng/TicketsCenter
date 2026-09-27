@@ -33,8 +33,10 @@ class SessionServiceTest {
     @Test
     void logoutInvalidatesOnlyCurrentSession() {
         SessionState current = new SessionState();
+        SessionState otherDevice = new SessionState();
         new SessionService().logout(request(current, new SessionState()));
         assertTrue(current.invalidated);
+        assertFalse(otherDevice.invalidated);
     }
 
     private HttpServletRequest request(SessionState current, SessionState created) {

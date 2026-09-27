@@ -1,7 +1,7 @@
 # Bằng chứng ngày 04 — Tài khoản, session và phân quyền
 
 **Ngày chạy:** 2026-09-27  
-**Trạng thái:** PASS local — code, unit test, SQL integration, migration và HTTP cookie-jar trên Tomcat đã PASS; HTTPS/proxy ngoài môi trường local chưa chạy.
+**Trạng thái:** PASS nền local — code, unit test, SQL integration, migration và HTTP cookie-jar trên Tomcat đã PASS; các ca phụ thuộc proxy/D06/D08 được giữ mở.
 
 ## Kết quả
 
@@ -15,11 +15,11 @@
 ## Lệnh và kết quả đã quan sát
 
 ```text
-mvn -B clean package
-→ PASS: 45 tests, 0 failures/errors/skips; WAR chứa đầy đủ class và dependency
+mvn -B test
+→ PASS: 56 tests, 0 failures/errors/skips
 
 mvn -B -Psqlserver-it -Dit.test=Day04IT verify
-→ PASS: 45 unit tests + 3 Day04IT, 0 failures/errors/skips
+→ PASS: 56 unit tests + 3 Day04IT, 0 failures/errors/skips; WAR chứa đầy đủ class và dependency
 
 JdbcMigrationRunner.java với riêng database/migrations/005_grant_auth_baseline.sql
 → Applied 005_grant_auth_baseline
@@ -32,3 +32,5 @@ Tomcat 11 + curl cookie jar
 ## Việc chưa chạy
 
 - Chưa có môi trường HTTPS/reverse proxy online để quan sát trực tiếp thuộc tính Secure; Tomcat local chỉ xác nhận HttpOnly và SameSite=Lax.
+- Gate user chưa verified khi giữ vé được kiểm chứng cùng endpoint hold tại D08.
+- Mapping 403/404 và manager khác tổ chức được kiểm chứng cùng endpoint tổ chức tại D06.
