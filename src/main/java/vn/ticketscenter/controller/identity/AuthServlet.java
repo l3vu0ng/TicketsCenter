@@ -19,8 +19,11 @@ import java.util.Map;
 })
 public final class AuthServlet extends HttpServlet {
 
+    public static final String RATE_LIMITER_ATTRIBUTE = "ticketscenter.authRateLimiter";
+
     private final CsrfService csrf = new CsrfService();
     private final SessionService sessions = new SessionService();
+    private final AuthRateLimiter defaultRateLimiter = new AuthRateLimiter();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -48,28 +51,47 @@ public final class AuthServlet extends HttpServlet {
         }
         AccountService accounts = accounts(request, response);
         if (accounts == null) return;
+        AuthRateLimiter limiter = resolveRateLimiter(request);
+        String clientIp = OtpServlet.resolveClientIp(request);
         try {
             Map<String, String> body = credentials(request);
             if (path.endsWith("/auth/register")) {
-                accounts.register(body.get("email"), body.get("password"));
+                String email = body.get("email");
+                limiter.checkRegister(email, clientIp);
+                accounts.register(email, body.get("password"));
+                limiter.recordRegister(email, clientIp);
                 HttpResponses.data(response, "{\"accepted\":true}");
                 return;
             }
             if (path.endsWith("/auth/login")) {
-                var account = accounts.authenticate(body.get("email"), body.get("password")).orElse(null);
+                String email = body.get("email");
+                limiter.checkLogin(email, clientIp);
+                var account = accounts.authenticate(email, body.get("password")).orElse(null);
                 if (account == null) {
+                    limiter.recordLoginFailure(email, clientIp);
                     HttpResponses.error(response, HttpServletResponse.SC_UNAUTHORIZED,
                             "INVALID_CREDENTIALS", "Email or password is invalid");
                     return;
                 }
+                limiter.recordLoginSuccess(email, clientIp);
                 sessions.login(request, account.id(), account.authVersion());
                 HttpResponses.data(response, "{\"authenticated\":true}");
                 return;
             }
             HttpResponses.error(response, HttpServletResponse.SC_NOT_FOUND, "NOT_FOUND", "Resource not found");
+        } catch (IllegalStateException exception) {
+            HttpResponses.error(response, 429, "RATE_LIMITED", exception.getMessage());
         } catch (IllegalArgumentException exception) {
             HttpResponses.error(response, HttpServletResponse.SC_BAD_REQUEST, "VALIDATION_FAILED", "Request is invalid");
         }
+    }
+
+    private AuthRateLimiter resolveRateLimiter(HttpServletRequest request) {
+        Object attr = request.getServletContext().getAttribute(RATE_LIMITER_ATTRIBUTE);
+        if (attr instanceof AuthRateLimiter limiter) {
+            return limiter;
+        }
+        return defaultRateLimiter;
     }
 
     private AccountService accounts(HttpServletRequest request, HttpServletResponse response) throws IOException {

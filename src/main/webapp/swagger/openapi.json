@@ -158,6 +158,14 @@
                 "schema": { "$ref": "#/components/schemas/ErrorResponse" }
               }
             }
+          },
+          "429": {
+            "description": "Quá giới hạn tần suất đăng ký (tối đa 10 lần/IP hoặc 5 lần/tài khoản trong 15 phút)",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
           }
         }
       }
@@ -205,6 +213,14 @@
           },
           "401": {
             "description": "Sai thông tin đăng nhập hoặc tài khoản bị khóa",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "429": {
+            "description": "Quá giới hạn tần suất đăng nhập (tối đa 5 lần sai/tài khoản hoặc 20 lần/IP trong 15 phút)",
             "content": {
               "application/json": {
                 "schema": { "$ref": "#/components/schemas/ErrorResponse" }
