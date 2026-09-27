@@ -45,6 +45,6 @@ build/
 .env.*
 !.env.example
 
-/scripts
-**/src/main/resources/application.properties
-!**/src/main/resources/application.properties.example
+# Properties files
+**/src/main/resources/*.properties
+!**/src/main/resources/*.properties.example

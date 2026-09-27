@@ -4,6 +4,7 @@ import com.microsoft.sqlserver.jdbc.SQLServerDataSource;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import vn.ticketscenter.config.AppConfig;
+import vn.ticketscenter.config.DatabaseConfig;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -160,14 +161,14 @@ public class SchemaConstraintsIT {
 
     private Connection openConnection() throws Exception {
         SQLServerDataSource dataSource = new SQLServerDataSource();
-        dataSource.setServerName(AppConfig.get("TC_SQL_HOST"));
-        dataSource.setPortNumber(AppConfig.getInt("TC_SQL_PORT", 1433));
-        dataSource.setDatabaseName(AppConfig.get("TC_SQL_TEST_DB"));
-        dataSource.setUser(AppConfig.get("TC_SQL_LOGIN"));
-        dataSource.setPassword(AppConfig.get("TC_SQL_PASSWORD"));
-        dataSource.setEncrypt(AppConfig.get("TC_SQL_ENCRYPT", "true"));
-        dataSource.setTrustServerCertificate(AppConfig.getBoolean("TC_SQL_TRUST_SERVER_CERT", false));
-        dataSource.setLoginTimeout(AppConfig.getInt("TC_SQL_CONNECT_TIMEOUT_SEC", 30));
+        dataSource.setServerName(DatabaseConfig.getHost());
+        dataSource.setPortNumber(DatabaseConfig.getPort());
+        dataSource.setDatabaseName(DatabaseConfig.getDatabaseName());
+        dataSource.setUser(DatabaseConfig.getUser());
+        dataSource.setPassword(DatabaseConfig.getPassword());
+        dataSource.setEncrypt(String.valueOf(DatabaseConfig.isEncrypt()));
+        dataSource.setTrustServerCertificate(DatabaseConfig.isTrustServerCertificate());
+        dataSource.setLoginTimeout(DatabaseConfig.getLoginTimeout());
         return dataSource.getConnection();
     }
 }

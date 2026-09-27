@@ -1,0 +1,15 @@
+# ===================================================================
+# TicketsCenter — vnpay.properties.example
+# Cấu hình Cổng Thanh Toán VNPAY Sandbox
+# ===================================================================
+
+vnpay.tmn.code=<sandbox_code>
+vnpay.hash.secret=<your_vnpay_hash_secret>
+vnpay.pay.url=https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+vnpay.return.url=http://localhost:8080/ticketscenter/api/payments/vnpay/return
+
+# Tương thích với các biến môi trường
+VNPAY_TMN_CODE=<sandbox_code>
+VNPAY_HASH_SECRET=<your_vnpay_hash_secret>
+VNPAY_PAY_URL=https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+VNPAY_RETURN_URL=http://localhost:8080/ticketscenter/api/payments/vnpay/return

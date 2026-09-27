@@ -1,0 +1,15 @@
+# ===================================================================
+# TicketsCenter — mail.properties.example
+# Cấu hình Dịch vụ Gửi Email (SMTP)
+# ===================================================================
+
+mail.smtp.host=smtp.gmail.com
+mail.smtp.port=587
+mail.smtp.user=no-reply@ticketscenter.vn
+mail.smtp.password=<your_smtp_password>
+
+# Tương thích với các biến môi trường
+MAIL_SMTP_HOST=smtp.gmail.com
+MAIL_SMTP_PORT=587
+MAIL_SMTP_USER=no-reply@ticketscenter.vn
+MAIL_SMTP_PASSWORD=<your_smtp_password>

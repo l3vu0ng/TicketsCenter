@@ -3,7 +3,7 @@ package vn.ticketscenter.acceptance;
 import com.microsoft.sqlserver.jdbc.SQLServerDataSource;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import vn.ticketscenter.config.AppConfig;
+import vn.ticketscenter.config.DatabaseConfig;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -17,39 +17,32 @@ public class DatabaseConnectionIT {
     @Test
     @DisplayName("Kết nối SQL Server thật và thực hiện SELECT 1 thành công")
     public void testDatabaseConnectionSuccess() throws Exception {
-        String host = AppConfig.get("TC_SQL_HOST");
-        String port = AppConfig.get("TC_SQL_PORT", "1433");
-        String dbName = AppConfig.get("TC_SQL_TEST_DB");
-        String user = AppConfig.get("TC_SQL_LOGIN");
-        String password = AppConfig.get("TC_SQL_PASSWORD");
-        String encryptValue = AppConfig.get("TC_SQL_ENCRYPT", "true");
-        String trustCertificateValue = AppConfig.get("TC_SQL_TRUST_SERVER_CERT", "false");
-        String timeoutValue = AppConfig.get("TC_SQL_CONNECT_TIMEOUT_SEC", "30");
+        String host = DatabaseConfig.getHost();
+        int port = DatabaseConfig.getPort();
+        String dbName = DatabaseConfig.getDatabaseName();
+        String user = DatabaseConfig.getUser();
+        String password = DatabaseConfig.getPassword();
+        boolean encrypt = DatabaseConfig.isEncrypt();
+        boolean trustCertificate = DatabaseConfig.isTrustServerCertificate();
+        int timeout = DatabaseConfig.getLoginTimeout();
 
-        assertNotNull(host, "Thuộc tính TC_SQL_HOST (hoặc db.host) không được để trống trong application.properties");
-        assertNotNull(dbName, "Thuộc tính TC_SQL_TEST_DB (hoặc db.name) không được để trống trong application.properties");
-        assertNotNull(user, "Thuộc tính TC_SQL_LOGIN (hoặc db.user) không được để trống trong application.properties");
-        assertNotNull(password, "Thuộc tính TC_SQL_PASSWORD (hoặc db.password) không được để trống trong application.properties");
-        assertFalse("YOUR_AZURE_SQL_PASSWORD_HERE".equals(password) || "{your_password_here}".equals(password),
+        assertNotNull(host, "Thuộc tính db.host (hoặc TC_SQL_HOST) không được để trống");
+        assertNotNull(dbName, "Thuộc tính db.name (hoặc TC_SQL_TEST_DB) không được để trống");
+        assertNotNull(user, "Thuộc tính db.user (hoặc TC_SQL_LOGIN) không được để trống");
+        assertNotNull(password, "Thuộc tính db.password (hoặc TC_SQL_PASSWORD) không được để trống");
+        assertFalse("<your_password_here>".equals(password) || "YOUR_AZURE_SQL_PASSWORD_HERE".equals(password),
                 "Vui lòng cấu hình mật khẩu thực tế trong application.properties (db.password)");
 
-
-        assertTrue(encryptValue.equalsIgnoreCase("true") || encryptValue.equalsIgnoreCase("false"),
-                "TC_SQL_ENCRYPT chỉ nhận true/false");
-        assertTrue(trustCertificateValue.equalsIgnoreCase("true") || trustCertificateValue.equalsIgnoreCase("false"),
-                "TC_SQL_TRUST_SERVER_CERT chỉ nhận true/false");
-
-        int timeout = Integer.parseInt(timeoutValue);
-        assertTrue(timeout > 0 && timeout <= 60, "TC_SQL_CONNECT_TIMEOUT_SEC phải trong khoảng 1..60");
+        assertTrue(timeout > 0 && timeout <= 60, "Timeout kết nối phải trong khoảng 1..60");
 
         SQLServerDataSource dataSource = new SQLServerDataSource();
         dataSource.setServerName(host);
-        dataSource.setPortNumber(Integer.parseInt(port));
+        dataSource.setPortNumber(port);
         dataSource.setDatabaseName(dbName);
         dataSource.setUser(user);
         dataSource.setPassword(password);
-        dataSource.setEncrypt(encryptValue);
-        dataSource.setTrustServerCertificate(Boolean.parseBoolean(trustCertificateValue));
+        dataSource.setEncrypt(String.valueOf(encrypt));
+        dataSource.setTrustServerCertificate(trustCertificate);
         dataSource.setLoginTimeout(timeout);
 
         try (Connection conn = dataSource.getConnection();
