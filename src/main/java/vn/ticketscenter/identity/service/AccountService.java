@@ -1,10 +1,9 @@
 package vn.ticketscenter.identity.service;
 
 import jakarta.persistence.PersistenceException;
-import vn.ticketscenter.identity.service.PasswordHasher;
 import vn.ticketscenter.identity.model.User;
 import vn.ticketscenter.config.AppConfig;
-import vn.ticketscenter.identity.repository.UserRepository;
+import vn.ticketscenter.identity.dao.UserDAO;
 import vn.ticketscenter.config.persistence.DatabasePrincipal;
 import vn.ticketscenter.config.persistence.TransactionManager;
 
@@ -32,7 +31,7 @@ public final class AccountService {
         validatePassword(password);
         try {
             transactions.execute(DatabasePrincipal.AUTH, entityManager -> {
-                UserRepository users = new UserRepository(entityManager);
+                UserDAO users = new UserDAO(entityManager);
                 if (users.findByNormalizedEmail(normalizedEmail).isPresent()) return null;
                 String displayEmail = email.trim();
                 String defaultName = displayEmail.substring(0, displayEmail.indexOf('@'));
@@ -47,12 +46,12 @@ public final class AccountService {
     public Optional<AuthenticatedAccount> authenticate(String identifier, String password) {
         String normalizedEmail;
         if ("admin".equalsIgnoreCase(identifier == null ? "" : identifier.trim())) {
-            normalizedEmail = normalizeEmail(AppConfig.get("admin.email", "admin@ticketscenter.local"));
+            normalizedEmail = normalizeEmail(AppConfig.get("admin.email", "adminTIcket@gmail.com"));
         } else {
             normalizedEmail = normalizeEmail(identifier);
         }
         return transactions.execute(DatabasePrincipal.AUTH, entityManager -> {
-            Optional<User> found = new UserRepository(entityManager).findByNormalizedEmail(normalizedEmail);
+            Optional<User> found = new UserDAO(entityManager).findByNormalizedEmail(normalizedEmail);
             User user = found.orElse(null);
             boolean passwordMatches = passwords.matches(password, user == null ? null : user.getPasswordHash());
             if (!passwordMatches || user == null || !user.isActive()) return Optional.empty();
@@ -63,7 +62,7 @@ public final class AccountService {
 
     public Optional<AuthenticatedAccount> current(UUID userId) {
         return transactions.execute(DatabasePrincipal.AUTH, entityManager ->
-                new UserRepository(entityManager).findById(userId)
+                new UserDAO(entityManager).findById(userId)
                         .filter(User::isActive)
                         .map(user -> new AuthenticatedAccount(
                                 user.getId(), user.getAuthVersion(), user.getEmail(), user.hasPlatformRole("ADMIN"))));

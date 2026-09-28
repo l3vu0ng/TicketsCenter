@@ -1,11 +1,10 @@
-package vn.ticketscenter.config;
+package vn.ticketscenter.config.persistence;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
-import vn.ticketscenter.config.persistence.DatabasePrincipal;
-import vn.ticketscenter.config.persistence.TransactionManager;
+import vn.ticketscenter.config.DatabaseConfig;
 
 import java.util.EnumMap;
 import java.util.Map;

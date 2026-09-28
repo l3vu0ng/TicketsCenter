@@ -54,6 +54,7 @@ class ModelInvariantTest {
         assertArrayEquals(new String[]{"ACTIVE", "DISABLED"}, names(IdentityEnums.UserStatus.values()));
         assertArrayEquals(new String[]{"MANAGER", "CHECK_IN_STAFF"}, names(IdentityEnums.OrganizationRole.values()));
         assertArrayEquals(new String[]{"PENDING", "APPROVED", "REJECTED"}, names(IdentityEnums.OrganizationRequestStatus.values()));
+        assertArrayEquals(new String[]{"VERIFY_EMAIL", "RESET_PASSWORD"}, names(IdentityEnums.OtpPurpose.values()));
         assertArrayEquals(new String[]{"DRAFT", "PENDING_APPROVAL", "REJECTED", "PUBLISHED", "CANCELLED"}, names(EventEnums.EventStatus.values()));
         assertArrayEquals(new String[]{"SEATED", "STANDING"}, names(EventEnums.ZoneType.values()));
         assertArrayEquals(new String[]{"AVAILABLE", "HELD", "SOLD"}, names(EventEnums.SeatStatus.values()));

@@ -1,4 +1,4 @@
-package vn.ticketscenter.identity.repository;
+package vn.ticketscenter.identity.dao;
 
 import jakarta.persistence.EntityManager;
 import vn.ticketscenter.identity.model.User;
@@ -6,11 +6,11 @@ import vn.ticketscenter.identity.model.User;
 import java.util.Optional;
 import java.util.UUID;
 
-public final class UserRepository {
+public final class UserDAO {
 
     private final EntityManager entityManager;
 
-    public UserRepository(EntityManager entityManager) {
+    public UserDAO(EntityManager entityManager) {
         this.entityManager = entityManager;
     }
 

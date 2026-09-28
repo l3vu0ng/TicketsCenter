@@ -1,7 +1,7 @@
 package vn.ticketscenter.identity.integration.mail;
 
 import vn.ticketscenter.config.MailConfig;
-import vn.ticketscenter.identity.model.OtpPurpose;
+import vn.ticketscenter.identity.model.IdentityEnums;
 
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
@@ -30,11 +30,11 @@ public final class ConfiguredMailGateway implements MailGateway {
 
     private final List<DispatchedMessage> dispatched = new CopyOnWriteArrayList<>();
 
-    public record DispatchedMessage(String recipientEmail, String otpCode, OtpPurpose purpose, Instant dispatchedAt) {
+    public record DispatchedMessage(String recipientEmail, String otpCode, IdentityEnums.OtpPurpose purpose, Instant dispatchedAt) {
     }
 
     @Override
-    public void sendOtp(String recipientEmail, String otpCode, OtpPurpose purpose) {
+    public void sendOtp(String recipientEmail, String otpCode, IdentityEnums.OtpPurpose purpose) {
         Objects.requireNonNull(recipientEmail, "recipientEmail is required");
         Objects.requireNonNull(otpCode, "otpCode is required");
         Objects.requireNonNull(purpose, "purpose is required");
@@ -72,7 +72,7 @@ public final class ConfiguredMailGateway implements MailGateway {
     }
 
     void deliverSmtp(String host, int port, String user, String password,
-                     String recipientEmail, String otpCode, OtpPurpose purpose) throws IOException {
+                     String recipientEmail, String otpCode, IdentityEnums.OtpPurpose purpose) throws IOException {
         Socket plainSocket = new Socket();
         plainSocket.connect(new InetSocketAddress(host, port), TIMEOUT_MILLIS);
         plainSocket.setSoTimeout(TIMEOUT_MILLIS);
@@ -116,7 +116,7 @@ public final class ConfiguredMailGateway implements MailGateway {
         send(writer, "DATA");
         expect(reader.readLine(), "354");
 
-        String purposeDesc = purpose == OtpPurpose.VERIFY_EMAIL ? "Xác minh tài khoản" : "Khôi phục mật khẩu";
+        String purposeDesc = purpose == IdentityEnums.OtpPurpose.VERIFY_EMAIL ? "Xác minh tài khoản" : "Khôi phục mật khẩu";
         String dateHeader = DateTimeFormatter.RFC_1123_DATE_TIME.format(Instant.now().atOffset(ZoneOffset.UTC));
 
         writer.write("From: TicketsCenter <" + user + ">\r\n");

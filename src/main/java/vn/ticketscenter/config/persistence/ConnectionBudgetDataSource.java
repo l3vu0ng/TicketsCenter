@@ -1,4 +1,4 @@
-package vn.ticketscenter.config;
+package vn.ticketscenter.config.persistence;
 
 import javax.sql.DataSource;
 import java.io.PrintWriter;

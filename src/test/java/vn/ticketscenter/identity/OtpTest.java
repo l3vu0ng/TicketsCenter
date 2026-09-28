@@ -7,7 +7,7 @@ import jakarta.persistence.TypedQuery;
 import org.junit.jupiter.api.Test;
 import vn.ticketscenter.identity.integration.mail.ConfiguredMailGateway;
 import vn.ticketscenter.identity.model.Otp;
-import vn.ticketscenter.identity.model.OtpPurpose;
+import vn.ticketscenter.identity.model.IdentityEnums;
 import vn.ticketscenter.identity.service.OtpService;
 import vn.ticketscenter.config.persistence.DatabasePrincipal;
 import vn.ticketscenter.config.persistence.TransactionManager;
@@ -37,7 +37,7 @@ class OtpTest {
         OtpService service = new OtpService(transactions.manager(), mail, clock, TEST_SECRET,
                 () -> String.format("%06d", counter.getAndIncrement()));
 
-        service.sendOtp(UUID.randomUUID(), "buyer@example.com", OtpPurpose.VERIFY_EMAIL);
+        service.sendOtp(UUID.randomUUID(), "buyer@example.com", IdentityEnums.OtpPurpose.VERIFY_EMAIL);
 
         assertEquals(1, mail.getDispatchedMessages().size());
         String code = mail.getDispatchedMessages().getFirst().otpCode();
@@ -60,15 +60,15 @@ class OtpTest {
 
         OtpService service = new OtpService(transactions.manager(), mail, clock, TEST_SECRET, () -> "123456");
 
-        service.sendOtp(UUID.randomUUID(), "user@example.com", OtpPurpose.VERIFY_EMAIL);
+        service.sendOtp(UUID.randomUUID(), "user@example.com", IdentityEnums.OtpPurpose.VERIFY_EMAIL);
 
         clock.advance(Duration.ofMillis(59_900));
         IllegalStateException exception = assertThrows(IllegalStateException.class,
-                () -> service.sendOtp(UUID.randomUUID(), "user@example.com", OtpPurpose.VERIFY_EMAIL));
+                () -> service.sendOtp(UUID.randomUUID(), "user@example.com", IdentityEnums.OtpPurpose.VERIFY_EMAIL));
         assertTrue(exception.getMessage().contains("cooldown"));
 
         clock.advance(Duration.ofMillis(100));
-        assertDoesNotThrow(() -> service.sendOtp(UUID.randomUUID(), "user@example.com", OtpPurpose.VERIFY_EMAIL));
+        assertDoesNotThrow(() -> service.sendOtp(UUID.randomUUID(), "user@example.com", IdentityEnums.OtpPurpose.VERIFY_EMAIL));
         assertEquals(2, mail.getDispatchedMessages().size());
     }
 
@@ -81,12 +81,12 @@ class OtpTest {
         OtpService service = new OtpService(transactions.manager(), mail, clock, TEST_SECRET, () -> "111222");
 
         for (int i = 0; i < 5; i++) {
-            service.sendOtp(UUID.randomUUID(), "limit@example.com", OtpPurpose.VERIFY_EMAIL);
+            service.sendOtp(UUID.randomUUID(), "limit@example.com", IdentityEnums.OtpPurpose.VERIFY_EMAIL);
             clock.advance(Duration.ofSeconds(60));
         }
 
         IllegalStateException ex = assertThrows(IllegalStateException.class,
-                () -> service.sendOtp(UUID.randomUUID(), "limit@example.com", OtpPurpose.VERIFY_EMAIL));
+                () -> service.sendOtp(UUID.randomUUID(), "limit@example.com", IdentityEnums.OtpPurpose.VERIFY_EMAIL));
         assertTrue(ex.getMessage().contains("Account rate limit"));
     }
 
@@ -99,12 +99,12 @@ class OtpTest {
         OtpService service = new OtpService(transactions.manager(), mail, clock, TEST_SECRET, () -> "333444");
 
         for (int i = 1; i <= 10; i++) {
-            service.sendOtp(UUID.randomUUID(), "user" + i + "@example.com", OtpPurpose.VERIFY_EMAIL, "203.0.113.195");
+            service.sendOtp(UUID.randomUUID(), "user" + i + "@example.com", IdentityEnums.OtpPurpose.VERIFY_EMAIL, "203.0.113.195");
             clock.advance(Duration.ofSeconds(2));
         }
 
         IllegalStateException ex = assertThrows(IllegalStateException.class,
-                () -> service.sendOtp(UUID.randomUUID(), "user11@example.com", OtpPurpose.VERIFY_EMAIL, "203.0.113.195"));
+                () -> service.sendOtp(UUID.randomUUID(), "user11@example.com", IdentityEnums.OtpPurpose.VERIFY_EMAIL, "203.0.113.195"));
         assertTrue(ex.getMessage().contains("IP rate limit"));
     }
 
@@ -117,11 +117,11 @@ class OtpTest {
         OtpService service = new OtpService(transactions.manager(), mail, clock, TEST_SECRET, () -> "555777");
         UUID userId = UUID.randomUUID();
 
-        service.sendOtp(userId, "dual@example.com", OtpPurpose.VERIFY_EMAIL);
+        service.sendOtp(userId, "dual@example.com", IdentityEnums.OtpPurpose.VERIFY_EMAIL);
         Otp verifyOtp = transactions.savedOtps.getFirst();
 
         clock.advance(Duration.ofSeconds(5));
-        service.sendOtp(userId, "dual@example.com", OtpPurpose.RESET_PASSWORD);
+        service.sendOtp(userId, "dual@example.com", IdentityEnums.OtpPurpose.RESET_PASSWORD);
         Otp resetOtp = transactions.savedOtps.get(1);
 
         assertNull(verifyOtp.getInvalidatedAt());
@@ -137,11 +137,11 @@ class OtpTest {
         AtomicInteger codes = new AtomicInteger(100000);
         OtpService service = new OtpService(transactions.manager(), mail, clock, TEST_SECRET, () -> String.valueOf(codes.getAndIncrement()));
 
-        service.sendOtp(UUID.randomUUID(), "user@example.com", OtpPurpose.VERIFY_EMAIL);
+        service.sendOtp(UUID.randomUUID(), "user@example.com", IdentityEnums.OtpPurpose.VERIFY_EMAIL);
         Otp firstOtp = transactions.savedOtps.getFirst();
 
         clock.advance(Duration.ofSeconds(60));
-        service.sendOtp(UUID.randomUUID(), "user@example.com", OtpPurpose.VERIFY_EMAIL);
+        service.sendOtp(UUID.randomUUID(), "user@example.com", IdentityEnums.OtpPurpose.VERIFY_EMAIL);
 
         assertNotNull(firstOtp.getInvalidatedAt());
         Otp secondOtp = transactions.savedOtps.get(1);
@@ -155,10 +155,10 @@ class OtpTest {
         InMemoryTransactionManager transactions = new InMemoryTransactionManager();
 
         OtpService service = new OtpService(transactions.manager(), mail, clock, TEST_SECRET, () -> "654321");
-        service.sendOtp(UUID.randomUUID(), "verify@example.com", OtpPurpose.VERIFY_EMAIL);
+        service.sendOtp(UUID.randomUUID(), "verify@example.com", IdentityEnums.OtpPurpose.VERIFY_EMAIL);
 
         for (int i = 0; i < 4; i++) {
-            var result = service.verifyOtp("verify@example.com", "000000", OtpPurpose.VERIFY_EMAIL);
+            var result = service.verifyOtp("verify@example.com", "000000", IdentityEnums.OtpPurpose.VERIFY_EMAIL);
             assertFalse(result.successful());
             assertEquals("OTP_INVALID", result.error());
         }
@@ -167,12 +167,12 @@ class OtpTest {
         assertEquals(4, otp.getFailedAttempts());
         assertNull(otp.getInvalidatedAt());
 
-        var fifthFailure = service.verifyOtp("verify@example.com", "000000", OtpPurpose.VERIFY_EMAIL);
+        var fifthFailure = service.verifyOtp("verify@example.com", "000000", IdentityEnums.OtpPurpose.VERIFY_EMAIL);
         assertFalse(fifthFailure.successful());
         assertEquals(5, otp.getFailedAttempts());
         assertNotNull(otp.getInvalidatedAt());
 
-        var subsequent = service.verifyOtp("verify@example.com", "654321", OtpPurpose.VERIFY_EMAIL);
+        var subsequent = service.verifyOtp("verify@example.com", "654321", IdentityEnums.OtpPurpose.VERIFY_EMAIL);
         assertFalse(subsequent.successful());
         assertEquals("OTP_NOT_FOUND", subsequent.error());
     }
@@ -184,16 +184,16 @@ class OtpTest {
         InMemoryTransactionManager transactions = new InMemoryTransactionManager();
 
         OtpService service = new OtpService(transactions.manager(), mail, clock, TEST_SECRET, () -> "999888");
-        service.sendOtp(UUID.randomUUID(), "user@example.com", OtpPurpose.VERIFY_EMAIL);
+        service.sendOtp(UUID.randomUUID(), "user@example.com", IdentityEnums.OtpPurpose.VERIFY_EMAIL);
 
         clock.advance(Duration.ofMinutes(4).plusSeconds(59));
-        var validAtBoundary = service.verifyOtp("user@example.com", "999888", OtpPurpose.VERIFY_EMAIL);
+        var validAtBoundary = service.verifyOtp("user@example.com", "999888", IdentityEnums.OtpPurpose.VERIFY_EMAIL);
         assertTrue(validAtBoundary.successful());
 
         clock.advance(Duration.ofSeconds(60));
-        service.sendOtp(UUID.randomUUID(), "user@example.com", OtpPurpose.VERIFY_EMAIL);
+        service.sendOtp(UUID.randomUUID(), "user@example.com", IdentityEnums.OtpPurpose.VERIFY_EMAIL);
         clock.advance(Duration.ofMinutes(5).plusSeconds(1));
-        var expiredAfterFiveMin = service.verifyOtp("user@example.com", "999888", OtpPurpose.VERIFY_EMAIL);
+        var expiredAfterFiveMin = service.verifyOtp("user@example.com", "999888", IdentityEnums.OtpPurpose.VERIFY_EMAIL);
         assertFalse(expiredAfterFiveMin.successful());
         assertEquals("OTP_EXPIRED", expiredAfterFiveMin.error());
     }
@@ -205,13 +205,13 @@ class OtpTest {
         InMemoryTransactionManager transactions = new InMemoryTransactionManager();
 
         OtpService service = new OtpService(transactions.manager(), mail, clock, TEST_SECRET, () -> "123456");
-        service.sendOtp(UUID.randomUUID(), "test@example.com", OtpPurpose.VERIFY_EMAIL);
+        service.sendOtp(UUID.randomUUID(), "test@example.com", IdentityEnums.OtpPurpose.VERIFY_EMAIL);
 
-        var nullCode = service.verifyOtp("test@example.com", null, OtpPurpose.VERIFY_EMAIL);
+        var nullCode = service.verifyOtp("test@example.com", null, IdentityEnums.OtpPurpose.VERIFY_EMAIL);
         assertFalse(nullCode.successful());
         assertEquals("OTP_REQUIRED", nullCode.error());
 
-        var blankCode = service.verifyOtp("test@example.com", "   ", OtpPurpose.VERIFY_EMAIL);
+        var blankCode = service.verifyOtp("test@example.com", "   ", IdentityEnums.OtpPurpose.VERIFY_EMAIL);
         assertFalse(blankCode.successful());
         assertEquals("OTP_REQUIRED", blankCode.error());
     }
@@ -223,9 +223,9 @@ class OtpTest {
         InMemoryTransactionManager transactions = new InMemoryTransactionManager();
 
         OtpService service = new OtpService(transactions.manager(), mail, clock, TEST_SECRET, () -> "334455");
-        service.sendOtp(UUID.randomUUID(), "CaseUser@Example.Com", OtpPurpose.VERIFY_EMAIL);
+        service.sendOtp(UUID.randomUUID(), "CaseUser@Example.Com", IdentityEnums.OtpPurpose.VERIFY_EMAIL);
 
-        var result = service.verifyOtp("  caseuser@example.com  ", "334455", OtpPurpose.VERIFY_EMAIL);
+        var result = service.verifyOtp("  caseuser@example.com  ", "334455", IdentityEnums.OtpPurpose.VERIFY_EMAIL);
         assertTrue(result.successful());
     }
 
@@ -296,7 +296,7 @@ class OtpTest {
                         case "executeUpdate" -> {
                             if (ql.startsWith("update Otp")) {
                                 String email = (String) params.get("email");
-                                OtpPurpose purpose = (OtpPurpose) params.get("purpose");
+                                IdentityEnums.OtpPurpose purpose = (IdentityEnums.OtpPurpose) params.get("purpose");
                                 savedOtps.forEach(otp -> {
                                     if ((email == null || otp.getEmailNormalized().equalsIgnoreCase(email))
                                             && (purpose == null || otp.getPurpose() == purpose)
@@ -310,7 +310,7 @@ class OtpTest {
                         case "getResultStream" -> {
                             if (ql.contains("tc_otps") || ql.contains("Otp")) {
                                 String email = (String) params.get("email");
-                                OtpPurpose purpose = (OtpPurpose) params.get("purpose");
+                                IdentityEnums.OtpPurpose purpose = (IdentityEnums.OtpPurpose) params.get("purpose");
                                 var stream = savedOtps.stream();
                                 if (email != null) {
                                     stream = stream.filter(o -> o.getEmailNormalized().equalsIgnoreCase(email));

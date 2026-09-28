@@ -4,8 +4,8 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import vn.ticketscenter.config.PersistenceListener;
-import vn.ticketscenter.config.PersistenceRegistry;
+import vn.ticketscenter.config.persistence.PersistenceListener;
+import vn.ticketscenter.config.persistence.PersistenceRegistry;
 
 import java.io.IOException;
 import java.util.function.BooleanSupplier;

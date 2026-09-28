@@ -1,8 +1,9 @@
-package vn.ticketscenter.config;
+package vn.ticketscenter.config.seed;
 
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletContextEvent;
 import org.junit.jupiter.api.Test;
+import vn.ticketscenter.config.persistence.PersistenceListener;
 
 import java.lang.reflect.Proxy;
 

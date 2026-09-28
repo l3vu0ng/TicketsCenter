@@ -5,7 +5,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 import org.junit.jupiter.api.*;
-import vn.ticketscenter.config.AdminSeeder;
+import vn.ticketscenter.config.seed.AdminSeeder;
 import vn.ticketscenter.config.DatabaseConfig;
 import vn.ticketscenter.identity.service.AccountService;
 import vn.ticketscenter.identity.service.PasswordHasher;

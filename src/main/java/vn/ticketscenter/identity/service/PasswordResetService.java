@@ -1,10 +1,9 @@
 package vn.ticketscenter.identity.service;
 
 import vn.ticketscenter.config.AppConfig;
-import vn.ticketscenter.identity.model.OtpPurpose;
+import vn.ticketscenter.identity.model.IdentityEnums;
 import vn.ticketscenter.identity.model.User;
-import vn.ticketscenter.identity.repository.UserRepository;
-import vn.ticketscenter.identity.service.AccountService;
+import vn.ticketscenter.identity.dao.UserDAO;
 import vn.ticketscenter.config.persistence.DatabasePrincipal;
 import vn.ticketscenter.config.persistence.TransactionManager;
 
@@ -63,16 +62,16 @@ public final class PasswordResetService {
     public void requestReset(String rawEmail, String clientIp) {
         String normalized = AccountService.normalizeEmail(rawEmail);
         Optional<User> userOpt = transactions.execute(DatabasePrincipal.AUTH, entityManager ->
-                new UserRepository(entityManager).findByNormalizedEmail(normalized).filter(User::isActive));
+                new UserDAO(entityManager).findByNormalizedEmail(normalized).filter(User::isActive));
 
         if (userOpt.isPresent()) {
             User user = userOpt.get();
-            otpService.sendOtp(user.getId(), rawEmail, OtpPurpose.RESET_PASSWORD, clientIp);
+            otpService.sendOtp(user.getId(), rawEmail, IdentityEnums.OtpPurpose.RESET_PASSWORD, clientIp);
         }
     }
 
     public ResetTokenResult verifyResetOtp(String rawEmail, String otpCode) {
-        OtpService.VerifyResult result = otpService.verifyOtp(rawEmail, otpCode, OtpPurpose.RESET_PASSWORD);
+        OtpService.VerifyResult result = otpService.verifyOtp(rawEmail, otpCode, IdentityEnums.OtpPurpose.RESET_PASSWORD);
         if (!result.successful()) {
             return ResetTokenResult.failure(result.error());
         }
@@ -84,7 +83,7 @@ public final class PasswordResetService {
 
         Instant expiresAt = clock.instant().plus(RESET_TOKEN_TTL);
         String token = transactions.execute(DatabasePrincipal.AUTH, entityManager -> {
-            UserRepository users = new UserRepository(entityManager);
+            UserDAO users = new UserDAO(entityManager);
             User user = users.findById(userId)
                     .orElseThrow(() -> new IllegalStateException("User not found for verified OTP"));
             return createToken(user.getId(), expiresAt.toEpochMilli(), user.getPasswordHash());
@@ -102,7 +101,7 @@ public final class PasswordResetService {
         }
 
         transactions.execute(DatabasePrincipal.AUTH, entityManager -> {
-            UserRepository users = new UserRepository(entityManager);
+            UserDAO users = new UserDAO(entityManager);
             User user = users.findById(parsed.userId())
                     .orElseThrow(() -> new IllegalArgumentException("Invalid reset token user"));
 

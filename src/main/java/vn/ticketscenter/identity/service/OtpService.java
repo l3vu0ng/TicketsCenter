@@ -3,11 +3,10 @@ package vn.ticketscenter.identity.service;
 import vn.ticketscenter.config.AppConfig;
 import vn.ticketscenter.identity.integration.mail.MailGateway;
 import vn.ticketscenter.identity.model.Otp;
-import vn.ticketscenter.identity.model.OtpPurpose;
+import vn.ticketscenter.identity.model.IdentityEnums;
 import vn.ticketscenter.identity.model.User;
-import vn.ticketscenter.identity.repository.OtpRepository;
-import vn.ticketscenter.identity.repository.UserRepository;
-import vn.ticketscenter.identity.service.AccountService;
+import vn.ticketscenter.identity.dao.OtpDAO;
+import vn.ticketscenter.identity.dao.UserDAO;
 import vn.ticketscenter.config.persistence.DatabasePrincipal;
 import vn.ticketscenter.config.persistence.TransactionManager;
 
@@ -69,11 +68,11 @@ public final class OtpService {
         this.codeGenerator = Objects.requireNonNull(codeGenerator, "codeGenerator is required");
     }
 
-    public void sendOtp(UUID userId, String rawEmail, OtpPurpose purpose) {
+    public void sendOtp(UUID userId, String rawEmail, IdentityEnums.OtpPurpose purpose) {
         sendOtp(userId, rawEmail, purpose, null);
     }
 
-    public void sendOtp(UUID userId, String rawEmail, OtpPurpose purpose, String clientIp) {
+    public void sendOtp(UUID userId, String rawEmail, IdentityEnums.OtpPurpose purpose, String clientIp) {
         Objects.requireNonNull(purpose, "purpose is required");
         String normalizedEmail = AccountService.normalizeEmail(rawEmail);
         Instant now = clock.instant();
@@ -81,7 +80,7 @@ public final class OtpService {
         checkRateLimits(normalizedEmail, clientIp, now);
 
         String code = transactions.execute(DatabasePrincipal.AUTH, entityManager -> {
-            OtpRepository repository = new OtpRepository(entityManager);
+            OtpDAO repository = new OtpDAO(entityManager);
             Optional<Otp> latest = repository.findLatest(normalizedEmail, purpose);
             if (latest.isPresent()) {
                 Instant latestCreated = latest.get().getCreatedAt();
@@ -140,7 +139,7 @@ public final class OtpService {
         }
     }
 
-    public VerifyResult verifyOtp(String rawEmail, String code, OtpPurpose purpose) {
+    public VerifyResult verifyOtp(String rawEmail, String code, IdentityEnums.OtpPurpose purpose) {
         Objects.requireNonNull(purpose, "purpose is required");
         if (code == null || code.isBlank()) {
             return VerifyResult.failure("OTP_REQUIRED");
@@ -149,7 +148,7 @@ public final class OtpService {
         Instant now = clock.instant();
 
         return transactions.execute(DatabasePrincipal.AUTH, entityManager -> {
-            OtpRepository repository = new OtpRepository(entityManager);
+            OtpDAO repository = new OtpDAO(entityManager);
             Optional<Otp> found = repository.findActiveWithLock(normalizedEmail, purpose);
             if (found.isEmpty()) {
                 return VerifyResult.failure("OTP_NOT_FOUND");
@@ -173,12 +172,12 @@ public final class OtpService {
 
             otp.consume(now);
             UUID targetUserId = otp.getUserId();
-            UserRepository users = new UserRepository(entityManager);
+            UserDAO users = new UserDAO(entityManager);
             if (targetUserId == null) {
                 targetUserId = users.findByNormalizedEmail(normalizedEmail).map(User::getId).orElse(null);
             }
 
-            if (purpose == OtpPurpose.VERIFY_EMAIL) {
+            if (purpose == IdentityEnums.OtpPurpose.VERIFY_EMAIL) {
                 if (targetUserId != null) {
                     users.findById(targetUserId).ifPresent(user -> user.verifyEmail(now));
                 } else {
@@ -190,7 +189,7 @@ public final class OtpService {
         });
     }
 
-    public byte[] computeHash(String emailNormalized, OtpPurpose purpose, String code) {
+    public byte[] computeHash(String emailNormalized, IdentityEnums.OtpPurpose purpose, String code) {
         try {
             Mac mac = Mac.getInstance("HmacSHA256");
             mac.init(new SecretKeySpec(secretKey, "HmacSHA256"));

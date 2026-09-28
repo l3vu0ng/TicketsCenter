@@ -2,7 +2,7 @@
 
 TicketsCenter là hệ thống quản lý sự kiện và bán vé trực tuyến, được thiết kế cho đồ án Hệ quản trị cơ sở dữ liệu. Dự án bao gồm quản lý tổ chức, sự kiện, khu vực và ghế ngồi; giữ vé, đặt hàng, thanh toán thử nghiệm, phát hành vé QR, check-in, hoàn vé và đối soát.
 
-Thiết kế chi tiết nằm trong [SPEC.md](spec.md).
+Thiết kế chi tiết nằm trong [SPEC.md](docs/references/SPEC.md).
 
 ## Công nghệ dự kiến
 
@@ -30,7 +30,7 @@ Repository hiện có đặc tả, sơ đồ và bộ khung Maven. Chưa có mã
 
 ## Cấu hình
 
-Khi phần ứng dụng được triển khai, cấu hình sẽ lấy từ biến môi trường. Các tên dưới đây được đề xuất trong [SPEC.md](spec.md#113-nhóm-biến-môi-trường-dự-kiến); mã đọc cấu hình và file `.env.example` chưa được tạo.
+Khi phần ứng dụng được triển khai, cấu hình sẽ lấy từ biến môi trường. Các tên dưới đây được đề xuất trong [SPEC.md](docs/references/SPEC.md#113-nhóm-biến-môi-trường-dự-kiến); mã đọc cấu hình và file `.env.example` chưa được tạo.
 
 | Nhóm | Biến dự kiến | Mục đích |
 |---|---|---|
@@ -59,4 +59,4 @@ Thông tin SMTP/email, lưu ảnh, URL VNPAY Sandbox và giới hạn kết nố
 
 ## Tài liệu
 
-- [Đặc tả thiết kế](spec.md)
+- [Đặc tả thiết kế](docs/references/SPEC.md)

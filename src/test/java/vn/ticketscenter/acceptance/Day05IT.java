@@ -6,8 +6,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import vn.ticketscenter.config.PersistenceListener;
-import vn.ticketscenter.config.PersistenceRegistry;
+import vn.ticketscenter.config.persistence.PersistenceListener;
+import vn.ticketscenter.config.persistence.PersistenceRegistry;
 import vn.ticketscenter.identity.controller.AuthServlet;
 import vn.ticketscenter.identity.controller.OtpServlet;
 import vn.ticketscenter.identity.filter.AuthenticationFilter;
@@ -15,7 +15,7 @@ import vn.ticketscenter.identity.filter.CsrfFilter;
 import vn.ticketscenter.config.web.RequestValidationFilter;
 import vn.ticketscenter.identity.integration.mail.ConfiguredMailGateway;
 import vn.ticketscenter.identity.model.Otp;
-import vn.ticketscenter.identity.model.OtpPurpose;
+import vn.ticketscenter.identity.model.IdentityEnums;
 import vn.ticketscenter.identity.model.User;
 import vn.ticketscenter.identity.service.AccountService;
 import vn.ticketscenter.identity.service.OtpService;
@@ -57,11 +57,11 @@ public class Day05IT {
         assertNotNull(user);
         assertNull(user.getEmailVerifiedAt());
 
-        otps.sendOtp(user.getId(), "newuser@example.com", OtpPurpose.VERIFY_EMAIL);
+        otps.sendOtp(user.getId(), "newuser@example.com", IdentityEnums.OtpPurpose.VERIFY_EMAIL);
         assertEquals(1, mail.getDispatchedMessages().size());
         assertEquals("123456", mail.getDispatchedMessages().getFirst().otpCode());
 
-        var verifyResult = otps.verifyOtp("newuser@example.com", "123456", OtpPurpose.VERIFY_EMAIL);
+        var verifyResult = otps.verifyOtp("newuser@example.com", "123456", IdentityEnums.OtpPurpose.VERIFY_EMAIL);
         assertTrue(verifyResult.successful());
 
         assertNotNull(user.getEmailVerifiedAt());
@@ -75,31 +75,31 @@ public class Day05IT {
         InMemoryPersistence persistence = new InMemoryPersistence();
 
         OtpService otps = new OtpService(persistence.manager(), mail, clock, SECRET, () -> "654321");
-        otps.sendOtp(UUID.randomUUID(), "testmatrix@example.com", OtpPurpose.VERIFY_EMAIL);
+        otps.sendOtp(UUID.randomUUID(), "testmatrix@example.com", IdentityEnums.OtpPurpose.VERIFY_EMAIL);
 
         clock.advance(Duration.ofSeconds(59));
         assertThrows(IllegalStateException.class,
-                () -> otps.sendOtp(UUID.randomUUID(), "testmatrix@example.com", OtpPurpose.VERIFY_EMAIL));
+                () -> otps.sendOtp(UUID.randomUUID(), "testmatrix@example.com", IdentityEnums.OtpPurpose.VERIFY_EMAIL));
 
         clock.advance(Duration.ofSeconds(1));
-        assertDoesNotThrow(() -> otps.sendOtp(UUID.randomUUID(), "testmatrix@example.com", OtpPurpose.VERIFY_EMAIL));
+        assertDoesNotThrow(() -> otps.sendOtp(UUID.randomUUID(), "testmatrix@example.com", IdentityEnums.OtpPurpose.VERIFY_EMAIL));
 
         for (int attempt = 1; attempt <= 4; attempt++) {
-            var fail = otps.verifyOtp("testmatrix@example.com", "000000", OtpPurpose.VERIFY_EMAIL);
+            var fail = otps.verifyOtp("testmatrix@example.com", "000000", IdentityEnums.OtpPurpose.VERIFY_EMAIL);
             assertFalse(fail.successful());
             assertEquals("OTP_INVALID", fail.error());
         }
 
-        var fifthFail = otps.verifyOtp("testmatrix@example.com", "000000", OtpPurpose.VERIFY_EMAIL);
+        var fifthFail = otps.verifyOtp("testmatrix@example.com", "000000", IdentityEnums.OtpPurpose.VERIFY_EMAIL);
         assertFalse(fifthFail.successful());
 
-        var exhausted = otps.verifyOtp("testmatrix@example.com", "654321", OtpPurpose.VERIFY_EMAIL);
+        var exhausted = otps.verifyOtp("testmatrix@example.com", "654321", IdentityEnums.OtpPurpose.VERIFY_EMAIL);
         assertFalse(exhausted.successful());
 
         clock.advance(Duration.ofSeconds(60));
-        otps.sendOtp(UUID.randomUUID(), "testmatrix@example.com", OtpPurpose.VERIFY_EMAIL);
+        otps.sendOtp(UUID.randomUUID(), "testmatrix@example.com", IdentityEnums.OtpPurpose.VERIFY_EMAIL);
         clock.advance(Duration.ofMinutes(5).plusSeconds(1));
-        var expired = otps.verifyOtp("testmatrix@example.com", "654321", OtpPurpose.VERIFY_EMAIL);
+        var expired = otps.verifyOtp("testmatrix@example.com", "654321", IdentityEnums.OtpPurpose.VERIFY_EMAIL);
         assertFalse(expired.successful());
         assertEquals("OTP_EXPIRED", expired.error());
     }
@@ -438,7 +438,7 @@ public class Day05IT {
                             }
                             if (ql.contains("Otp")) {
                                 String email = (String) params.get("email");
-                                OtpPurpose purpose = (OtpPurpose) params.get("purpose");
+                                IdentityEnums.OtpPurpose purpose = (IdentityEnums.OtpPurpose) params.get("purpose");
                                 yield otps.stream()
                                         .filter(o -> email == null || o.getEmailNormalized().equalsIgnoreCase(email))
                                         .filter(o -> purpose == null || o.getPurpose() == purpose)

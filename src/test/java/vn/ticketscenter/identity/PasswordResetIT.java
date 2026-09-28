@@ -7,7 +7,7 @@ import jakarta.persistence.TypedQuery;
 import org.junit.jupiter.api.Test;
 import vn.ticketscenter.identity.integration.mail.ConfiguredMailGateway;
 import vn.ticketscenter.identity.model.Otp;
-import vn.ticketscenter.identity.model.OtpPurpose;
+import vn.ticketscenter.identity.model.IdentityEnums;
 import vn.ticketscenter.identity.model.User;
 import vn.ticketscenter.identity.service.AccountService;
 import vn.ticketscenter.identity.service.OtpService;
@@ -105,7 +105,7 @@ public class PasswordResetIT {
         OtpService otpService = new OtpService(persistence.manager(), mail, clock, TEST_SECRET, () -> "555666");
         PasswordResetService resetService = new PasswordResetService(persistence.manager(), otpService, hasher, clock, TEST_SECRET);
 
-        otpService.sendOtp(charlieId, "charlie@example.com", OtpPurpose.VERIFY_EMAIL);
+        otpService.sendOtp(charlieId, "charlie@example.com", IdentityEnums.OtpPurpose.VERIFY_EMAIL);
 
         var verifyResult = resetService.verifyResetOtp("charlie@example.com", "555666");
         assertFalse(verifyResult.successful());
@@ -367,7 +367,7 @@ public class PasswordResetIT {
                             }
                             if (ql.contains("Otp")) {
                                 String email = (String) params.get("email");
-                                OtpPurpose purpose = (OtpPurpose) params.get("purpose");
+                                IdentityEnums.OtpPurpose purpose = (IdentityEnums.OtpPurpose) params.get("purpose");
                                 yield otps.stream()
                                         .filter(o -> email == null || o.getEmailNormalized().equalsIgnoreCase(email))
                                         .filter(o -> purpose == null || o.getPurpose() == purpose)

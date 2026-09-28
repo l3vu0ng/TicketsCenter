@@ -1,13 +1,16 @@
-package vn.ticketscenter.config;
+package vn.ticketscenter.config.persistence;
 
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;
+import vn.ticketscenter.config.AppConfig;
+import vn.ticketscenter.config.ServerConfig;
+import vn.ticketscenter.config.seed.AdminSeeder;
+import vn.ticketscenter.identity.service.PasswordHasher;
 
+import java.time.Clock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.time.Clock;
-import vn.ticketscenter.identity.service.PasswordHasher;
 
 @WebListener
 public final class PersistenceListener implements ServletContextListener {

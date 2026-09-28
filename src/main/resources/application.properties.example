@@ -52,7 +52,7 @@ app.secret.key=<your_secret_key_here>
 
 # Demo admin seed. Keep disabled unless explicitly needed.
 admin.seed.enabled=false
-admin.email=admin@ticketscenter.local
+admin.email=adminTIcket@gmail.com
 admin.password=<your_non_demo_admin_password>
 
 # 3. Cấu hình Cổng Thanh Toán VNPAY Sandbox

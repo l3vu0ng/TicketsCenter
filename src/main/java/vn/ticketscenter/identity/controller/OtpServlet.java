@@ -4,13 +4,13 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import vn.ticketscenter.config.PersistenceListener;
-import vn.ticketscenter.config.PersistenceRegistry;
+import vn.ticketscenter.config.persistence.PersistenceListener;
+import vn.ticketscenter.config.persistence.PersistenceRegistry;
 import vn.ticketscenter.config.web.HttpResponses;
 import vn.ticketscenter.identity.filter.AuthenticationFilter;
 import vn.ticketscenter.identity.integration.mail.ConfiguredMailGateway;
 import vn.ticketscenter.identity.integration.mail.MailGateway;
-import vn.ticketscenter.identity.model.OtpPurpose;
+import vn.ticketscenter.identity.model.IdentityEnums;
 import vn.ticketscenter.identity.service.AccountService;
 import vn.ticketscenter.identity.service.OtpService;
 import vn.ticketscenter.identity.service.PasswordHasher;
@@ -86,7 +86,7 @@ public final class OtpServlet extends HttpServlet {
         if (purposeStr == null || purposeStr.isBlank()) {
             throw new IllegalArgumentException("purpose is required");
         }
-        OtpPurpose purpose = OtpPurpose.valueOf(purposeStr.trim().toUpperCase());
+        IdentityEnums.OtpPurpose purpose = IdentityEnums.OtpPurpose.valueOf(purposeStr.trim().toUpperCase());
 
         String email = body.get("email");
         UUID userId = null;
@@ -112,9 +112,9 @@ public final class OtpServlet extends HttpServlet {
         String email = value(body.get("email"), "email is required");
         String code = value(body.get("code"), "code is required");
         String purposeStr = value(body.get("purpose"), "purpose is required");
-        OtpPurpose purpose = OtpPurpose.valueOf(purposeStr.trim().toUpperCase());
+        IdentityEnums.OtpPurpose purpose = IdentityEnums.OtpPurpose.valueOf(purposeStr.trim().toUpperCase());
 
-        if (purpose == OtpPurpose.RESET_PASSWORD) {
+        if (purpose == IdentityEnums.OtpPurpose.RESET_PASSWORD) {
             var resetResult = resetService.verifyResetOtp(email, code);
             if (!resetResult.successful()) {
                 HttpResponses.error(response, HttpServletResponse.SC_BAD_REQUEST,

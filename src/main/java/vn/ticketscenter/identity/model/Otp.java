@@ -23,7 +23,7 @@ public class Otp {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "purpose", nullable = false, length = 30)
-    private OtpPurpose purpose;
+    private IdentityEnums.OtpPurpose purpose;
 
     @Column(name = "secret_hash", nullable = false, length = 64)
     private byte[] secretHash;
@@ -46,7 +46,7 @@ public class Otp {
     protected Otp() {
     }
 
-    public Otp(UUID userId, String emailNormalized, OtpPurpose purpose, byte[] secretHash, Instant expiresAt, Instant createdAt) {
+    public Otp(UUID userId, String emailNormalized, IdentityEnums.OtpPurpose purpose, byte[] secretHash, Instant expiresAt, Instant createdAt) {
         this.userId = userId;
         this.emailNormalized = Objects.requireNonNull(emailNormalized);
         this.purpose = Objects.requireNonNull(purpose);
@@ -68,7 +68,7 @@ public class Otp {
         return emailNormalized;
     }
 
-    public OtpPurpose getPurpose() {
+    public IdentityEnums.OtpPurpose getPurpose() {
         return purpose;
     }
 
