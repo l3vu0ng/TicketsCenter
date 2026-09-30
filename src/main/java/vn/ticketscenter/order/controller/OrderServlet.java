@@ -12,11 +12,16 @@ import vn.ticketscenter.config.web.JsonObjectParser;
 import vn.ticketscenter.identity.filter.AuthenticationFilter;
 import vn.ticketscenter.identity.service.AccountService.AuthenticatedAccount;
 import vn.ticketscenter.order.dto.OrderDtos.OrderResult;
+import vn.ticketscenter.fulfillment.dto.FulfillmentDtos.RefundableTicket;
+import vn.ticketscenter.fulfillment.repository.OperationsRepository;
+import vn.ticketscenter.fulfillment.service.OperationsService;
 import vn.ticketscenter.order.repository.OrderRepository;
 import vn.ticketscenter.order.service.OrderService;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.UUID;
 
 @WebServlet(name = "OrderServlet", urlPatterns = {"/api/orders", "/api/orders/*"})
@@ -25,6 +30,45 @@ public final class OrderServlet extends HttpServlet {
 
     public OrderServlet() { this.orderService = null; }
     OrderServlet(OrderService orderService) { this.orderService = orderService; }
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        AuthenticatedAccount account = account(request, response);
+        if (account == null) return;
+        try {
+            String pathInfo = request.getPathInfo();
+            if (pathInfo != null && pathInfo.endsWith("/refundable-tickets")) {
+                String idPart = pathInfo.substring(1, pathInfo.length() - 19);
+                UUID orderId = uuid(idPart);
+                Object configured = request.getServletContext().getAttribute(PersistenceListener.REGISTRY_ATTRIBUTE);
+                if (configured instanceof PersistenceRegistry registry) {
+                    OperationsService service = new OperationsService(registry.transactionManager(), new OperationsRepository());
+                    List<RefundableTicket> tickets = service.refundable(account, orderId);
+                    HttpResponses.data(response, "{\"items\":" + refunds(tickets) + "}");
+                    return;
+                }
+                HttpResponses.error(response, 503, "DEPENDENCY_UNAVAILABLE", "Operations service unavailable");
+                return;
+            }
+            HttpResponses.error(response, 404, "NOT_FOUND", "Endpoint không tồn tại");
+        } catch (SecurityException exception) {
+            HttpResponses.error(response, 403, "FORBIDDEN", exception.getMessage());
+        } catch (IllegalArgumentException exception) {
+            HttpResponses.error(response, 400, "VALIDATION_FAILED", exception.getMessage());
+        } catch (RuntimeException exception) {
+            HttpResponses.error(response, exception instanceof NoSuchElementException ? 404 : 409, "REQUEST_FAILED", exception.getMessage());
+        }
+    }
+
+    private static String refunds(List<RefundableTicket> v) {
+        return v.stream().map(x -> "{\"ticketId\":" + HttpResponses.jsonString(x.ticketId().toString())
+                + ",\"paidAmount\":" + HttpResponses.jsonString(x.paidAmount().toString())
+                + ",\"zoneName\":" + HttpResponses.jsonString(x.zoneName())
+                + ",\"seatLabel\":" + (x.seatLabel() == null ? "null" : HttpResponses.jsonString(x.seatLabel())) + "}")
+                .reduce((a, b) -> a + "," + b)
+                .map(x -> "[" + x + "]")
+                .orElse("[]");
+    }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
