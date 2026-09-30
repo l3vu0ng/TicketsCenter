@@ -314,7 +314,7 @@ BEGIN
     IF @started = 1 BEGIN TRANSACTION; ELSE SAVE TRANSACTION tc_sp05;
     BEGIN TRY
         IF ISJSON(@ticket_ids) <> 1 OR NULLIF(LTRIM(RTRIM(@reason)), N'''') IS NULL THROW 51250, ''Ticket list and reason are required'', 1;
-        DECLARE @tickets TABLE(id uniqueidentifier NULL PRIMARY KEY);
+        DECLARE @tickets TABLE(id uniqueidentifier NOT NULL PRIMARY KEY);
         INSERT @tickets SELECT TRY_CONVERT(uniqueidentifier, value) FROM OPENJSON(@ticket_ids);
         IF NOT EXISTS (SELECT 1 FROM @tickets) OR EXISTS (SELECT 1 FROM @tickets WHERE id IS NULL) THROW 51251, ''Invalid ticket list'', 1;
         IF (SELECT COUNT(*) FROM OPENJSON(@ticket_ids)) <> (SELECT COUNT(*) FROM @tickets) THROW 51252, ''Duplicate ticket id'', 1;

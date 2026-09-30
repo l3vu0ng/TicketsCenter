@@ -14,6 +14,8 @@ import vn.ticketscenter.identity.service.AccountService;
 import vn.ticketscenter.identity.service.AuthorizationService;
 import vn.ticketscenter.config.persistence.TransactionManager;
 import vn.ticketscenter.config.web.JsonObjectParser;
+import vn.ticketscenter.event.repository.EventRepository;
+import vn.ticketscenter.event.service.EventService;
 
 import java.io.IOException;
 import java.util.Map;
@@ -87,6 +89,36 @@ public class AdminServlet extends HttpServlet {
         if (service == null) return;
 
         String pathInfo = req.getPathInfo();
+        String[] parts = pathInfo == null ? new String[0] : java.util.Arrays.stream(pathInfo.split("/"))
+                .filter(part -> !part.isBlank()).toArray(String[]::new);
+        if (parts.length == 3 && "events".equals(parts[0])) {
+            try {
+                UUID eventId = UUID.fromString(parts[1]);
+                Map<String, String> body = JsonObjectParser.parse(req.getReader());
+                EventService events = resolveEventService(req, resp);
+                if (events == null) return;
+                if ("publish".equals(parts[2])) {
+                    String ruleId = body.get("commissionRuleId");
+                    if (ruleId == null) throw new IllegalArgumentException("commissionRuleId là bắt buộc");
+                    events.publish(accountOpt.get(), eventId, UUID.fromString(ruleId));
+                    HttpResponses.data(resp, "{\"eventId\":" + HttpResponses.jsonString(eventId.toString())
+                            + ",\"status\":\"PUBLISHED\"}");
+                } else if ("reject".equals(parts[2])) {
+                    events.reject(accountOpt.get(), eventId, body.get("reason"));
+                    HttpResponses.data(resp, "{\"eventId\":" + HttpResponses.jsonString(eventId.toString())
+                            + ",\"status\":\"REJECTED\"}");
+                } else {
+                    HttpResponses.error(resp, 404, "NOT_FOUND", "Thao tác sự kiện không tồn tại");
+                }
+            } catch (IllegalArgumentException exception) {
+                HttpResponses.error(resp, 400, "VALIDATION_FAILED", exception.getMessage());
+            } catch (IllegalStateException exception) {
+                HttpResponses.error(resp, 409, "CONFLICT", exception.getMessage());
+            } catch (jakarta.persistence.PersistenceException exception) {
+                HttpResponses.error(resp, 409, "CONFLICT", "Không thể cập nhật trạng thái sự kiện");
+            }
+            return;
+        }
         if ("/users/status".equals(pathInfo)) {
             Map<String, String> body = JsonObjectParser.parse(req.getReader());
             String userIdStr = body.get("userId");
@@ -125,6 +157,16 @@ public class AdminServlet extends HttpServlet {
             return null;
         }
         return new AdminService(registry.transactionManager());
+    }
+
+    private EventService resolveEventService(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        Object configured = req.getServletContext().getAttribute(PersistenceListener.REGISTRY_ATTRIBUTE);
+        if (configured instanceof PersistenceRegistry registry) {
+            return new EventService(registry.transactionManager(), new EventRepository());
+        }
+        HttpResponses.error(resp, HttpServletResponse.SC_SERVICE_UNAVAILABLE,
+                "DEPENDENCY_UNAVAILABLE", "Event service is temporarily unavailable");
+        return null;
     }
 
     private Optional<AccountService.AuthenticatedAccount> getAuthenticatedAccount(HttpServletRequest req) {

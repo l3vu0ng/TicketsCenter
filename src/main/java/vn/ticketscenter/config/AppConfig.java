@@ -54,6 +54,7 @@ public final class AppConfig {
         public static final String APP_BASE_URL = "app.base.url";
         public static final String APP_ENV = "app.env";
         public static final String APP_SECRET_KEY = "app.secret.key";
+        public static final String EVENT_IMAGE_DIRECTORY = "event.image.directory";
 
         // 3. Cổng Thanh Toán VNPAY Sandbox
         public static final String VNPAY_TMN_CODE = "vnpay.tmn.code";

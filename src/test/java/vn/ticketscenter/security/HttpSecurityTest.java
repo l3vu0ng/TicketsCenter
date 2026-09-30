@@ -33,12 +33,25 @@ class HttpSecurityTest {
         assertFalse(called[0]);
     }
 
+    @Test
+    void eventCoverAllowsMultipartWithinItsFiveMegabyteLimit() throws Exception {
+        int[] status = {200};
+        boolean[] called = {false};
+        HttpServletRequest request = request("POST", 1_000_000, "multipart/form-data; boundary=test");
+
+        new RequestValidationFilter().doFilter(request, response(status), chain(called));
+
+        assertTrue(called[0]);
+    }
+
     private HttpServletRequest request(String method, long length, String contentType) {
         return (HttpServletRequest) Proxy.newProxyInstance(getClass().getClassLoader(),
                 new Class<?>[]{HttpServletRequest.class}, (proxy, called, args) -> switch (called.getName()) {
                     case "getMethod" -> method;
                     case "getContentLengthLong" -> length;
                     case "getContentType" -> contentType;
+                    case "getRequestURI" -> "/api/events/10000000-0000-0000-0000-000000000001/cover";
+                    case "getContextPath" -> "";
                     case "getSession" -> null;
                     default -> null;
                 });

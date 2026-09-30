@@ -49,6 +49,7 @@ db.worker.password=<your_worker_db_password>
 app.base.url=http://localhost:8080/ticketscenter
 app.env=development
 app.secret.key=<your_secret_key_here>
+event.image.directory=/var/lib/ticketscenter/event-images
 
 # Chính sách server-side dùng khi admin duyệt tổ chức; không nhận từ applicant.
 # organization.initialCommissionPolicy={"ratePercent":5,"fixedFee":0,"effectiveFrom":"2026-01-01","effectiveTo":"2027-01-01"}

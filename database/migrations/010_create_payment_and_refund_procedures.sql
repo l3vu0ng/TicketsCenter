@@ -90,9 +90,9 @@ BEGIN
                 WHERE order_id = @order_id AND seat_id IS NULL GROUP BY zone_id
             ) q ON q.zone_id = z.id WHERE z.held_quantity < q.quantity
         ) THROW 51387, ''Held standing inventory is inconsistent'', 1;
-        UPDATE s SET status = ''SOLD'', version = version + 1 FROM dbo.tc_seats s
+        UPDATE s SET status = ''SOLD'', version = s.version + 1 FROM dbo.tc_seats s
         JOIN dbo.tc_order_items oi ON oi.seat_id = s.id WHERE oi.order_id = @order_id AND s.status = ''HELD'';
-        UPDATE z SET held_quantity = held_quantity - q.quantity, sold_quantity = sold_quantity + q.quantity, version = version + 1
+        UPDATE z SET held_quantity = held_quantity - q.quantity, sold_quantity = sold_quantity + q.quantity, version = z.version + 1
         FROM dbo.tc_zones z JOIN (SELECT zone_id, SUM(quantity) quantity FROM dbo.tc_order_items
                                   WHERE order_id = @order_id AND seat_id IS NULL GROUP BY zone_id) q ON q.zone_id = z.id;
         UPDATE dbo.tc_ticket_holds SET status = ''CONSUMED'', version = version + 1 WHERE id = @hold_id AND status = ''ACTIVE'';
@@ -151,7 +151,7 @@ BEGIN
         WHERE rt.refund_request_id = @request_id ORDER BY t.id;
         IF @decision = ''REJECT'' BEGIN
             IF NULLIF(LTRIM(RTRIM(@rejection_reason)), N'''') IS NULL THROW 51405, ''Rejection reason is required'', 1;
-            UPDATE t SET status = CASE WHEN @event_status = ''CANCELLED'' THEN ''INVALIDATED'' ELSE ''ACTIVE'' END, version = version + 1
+            UPDATE t SET status = CASE WHEN @event_status = ''CANCELLED'' THEN ''INVALIDATED'' ELSE ''ACTIVE'' END, version = t.version + 1
             FROM dbo.tc_tickets t JOIN dbo.tc_refund_request_tickets rt ON rt.ticket_id = t.id
             WHERE rt.refund_request_id = @request_id AND t.status = ''REFUND_PENDING'';
             UPDATE dbo.tc_refund_request_tickets SET is_open = 0 WHERE refund_request_id = @request_id;
@@ -164,14 +164,14 @@ BEGIN
                 SELECT z.id FROM dbo.tc_zones z WITH (UPDLOCK, HOLDLOCK) WHERE EXISTS (
                     SELECT 1 FROM dbo.tc_refund_request_tickets rt JOIN dbo.tc_tickets t ON t.id = rt.ticket_id
                     JOIN dbo.tc_order_items oi ON oi.id = t.order_item_id WHERE rt.refund_request_id = @request_id AND oi.zone_id = z.id);
-                UPDATE s SET status = ''AVAILABLE'', version = version + 1 FROM dbo.tc_seats s JOIN dbo.tc_order_items oi ON oi.seat_id = s.id
+                UPDATE s SET status = ''AVAILABLE'', version = s.version + 1 FROM dbo.tc_seats s JOIN dbo.tc_order_items oi ON oi.seat_id = s.id
                 JOIN dbo.tc_tickets t ON t.order_item_id = oi.id JOIN dbo.tc_refund_request_tickets rt ON rt.ticket_id = t.id
                 WHERE rt.refund_request_id = @request_id AND s.status = ''SOLD'';
-                UPDATE z SET sold_quantity = sold_quantity - q.quantity, version = version + 1 FROM dbo.tc_zones z JOIN (
+                UPDATE z SET sold_quantity = sold_quantity - q.quantity, version = z.version + 1 FROM dbo.tc_zones z JOIN (
                     SELECT oi.zone_id, COUNT_BIG(*) quantity FROM dbo.tc_refund_request_tickets rt JOIN dbo.tc_tickets t ON t.id = rt.ticket_id
                     JOIN dbo.tc_order_items oi ON oi.id = t.order_item_id WHERE rt.refund_request_id = @request_id AND oi.seat_id IS NULL GROUP BY oi.zone_id
                 ) q ON q.zone_id = z.id;
-                UPDATE t SET status = ''REFUNDED'', version = version + 1 FROM dbo.tc_tickets t
+                UPDATE t SET status = ''REFUNDED'', version = t.version + 1 FROM dbo.tc_tickets t
                 JOIN dbo.tc_refund_request_tickets rt ON rt.ticket_id = t.id WHERE rt.refund_request_id = @request_id;
                 UPDATE dbo.tc_refund_request_tickets SET is_open = 0 WHERE refund_request_id = @request_id;
                 UPDATE dbo.tc_refund_requests SET status = ''COMPLETED'', reviewer_id = @actor_id, decided_at = @now, version = version + 1 WHERE id = @request_id;
@@ -246,15 +246,15 @@ BEGIN
             SELECT s.id FROM dbo.tc_seats s WITH (UPDLOCK, HOLDLOCK) WHERE EXISTS (
                 SELECT 1 FROM dbo.tc_refund_request_tickets rt JOIN dbo.tc_tickets t ON t.id = rt.ticket_id
                 JOIN dbo.tc_order_items oi ON oi.id = t.order_item_id WHERE rt.refund_request_id = @request_id AND oi.seat_id = s.id) ORDER BY s.id;
-            UPDATE s SET status = ''AVAILABLE'', version = version + 1 FROM dbo.tc_seats s JOIN dbo.tc_order_items oi ON oi.seat_id = s.id
+            UPDATE s SET status = ''AVAILABLE'', version = s.version + 1 FROM dbo.tc_seats s JOIN dbo.tc_order_items oi ON oi.seat_id = s.id
             JOIN dbo.tc_tickets t ON t.order_item_id = oi.id JOIN dbo.tc_refund_request_tickets rt ON rt.ticket_id = t.id
             WHERE rt.refund_request_id = @request_id AND s.status = ''SOLD'';
-            UPDATE z SET sold_quantity = sold_quantity - q.quantity, version = version + 1 FROM dbo.tc_zones z JOIN (
+            UPDATE z SET sold_quantity = sold_quantity - q.quantity, version = z.version + 1 FROM dbo.tc_zones z JOIN (
                 SELECT oi.zone_id, COUNT_BIG(*) quantity FROM dbo.tc_refund_request_tickets rt JOIN dbo.tc_tickets t ON t.id = rt.ticket_id
                 JOIN dbo.tc_order_items oi ON oi.id = t.order_item_id WHERE rt.refund_request_id = @request_id AND oi.seat_id IS NULL
                   AND t.status = ''REFUND_PENDING'' GROUP BY oi.zone_id
             ) q ON q.zone_id = z.id;
-            UPDATE t SET status = ''REFUNDED'', version = version + 1 FROM dbo.tc_tickets t
+            UPDATE t SET status = ''REFUNDED'', version = t.version + 1 FROM dbo.tc_tickets t
             JOIN dbo.tc_refund_request_tickets rt ON rt.ticket_id = t.id WHERE rt.refund_request_id = @request_id AND t.status = ''REFUND_PENDING'';
             UPDATE dbo.tc_refund_request_tickets SET is_open = 0 WHERE refund_request_id = @request_id;
             UPDATE dbo.tc_refund_requests SET status = ''COMPLETED'', version = version + 1 WHERE id = @request_id;

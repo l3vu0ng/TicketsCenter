@@ -32,6 +32,9 @@ public class Event {
     @Column(name = "cover_image_url", nullable = true, length = 2048)
     private String coverImageUrl;
 
+    @Column(name = "rejection_reason", length = 1000)
+    private String rejectionReason;
+
     @Column(name = "venue_name", nullable = false, length = 250)
     private String venueName;
 

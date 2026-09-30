@@ -15,6 +15,16 @@
 - ID tổ chức/đối tượng trong URL chỉ là input: Service luôn kiểm tra owner, membership đang active và phạm vi tổ chức từ database.
 - Response không chứa passwordHash, OTP/HMAC, secret provider, connection data, stack trace hoặc QR ngoài endpoint QR đã kiểm quyền.
 
+### Sự kiện, khu/ghế và ảnh bìa đã triển khai ngày 7
+
+- `POST /organizations/{organizationId}/events` tạo `DRAFT`; `GET` cùng path trả cả bản nháp và `rejectionReason` cho manager đúng tổ chức.
+- `POST /events/{eventId}/edit|delete|submit` sửa, xóa hoặc gửi duyệt. Submit yêu cầu ảnh bìa và ít nhất một khu hợp lệ.
+- `POST /events/{eventId}/zones`, `POST /zones/{zoneId}/edit|delete`: `SEATED` dùng `rows` + `seatsPerRow`; `STANDING` chỉ dùng `capacity`; giá VND có thể bằng 0.
+- `POST /events/{eventId}/cover` nhận multipart part `cover`: PNG/JPEG decode được, tối đa 5 MB và 12 triệu pixel. Storage directory lấy từ `event.image.directory`, nằm ngoài WAR.
+- `POST /admin/events/{eventId}/publish` nhận `commissionRuleId` và gọi `dbo.usp_PublishEvent`; `/reject` nhận `reason` tối đa 1000 ký tự.
+- `GET /events` chỉ trả `PUBLISHED`, hỗ trợ `q`, `categoryId`, `from`, `to`, sort allowlist `start|minPrice`, `page` và `pageSize`. `GET /events/{eventId}` và `/zones` trả chi tiết, tồn kho và sơ đồ ghế.
+- `GET /event-categories` và `/event-images/{storageKey}` là public.
+
 ### Auth đã triển khai ngày 4 và ngày 5
 
 - `GET /auth/csrf` trả `{"data":{"token":"..."}}` và tạo session nếu cần.

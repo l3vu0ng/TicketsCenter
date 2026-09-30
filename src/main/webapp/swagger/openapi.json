@@ -23,6 +23,10 @@
     {
       "name": "OTP & Password Reset",
       "description": "Phát hành mã OTP, xác thực email và khôi phục mật khẩu"
+    },
+    {
+      "name": "Events",
+      "description": "Bản nháp, khu/ghế, ảnh bìa, duyệt và catalog công khai"
     }
   ],
   "paths": {
@@ -480,6 +484,32 @@
           }
         }
       }
+    },
+    "/api/organizations/{organizationId}/events": {
+      "get": {"tags": ["Events"], "summary": "Danh sách sự kiện của tổ chức", "responses": {"200": {"description": "Gồm bản nháp và lý do từ chối"}}},
+      "post": {"tags": ["Events"], "summary": "Tạo sự kiện DRAFT", "responses": {"200": {"description": "Đã tạo"}}}
+    },
+    "/api/events": {
+      "get": {"tags": ["Events"], "summary": "Tìm sự kiện PUBLISHED", "responses": {"200": {"description": "Catalog phân trang"}}}
+    },
+    "/api/events/{eventId}": {
+      "get": {"tags": ["Events"], "summary": "Chi tiết sự kiện công khai", "responses": {"200": {"description": "Chi tiết"}, "404": {"description": "Không tìm thấy"}}}
+    },
+    "/api/events/{eventId}/zones": {
+      "get": {"tags": ["Events"], "summary": "Khu, tồn chỗ và sơ đồ ghế", "responses": {"200": {"description": "Khu và ghế"}}},
+      "post": {"tags": ["Events"], "summary": "Thêm khu và sinh ghế", "responses": {"200": {"description": "Đã tạo"}}}
+    },
+    "/api/events/{eventId}/cover": {
+      "post": {"tags": ["Events"], "summary": "Upload PNG/JPEG tối đa 5 MB", "responses": {"200": {"description": "Ảnh đã lưu"}, "413": {"description": "Ảnh quá lớn"}}}
+    },
+    "/api/admin/events/{eventId}/publish": {
+      "post": {"tags": ["Events"], "summary": "Admin xuất bản sự kiện", "responses": {"200": {"description": "Đã xuất bản"}}}
+    },
+    "/api/admin/events/{eventId}/reject": {
+      "post": {"tags": ["Events"], "summary": "Admin từ chối kèm lý do", "responses": {"200": {"description": "Đã từ chối"}}}
+    },
+    "/api/event-categories": {
+      "get": {"tags": ["Events"], "summary": "Danh mục sự kiện", "responses": {"200": {"description": "Danh mục seed"}}}
     }
   },
   "components": {

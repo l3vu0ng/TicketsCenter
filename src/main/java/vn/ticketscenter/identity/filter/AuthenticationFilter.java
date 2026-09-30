@@ -38,7 +38,9 @@ public final class AuthenticationFilter implements Filter {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
         String path = httpRequest.getRequestURI().substring(httpRequest.getContextPath().length());
-        if (PUBLIC_PATHS.contains(path) || ("GET".equals(httpRequest.getMethod()) && path.startsWith("/api/events"))) {
+        if (PUBLIC_PATHS.contains(path) || ("GET".equals(httpRequest.getMethod())
+                && (path.startsWith("/api/events") || path.equals("/api/event-categories")
+                || path.startsWith("/api/event-images/")))) {
             attachAccountIfSessionPresent(httpRequest);
             chain.doFilter(request, response);
             return;

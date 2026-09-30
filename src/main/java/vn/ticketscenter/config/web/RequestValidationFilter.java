@@ -13,6 +13,7 @@ import java.util.Set;
 public final class RequestValidationFilter implements Filter {
 
     private static final long MAX_BODY_BYTES = 64 * 1024;
+    private static final long MAX_COVER_BODY_BYTES = 5_300_000;
     private static final Set<String> BODY_METHODS = Set.of("POST", "PUT", "PATCH");
 
     @Override
@@ -21,7 +22,9 @@ public final class RequestValidationFilter implements Filter {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
         httpResponse.setHeader("Cache-Control", "no-store");
-        if (httpRequest.getContentLengthLong() > MAX_BODY_BYTES) {
+        boolean eventCover = isEventCover(httpRequest);
+        long limit = eventCover ? MAX_COVER_BODY_BYTES : MAX_BODY_BYTES;
+        if (httpRequest.getContentLengthLong() > limit) {
             HttpResponses.error(httpResponse, HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE,
                     "PAYLOAD_TOO_LARGE", "Request payload is too large");
             return;
@@ -29,12 +32,20 @@ public final class RequestValidationFilter implements Filter {
         if (BODY_METHODS.contains(httpRequest.getMethod())) {
             String contentType = httpRequest.getContentType();
             if (contentType == null || !(contentType.startsWith("application/json")
-                    || contentType.startsWith("application/x-www-form-urlencoded"))) {
+                    || contentType.startsWith("application/x-www-form-urlencoded")
+                    || (eventCover && contentType.startsWith("multipart/form-data")))) {
                 HttpResponses.error(httpResponse, HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE,
                         "CONTENT_TYPE_INVALID", "Unsupported content type");
                 return;
             }
         }
         chain.doFilter(request, response);
+    }
+
+    private boolean isEventCover(HttpServletRequest request) {
+        String contentType = request.getContentType();
+        if (contentType == null || !contentType.startsWith("multipart/form-data")) return false;
+        String path = request.getRequestURI().substring(request.getContextPath().length());
+        return path.matches("/api/events/[0-9a-fA-F-]{36}/cover");
     }
 }

@@ -62,8 +62,8 @@ Không yêu cầu người nhận đoán phần thiếu. Ghi tên người xử 
 | [D03](week-1/day-03-model-jpa-transaction.md) | 2026-09-27 | Model nền, JPA và transaction theo principal | 18 | D03-T01…T04 | Partial: entity/JPA/role PASS; login/SP evidence blocked |
 | [D04](week-1/day-04-tai-khoan-session-phan-quyen.md) | 2026-09-28 | Đăng ký, đăng nhập, phiên và bảo vệ HTTP | 15 | D04-T01…T04 | PASS nền local; proxy/D06/D08 còn ca tích hợp |
 | [D05](week-1/day-05-otp-email-khoi-phuc-mat-khau.md) | 2026-09-29 | OTP email, đặt lại mật khẩu và nhà cung cấp tích hợp | 15 | D05-T01…T04 | Đã kiểm chứng |
-| [D06](week-1/day-06-to-chuc-thanh-vien-hoa-hong.md) | 2026-09-30 | Tổ chức, thành viên và chính sách hoa hồng | 16 | D06-T01…T04 | Chưa làm |
-| [D07](week-1/day-07-su-kien-khu-ghe-anh.md) | 2026-10-01 | Sự kiện, khu/ghế, ảnh bìa và công khai | 18 | D07-T01…T04 | Chưa làm |
+| [D06](week-1/day-06-to-chuc-thanh-vien-hoa-hong.md) | 2026-09-30 | Tổ chức, thành viên và chính sách hoa hồng | 16 | D06-T01…T04 | Đã kiểm chứng |
+| [D07](week-1/day-07-su-kien-khu-ghe-anh.md) | 2026-10-01 | Sự kiện, khu/ghế, ảnh bìa và công khai | 18 | D07-T01…T04 | Đã kiểm chứng |
 
 ### Tuần 2 — Bán vé, thanh toán và check-in (117 giờ công)
 

@@ -19,6 +19,9 @@ import vn.ticketscenter.identity.filter.AuthenticationFilter;
 import vn.ticketscenter.identity.repository.OrganizationRepository;
 import vn.ticketscenter.identity.service.AccountService.AuthenticatedAccount;
 import vn.ticketscenter.identity.service.OrganizationService;
+import vn.ticketscenter.event.controller.EventServlet;
+import vn.ticketscenter.event.repository.EventRepository;
+import vn.ticketscenter.event.service.EventService;
 
 import java.io.IOException;
 import java.util.List;
@@ -60,6 +63,13 @@ public final class OrganizationServlet extends HttpServlet {
                 return;
             }
             String[] parts = parts(path);
+            if (parts.length == 3 && "organizations".equals(parts[0]) && "events".equals(parts[2])) {
+                EventService events = resolveEventService(request, response);
+                if (events == null) return;
+                HttpResponses.data(response, EventServlet.pageJson(events.getOrganizationEvents(
+                        account, uuid(parts[1]), page(request, "page", 1), page(request, "pageSize", 20))));
+                return;
+            }
             if (parts.length == 3 && "organizations".equals(parts[0]) && "members".equals(parts[2])) {
                 HttpResponses.data(response, membersJson(service.getMembers(account, uuid(parts[1]))));
                 return;
@@ -79,6 +89,14 @@ public final class OrganizationServlet extends HttpServlet {
         try {
             String path = apiPath(request);
             Map<String, String> body = JsonObjectParser.parse(request.getReader());
+            String[] eventParts = parts(path);
+            if (eventParts.length == 3 && "organizations".equals(eventParts[0]) && "events".equals(eventParts[2])) {
+                EventService events = resolveEventService(request, response);
+                if (events == null) return;
+                UUID eventId = events.createDraft(account, uuid(eventParts[1]), EventServlet.eventCommand(body));
+                HttpResponses.data(response, "{\"eventId\":" + json(eventId) + ",\"status\":\"DRAFT\"}");
+                return;
+            }
             if ("/organization-requests".equals(path)) {
                 UUID id = service.createRequest(account, new OrganizationRequestCommand(
                         body.get("name"), body.get("contactEmail"), body.get("contactPhone"), body.get("description")));
@@ -119,6 +137,15 @@ public final class OrganizationServlet extends HttpServlet {
             return new OrganizationService(registry.transactionManager(), new OrganizationRepository());
         }
         HttpResponses.error(response, 503, "DEPENDENCY_UNAVAILABLE", "Organization service is temporarily unavailable");
+        return null;
+    }
+
+    private EventService resolveEventService(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        Object configured = request.getServletContext().getAttribute(PersistenceListener.REGISTRY_ATTRIBUTE);
+        if (configured instanceof PersistenceRegistry registry) {
+            return new EventService(registry.transactionManager(), new EventRepository());
+        }
+        HttpResponses.error(response, 503, "DEPENDENCY_UNAVAILABLE", "Event service is temporarily unavailable");
         return null;
     }
 
