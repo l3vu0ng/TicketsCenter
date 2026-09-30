@@ -34,4 +34,8 @@ public final class FulfillmentDtos {
                              String seatLabel, BigDecimal paidAmount, String status, Instant issuedAt) {}
 
     public record PaymentConfirmation(String orderStatus, String paymentStatus, List<TicketView> tickets) {}
+
+    public record CheckInResultView(String result, UUID ticketId, Instant scannedAt) {}
+    public record RefundableTicket(UUID ticketId, BigDecimal paidAmount, String zoneName, String seatLabel) {}
+    public record RefundRequestResult(UUID requestId, BigDecimal requestedAmount) {}
 }
