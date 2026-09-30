@@ -23,6 +23,10 @@
     {
       "name": "OTP & Password Reset",
       "description": "Phát hành mã OTP, xác thực email và khôi phục mật khẩu"
+    },
+    {
+      "name": "Organizations",
+      "description": "Yêu cầu tổ chức, thành viên và chính sách hoa hồng"
     }
   ],
   "paths": {
@@ -480,6 +484,48 @@
           }
         }
       }
+    },
+    "/api/organization-requests": {
+      "post": {
+        "tags": ["Organizations"],
+        "summary": "Gửi yêu cầu tạo tổ chức",
+        "responses": {"200": {"description": "Yêu cầu PENDING đã được tạo"}, "400": {"description": "Dữ liệu không hợp lệ"}, "401": {"description": "Chưa đăng nhập"}}
+      }
+    },
+    "/api/me/organization-requests": {
+      "get": {
+        "tags": ["Organizations"],
+        "summary": "Danh sách yêu cầu tổ chức của tài khoản hiện tại",
+        "responses": {"200": {"description": "Danh sách phân trang"}, "401": {"description": "Chưa đăng nhập"}}
+      }
+    },
+    "/api/admin/organization-requests/{requestId}/approve": {
+      "post": {
+        "tags": ["Organizations"],
+        "summary": "Duyệt yêu cầu và tạo tổ chức, manager, chính sách ban đầu qua SP01",
+        "parameters": [{"in": "path", "name": "requestId", "required": true, "schema": {"type": "string", "format": "uuid"}}],
+        "responses": {"200": {"description": "Đã duyệt"}, "403": {"description": "Cần ADMIN"}, "409": {"description": "Trạng thái xung đột"}}
+      }
+    },
+    "/api/admin/organization-requests/{requestId}/reject": {
+      "post": {
+        "tags": ["Organizations"],
+        "summary": "Từ chối yêu cầu đang PENDING",
+        "parameters": [{"in": "path", "name": "requestId", "required": true, "schema": {"type": "string", "format": "uuid"}}],
+        "responses": {"200": {"description": "Đã từ chối"}, "400": {"description": "Thiếu lý do"}, "403": {"description": "Cần ADMIN"}}
+      }
+    },
+    "/api/organizations/{organizationId}/members": {
+      "get": {
+        "tags": ["Organizations"], "summary": "Danh sách thành viên", "responses": {"200": {"description": "Danh sách V10"}, "403": {"description": "Cần manager đúng tổ chức"}}
+      },
+      "post": {
+        "tags": ["Organizations"], "summary": "Thêm hoặc kích hoạt lại thành viên", "responses": {"200": {"description": "Đã cập nhật"}, "403": {"description": "Cần manager đúng tổ chức"}, "409": {"description": "Vi phạm manager cuối"}}
+      }
+    },
+    "/api/admin/organizations/{organizationId}/commission-rules": {
+      "get": {"tags": ["Organizations"], "summary": "Danh sách chính sách hoa hồng", "responses": {"200": {"description": "Danh sách chính sách"}}},
+      "post": {"tags": ["Organizations"], "summary": "Tạo chính sách hoa hồng", "responses": {"200": {"description": "Đã tạo"}, "400": {"description": "Điều khoản không hợp lệ"}}}
     }
   },
   "components": {

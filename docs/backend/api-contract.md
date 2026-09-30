@@ -27,6 +27,13 @@
 - `POST /auth/password/reset` nhận `{resetToken, newPassword}`, cập nhật hash mật khẩu mới, hủy resetToken và tăng `authVersion`.
 - Các mutation POST yêu cầu `X-CSRF-Token`; body tối đa 64 KiB và là `application/json` hoặc `application/x-www-form-urlencoded`.
 
+### Tổ chức và thành viên đã triển khai ngày 6
+
+- `POST /organization-requests`; `GET /me/organization-requests`: applicant luôn lấy từ session, dữ liệu trả về có phân trang.
+- `GET /admin/organization-requests`; `GET /admin/organization-requests/{id}`; `POST .../{id}/approve|reject`: chỉ ADMIN; approve gọi SP01 với chính sách hoa hồng từ cấu hình server.
+- `GET/POST /organizations/{id}/members`; `POST .../members/{userId}/role|activate|deactivate`: manager active đúng tổ chức; TR06 bảo vệ manager cuối.
+- `GET /me/memberships`; `GET/POST /admin/organizations/{id}/commission-rules`: đọc membership hiện tại và quản trị chính sách hoa hồng.
+
 ## 2. Ánh xạ đúng UI-01…UI-24
 
 | UI | Nghiệp vụ | Endpoint backend | Quyền/owner ghi |

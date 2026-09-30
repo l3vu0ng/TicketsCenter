@@ -1,18 +1,10 @@
 package vn.ticketscenter.admin.dto;
 
-import java.util.UUID;
-
 public final class AdminDtos {
     private AdminDtos() {}
 
-    public record OrganizationApprovalRequest(
-            UUID requestId,
-            boolean approve,
-            String rejectionReason
-    ) {}
-
     public record UserStatusUpdateRequest(
-            UUID userId,
+            java.util.UUID userId,
             boolean active
     ) {}
 

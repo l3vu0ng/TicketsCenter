@@ -6,7 +6,6 @@ import jakarta.persistence.EntityTransaction;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import vn.ticketscenter.admin.dto.AdminDtos.AdminDashboardSummary;
-import vn.ticketscenter.admin.dto.AdminDtos.OrganizationApprovalRequest;
 import vn.ticketscenter.admin.service.AdminService;
 import vn.ticketscenter.identity.service.AccountService.AuthenticatedAccount;
 import vn.ticketscenter.config.persistence.DatabasePrincipal;
@@ -51,30 +50,10 @@ class AdminServiceTest {
     }
 
     @Test
-    @DisplayName("Non-admin user cannot process organization requests")
-    void testNonAdminBlockedFromApproval() {
-        AdminService service = new AdminService(createTestTransactionManager());
-        AuthenticatedAccount customer = new AuthenticatedAccount(
-                UUID.randomUUID(), 1, "customer@test.com", false);
-
-        OrganizationApprovalRequest req = new OrganizationApprovalRequest(UUID.randomUUID(), true, null);
-        assertThrows(SecurityException.class, () -> service.processOrganizationRequest(customer, req));
-    }
-
-    @Test
     @DisplayName("Unauthenticated request is rejected")
     void testUnauthenticatedBlocked() {
         AdminService service = new AdminService(createTestTransactionManager());
         assertThrows(SecurityException.class, () -> service.getDashboardSummary(null));
     }
 
-    @Test
-    @DisplayName("Admin user with null approval request returns false")
-    void testNullApprovalRequest() {
-        AdminService service = new AdminService(createTestTransactionManager());
-        AuthenticatedAccount admin = new AuthenticatedAccount(
-                UUID.randomUUID(), 1, "admin@test.com", true);
-
-        assertFalse(service.processOrganizationRequest(admin, null));
-    }
 }

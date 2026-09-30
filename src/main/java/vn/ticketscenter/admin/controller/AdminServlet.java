@@ -5,7 +5,6 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import vn.ticketscenter.admin.dto.AdminDtos.AdminDashboardSummary;
-import vn.ticketscenter.admin.dto.AdminDtos.OrganizationApprovalRequest;
 import vn.ticketscenter.admin.service.AdminService;
 import vn.ticketscenter.identity.service.SessionService;
 import vn.ticketscenter.config.persistence.PersistenceListener;
@@ -88,32 +87,6 @@ public class AdminServlet extends HttpServlet {
         if (service == null) return;
 
         String pathInfo = req.getPathInfo();
-        if ("/organizations/review".equals(pathInfo)) {
-            Map<String, String> body = JsonObjectParser.parse(req.getReader());
-            String reqIdStr = body.get("requestId");
-            boolean approve = Boolean.parseBoolean(body.get("approve"));
-            String reason = body.get("rejectionReason");
-
-            if (reqIdStr == null || reqIdStr.isBlank()) {
-                HttpResponses.error(resp, 400, "VALIDATION_FAILED", "requestId là bắt buộc");
-                return;
-            }
-
-            try {
-                UUID requestId = UUID.fromString(reqIdStr.trim());
-                boolean processed = service.processOrganizationRequest(accountOpt.get(),
-                        new OrganizationApprovalRequest(requestId, approve, reason));
-                if (processed) {
-                    HttpResponses.data(resp, "{\"status\":" + HttpResponses.jsonString(approve ? "APPROVED" : "REJECTED") + "}");
-                } else {
-                    HttpResponses.error(resp, 404, "NOT_FOUND", "Không tìm thấy yêu cầu tổ chức");
-                }
-            } catch (IllegalArgumentException e) {
-                HttpResponses.error(resp, 400, "VALIDATION_FAILED", "requestId không hợp lệ");
-            }
-            return;
-        }
-
         if ("/users/status".equals(pathInfo)) {
             Map<String, String> body = JsonObjectParser.parse(req.getReader());
             String userIdStr = body.get("userId");
