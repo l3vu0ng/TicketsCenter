@@ -69,10 +69,10 @@ Không yêu cầu người nhận đoán phần thiếu. Ghi tên người xử 
 
 | Ngày | Lịch | Công việc chính | Giờ công | Mã task | Trạng thái |
 |---|---|---|---:|---|:---:|
-| [D08](week-2/day-08-giu-ve-va-giai-phong.md) | 2026-10-02 | Giữ vé nguyên tử và giải phóng khi hủy/hết hạn | 17 | D08-T01…T04 | Chưa làm |
-| [D09](week-2/day-09-don-hang-coupon.md) | 2026-10-03 | Tạo đơn từ Hold và quản lý coupon | 17 | D09-T01…T04 | Chưa làm |
-| [D10](week-2/day-10-vnpay-khoi-tao-xac-thuc.md) | 2026-10-04 | Khởi tạo VNPAY và xác thực kết quả cổng | 16 | D10-T01…T04 | Chưa làm |
-| [D11](week-2/day-11-ghi-nhan-thanh-toan-phat-hanh-ve.md) | 2026-10-05 | Ghi nhận thu tiền, phát hành vé và QR | 19 | D11-T01…T04 | Chưa làm |
+| [D08](week-2/day-08-giu-ve-va-giai-phong.md) | 2026-10-02 | Giữ vé nguyên tử và giải phóng khi hủy/hết hạn | 17 | D08-T01…T04 | Đã kiểm chứng |
+| [D09](week-2/day-09-don-hang-coupon.md) | 2026-10-03 | Tạo đơn từ Hold và quản lý coupon | 17 | D09-T01…T04 | Đã kiểm chứng |
+| [D10](week-2/day-10-vnpay-khoi-tao-xac-thuc.md) | 2026-10-04 | Khởi tạo VNPAY và xác thực kết quả cổng | 16 | D10-T01…T04 | Đã kiểm chứng |
+| [D11](week-2/day-11-ghi-nhan-thanh-toan-phat-hanh-ve.md) | 2026-10-05 | Ghi nhận thu tiền, phát hành vé và QR | 19 | D11-T01…T04 | Đã kiểm chứng |
 | [D12](week-2/day-12-outbox-worker-doi-soat-thanh-toan-email.md) | 2026-10-06 | Worker, đối chiếu thanh toán và email bền vững | 15 | D12-T01…T04 | Chưa làm |
 | [D13](week-2/day-13-check-in-qr.md) | 2026-10-07 | Check-in vé và lịch sử quét theo tổ chức | 15 | D13-T01…T04 | Chưa làm |
 | [D14](week-2/day-14-yeu-cau-va-duyet-hoan.md) | 2026-10-08 | Yêu cầu hoàn vé và quyết định của admin | 18 | D14-T01…T04 | Chưa làm |

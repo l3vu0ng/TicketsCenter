@@ -147,7 +147,7 @@ public class Config {
         if (ipAddress != null && ipAddress.contains(",")) {
             ipAddress = ipAddress.split(",")[0].trim();
         }
-        if ("0:0:0:0:0:0:0:1".equals(ipAddress)) {
+        if ("0:0:0:0:0:0:0:1".equals(ipAddress) || "[0:0:0:0:0:0:0:1]".equals(ipAddress) || (ipAddress != null && ipAddress.contains(":"))) {
             ipAddress = "127.0.0.1";
         }
         return (ipAddress != null && !ipAddress.isBlank()) ? ipAddress : "127.0.0.1";

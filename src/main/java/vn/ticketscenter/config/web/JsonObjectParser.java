@@ -29,7 +29,7 @@ public final class JsonObjectParser {
         do {
             String key = string();
             expect(':');
-            String value = string();
+            String value = value();
             if (values.putIfAbsent(key, value) != null) throw invalid();
             skipWhitespace();
         } while (take(','));
@@ -37,6 +37,26 @@ public final class JsonObjectParser {
         skipWhitespace();
         if (index != source.length()) throw invalid();
         return values;
+    }
+
+    private String value() {
+        skipWhitespace();
+        if (index < source.length() && source.charAt(index) == '"') return string();
+        int start = index;
+        char open = index < source.length() ? source.charAt(index) : 0;
+        if (open != '[') throw invalid();
+        char close = ']';
+        int depth = 0;
+        boolean quoted = false;
+        while (index < source.length()) {
+            char current = source.charAt(index++);
+            if (current == '"' && (index < 2 || source.charAt(index - 2) != '\\')) quoted = !quoted;
+            if (!quoted) {
+                if (current == open) depth++;
+                if (current == close && --depth == 0) return source.substring(start, index);
+            }
+        }
+        throw invalid();
     }
 
     private String string() {

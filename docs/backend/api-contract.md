@@ -115,4 +115,23 @@ Không endpoint browser nào được tên `/mark-paid`, `/mark-refunded`, `/mar
 Timeout sau commit không được diễn giải là thất bại. Caller đọc trạng thái đã lưu rồi mới quyết định trả kết quả hoặc retry hữu hạn.
 # Ghi nhận schema nền
 
+### Giữ vé và thu hồi (Ngày 08)
+
+- `POST /api/holds` nhận `{ "eventId": "...", "items": [{"zoneId":"...","seatId":null,"quantity":2}] }`; buyer phải active/verified và tổng quantity nằm trong 1–8.
+- SQL `dbo.usp_CreateTicketHold` khóa event/zone/seat bằng `UPDLOCK, HOLDLOCK`, kiểm tra event đang bán, tồn kho và đặt TTL cố định 10 phút trong cùng transaction.
+- `POST /api/holds/{holdId}/cancel` gọi `dbo.usp_ReleaseTicketHold` với owner từ session; ghế chuyển `AVAILABLE`, quota `held_quantity` giảm và hold thành `RELEASED`. Hold hết hạn được thu hồi khi buyer tạo hold mới.
+
+### Thanh toán và phát hành vé (Ngày 11)
+
+- `POST /api/payments/{orderId}` nhận `paymentId` (nullable cho đơn 0 đồng) và `providerReference`; server gọi `dbo.usp_ApplyPaymentResult` với kết quả `CAPTURED` đã xác thực.
+- Stored procedure khóa tồn kho, chuyển order `PAID`, hold `CONSUMED`, consume coupon, cập nhật `sold_quantity` và phân bổ tiền từng vé bằng `fn_AllocateTicketPaidAmounts`.
+- Mỗi vé dùng mã ngẫu nhiên 256-bit; chỉ hash SHA-256 lưu trong DB. `GET /api/me/tickets` trả vé của buyer; `GET /api/tickets/{ticketId}/qr` trả PNG QR, không trả secret hash.
+
+### Đơn hàng và coupon (Ngày 09)
+
+- `POST /api/orders` nhận `{ "holdId": "..." }`; server gọi `dbo.usp_CreateOrderFromHold`, xác định buyer từ session và trả breakdown server-side.
+- `POST /api/orders/{orderId}/coupon` nhận `couponCode`; mã rỗng/blank là thao tác gỡ mã. Server gọi `dbo.usp_ApplyOrderCoupon`, không nhận tổng tiền hoặc discount từ client.
+- `OrderItem.unitPrice`, tên khu và nhãn ghế được snapshot từ HoldItem. Coupon chỉ áp dụng cho order của buyer, `PENDING_PAYMENT`, Hold còn hiệu lực và không có Payment `PENDING`/`UNKNOWN`.
+- Discount dùng `fn_CalculateCouponDiscount`: floor đồng nguyên, tối đa 30% subtotal; quota dùng `vw_CouponUsage`/`fn_GetCouponEligibility` và redemption `RESERVED` nguyên tử.
+
 Migration schema/constraint không tạo endpoint, Stored Procedure hoặc UDF mới. Các Servlet/Service sau chỉ được gọi object SQL khi object đó xuất hiện trong migration chức năng và được bổ sung vào hợp đồng này; không tạo API giả chỉ để kiểm kê bảng.

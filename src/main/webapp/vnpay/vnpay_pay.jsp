@@ -30,6 +30,7 @@
             <h3>Khởi tạo giao dịch thanh toán</h3>
             <div class="table-responsive">
                 <form action="${pageContext.request.contextPath}/vnpayajax" id="frmCreateOrder" method="post">        
+                    <input type="hidden" name="returnUrl" value="${pageContext.request.scheme}://${pageContext.request.serverName}:${pageContext.request.serverPort}${pageContext.request.contextPath}/vnpay/vnpay_return.jsp" />
                     <div class="form-group">
                         <label for="amount">Số tiền thanh toán (VND)</label>
                         <input class="form-control" id="amount" max="100000000" min="1" name="amount" type="number" value="50000" required />

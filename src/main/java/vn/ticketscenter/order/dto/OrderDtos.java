@@ -24,4 +24,9 @@ public final class OrderDtos {
             OrderEnums.OrderStatus status,
             Instant createdAt
     ) {}
+
+    public record OrderResult(
+            UUID orderId, String orderCode, BigDecimal subtotal, BigDecimal discount,
+            BigDecimal total, String status, UUID couponId
+    ) {}
 }
