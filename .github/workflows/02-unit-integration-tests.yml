@@ -113,11 +113,32 @@ jobs:
           TC_SQL_PASSWORD: "YourStrong@Password123"
           TC_SQL_ENCRYPT: "false"
           TC_SQL_TRUST_SERVER_CERT: "true"
+          DB_HOST: "127.0.0.1"
+          DB_PORT: "1433"
+          DB_NAME: "TicketCenterticke"
+          DB_USER: "sa"
+          DB_PASSWORD: "YourStrong@Password123"
+          DB_ENCRYPT: "false"
+          DB_TRUSTSERVERCERTIFICATE: "true"
         run: |
           echo "=== Chạy Failsafe Integration Tests (Day06IT, Day07IT, Day08IT, Day09IT, Day11IT) ==="
           mvn -B -Psqlserver-it verify \
             -Dsurefire.failIfNoSpecifiedTests=false \
             -Dtest=__none__ \
+            -Ddb.host=127.0.0.1 \
+            -Ddb.port=1433 \
+            -Ddb.name=TicketCenterticke \
+            -Ddb.user=sa \
+            -Ddb.password="YourStrong@Password123" \
+            -Ddb.encrypt=false \
+            -Ddb.trustServerCertificate=true \
+            -DTC_SQL_HOST=127.0.0.1 \
+            -DTC_SQL_PORT=1433 \
+            -DTC_SQL_TEST_DB=TicketCenterticke \
+            -DTC_SQL_LOGIN=sa \
+            -DTC_SQL_PASSWORD="YourStrong@Password123" \
+            -DTC_SQL_ENCRYPT=false \
+            -DTC_SQL_TRUST_SERVER_CERT=true \
             -Dit.test="Day06IT,Day07IT,Day08IT,Day09IT,Day11IT"
 
       - name: Generate Integration Test Summary
