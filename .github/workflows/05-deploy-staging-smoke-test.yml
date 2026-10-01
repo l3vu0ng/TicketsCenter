@@ -34,20 +34,26 @@ jobs:
         env:
           MSSQL_SA_PASSWORD: "YourStrong@Password123"
         run: |
-          echo "=== Cài đặt mssql-tools18 ==="
-          curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --dearmor -o /usr/share/keyrings/microsoft-prod.gpg
-          curl -fsSL https://packages.microsoft.com/config/ubuntu/22.04/prod.list | sudo tee /etc/apt/sources.list.d/msprod.list
-          sudo apt-get update && sudo ACCEPT_EULA=Y apt-get install -y mssql-tools18 unixodbc-dev
-          export PATH="$PATH:/opt/mssql-tools18/bin"
+          echo "=== Tìm container SQL Server ==="
+          CONTAINER_ID=$(docker ps -q --filter ancestor=mcr.microsoft.com/mssql/server:2022-latest | head -n 1)
+          if [ -z "$CONTAINER_ID" ]; then
+            echo "::error::Không tìm thấy container SQL Server đang chạy!"
+            exit 1
+          fi
+          echo "SQL Server Container ID: $CONTAINER_ID"
 
           echo "Tạo cơ sở dữ liệu staging..."
-          sqlcmd -S 127.0.0.1 -U sa -P "$MSSQL_SA_PASSWORD" -C -Q "CREATE DATABASE StagingTicketsCenter;"
+          docker exec "$CONTAINER_ID" /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$MSSQL_SA_PASSWORD" -C -Q "CREATE DATABASE StagingTicketsCenter;"
+
+          echo "Copy migrations vào container..."
+          docker cp database/migrations "$CONTAINER_ID":/tmp/staging_migrations
 
           echo "=== Thực hiện xác minh Migration theo thứ tự chặt chẽ ==="
-          for sql_file in $(ls database/migrations/*.sql | sort); do
-            echo "--- Đang áp dụng migration: $sql_file ---"
-            sqlcmd -S 127.0.0.1 -U sa -P "$MSSQL_SA_PASSWORD" -C -d StagingTicketsCenter -i "$sql_file" || {
-              echo "::error::Lỗi khi chạy migration file $sql_file"
+          for file in $(ls database/migrations/*.sql | sort); do
+            filename=$(basename "$file")
+            echo "--- Đang áp dụng migration: $filename ---"
+            docker exec "$CONTAINER_ID" /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$MSSQL_SA_PASSWORD" -C -d StagingTicketsCenter -i "/tmp/staging_migrations/$filename" || {
+              echo "::error::Lỗi khi chạy migration file $filename"
               exit 1
             }
           done

@@ -78,22 +78,30 @@ jobs:
         env:
           MSSQL_SA_PASSWORD: "YourStrong@Password123"
         run: |
-          echo "=== Chờ SQL Server khởi động hoàn tất ==="
-          sudo apt-get update && sudo apt-get install -y curl gnupg
-          curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --dearmor -o /usr/share/keyrings/microsoft-prod.gpg
-          curl -fsSL https://packages.microsoft.com/config/ubuntu/22.04/prod.list | sudo tee /etc/apt/sources.list.d/msprod.list
-          sudo apt-get update && sudo ACCEPT_EULA=Y apt-get install -y mssql-tools18 unixodbc-dev
-
-          export PATH="$PATH:/opt/mssql-tools18/bin"
+          echo "=== Tìm container SQL Server ==="
+          CONTAINER_ID=$(docker ps -q --filter ancestor=mcr.microsoft.com/mssql/server:2022-latest | head -n 1)
+          if [ -z "$CONTAINER_ID" ]; then
+            echo "::error::Không tìm thấy container SQL Server đang chạy!"
+            exit 1
+          fi
+          echo "SQL Server Container ID: $CONTAINER_ID"
 
           echo "Tạo database TicketCenterticke trên SQL Server..."
-          sqlcmd -S 127.0.0.1 -U sa -P "$MSSQL_SA_PASSWORD" -C -Q "CREATE DATABASE TicketCenterticke;"
+          docker exec "$CONTAINER_ID" /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$MSSQL_SA_PASSWORD" -C -Q "CREATE DATABASE TicketCenterticke;"
 
-          echo "Áp dụng toàn bộ migrations từ 001 đến 014..."
+          echo "Copy migrations vào container..."
+          docker cp database/migrations "$CONTAINER_ID":/tmp/migrations
+
+          echo "Áp dụng toàn bộ migrations theo thứ tự..."
           for file in $(ls database/migrations/*.sql | sort); do
-            echo "Running migration: $file"
-            sqlcmd -S 127.0.0.1 -U sa -P "$MSSQL_SA_PASSWORD" -C -d TicketCenterticke -i "$file"
+            filename=$(basename "$file")
+            echo "Running migration: $filename"
+            docker exec "$CONTAINER_ID" /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$MSSQL_SA_PASSWORD" -C -d TicketCenterticke -i "/tmp/migrations/$filename" || {
+              echo "::error::Lỗi khi chạy migration: $filename"
+              exit 1
+            }
           done
+          echo "=> Áp dụng thành công toàn bộ migration vào SQL Server."
 
       - name: Run SQL Server Integration Tests (Failsafe IT)
         env:
