@@ -1,0 +1,26 @@
+sequenceDiagram
+    autonumber
+    actor Client as App Client
+    participant Filter as API / Filter
+    participant Redis as Redis Cache
+    participant DB as SQL Server (DBS)
+
+    Client->>Filter: POST /api/transactions (Header: X-Idempotency-Key)
+    Filter->>Redis: SET idempotency:txn:<key> "PENDING" NX EX 86400
+    
+    alt Key ĐÃ TỒN TẠI (Redis trả về null/false)
+        Redis-->>Filter: Key already exists
+        Filter-->>Client: Fallback: 409 Conflict (Giao dịch đang xử lý hoặc bị trùng)
+    else Key CHƯA TỒN TẠI (Redis trả về OK/true)
+        Redis-->>Filter: Acquired lock (TTL 24h)
+        Filter->>DB: Bắt đầu Transaction trừ tiền ví/tài khoản
+        alt Trừ tiền thành công
+            DB-->>Filter: Commit thành công
+            Filter->>Redis: SET idempotency:txn:<key> "SUCCESS:<txnId>" EX 86400
+            Filter-->>Client: 200 OK (Giao dịch thành công)
+        else Thất bại (thiếu số dư / DB lỗi)
+            DB-->>Filter: Rollback
+            Filter->>Redis: DEL idempotency:txn:<key> (hoặc mark FAILED)
+            Filter-->>Client: 400 Bad Request / 500 Error
+        end
+    end

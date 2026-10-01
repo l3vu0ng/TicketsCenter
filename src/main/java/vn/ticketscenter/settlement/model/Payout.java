@@ -38,7 +38,45 @@ public class Payout {
     protected Payout() {
     }
 
+    public Payout(Settlement settlement, java.math.BigDecimal amount,
+                  String reference, java.time.Instant createdAt) {
+        if (amount == null || amount.signum() <= 0 || amount.scale() > 0) {
+            throw new IllegalArgumentException("payout amount must be positive whole VND");
+        }
+        if (reference == null || reference.isBlank()) {
+            throw new IllegalArgumentException("payout reference is required");
+        }
+        this.settlement = java.util.Objects.requireNonNull(settlement);
+        this.amount = amount;
+        this.reference = reference;
+        this.createdAt = java.util.Objects.requireNonNull(createdAt);
+        this.status = SettlementEnums.PayoutStatus.PENDING;
+    }
+
     public java.util.UUID getId() {
         return id;
+    }
+
+    public void markSucceeded(java.time.Instant now) {
+        requirePending();
+        java.time.Instant paidAt = java.util.Objects.requireNonNull(now);
+        status = SettlementEnums.PayoutStatus.SUCCEEDED;
+        this.paidAt = paidAt;
+    }
+
+    public void markFailed() {
+        requirePending();
+        status = SettlementEnums.PayoutStatus.FAILED;
+        paidAt = null;
+    }
+
+    public SettlementEnums.PayoutStatus getStatus() {
+        return status;
+    }
+
+    private void requirePending() {
+        if (status != SettlementEnums.PayoutStatus.PENDING) {
+            throw new IllegalStateException("only pending payout can change outcome");
+        }
     }
 }

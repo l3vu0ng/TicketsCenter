@@ -35,6 +35,10 @@
     {
       "name": "Refunds",
       "description": "Retry vận hành; kết quả provider không nhận từ browser"
+    },
+    {
+      "name": "VNPAY Payment Gateway",
+      "description": "Tạo URL thanh toán Sandbox, truy vấn giao dịch (QueryDR) và hoàn tiền (Refund)"
     }
   ],
   "paths": {
@@ -588,6 +592,156 @@
     },
     "/api/event-categories": {
       "get": {"tags": ["Events"], "summary": "Danh mục sự kiện", "responses": {"200": {"description": "Danh mục seed"}}}
+    },
+    "/vnpayajax": {
+      "post": {
+        "tags": ["VNPAY Payment Gateway"],
+        "summary": "Tạo URL thanh toán VNPAY Sandbox",
+        "description": "Tạo giao dịch thanh toán và trả về URL chuyển hướng sang cổng thanh toán VNPAY Sandbox.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "required": ["amount"],
+                "properties": {
+                  "amount": {
+                    "type": "integer",
+                    "description": "Số tiền cần thanh toán (VNĐ)",
+                    "example": 50000
+                  },
+                  "bankCode": {
+                    "type": "string",
+                    "description": "Mã ngân hàng (bỏ trống nếu muốn người dùng chọn tại cổng VNPAY)",
+                    "example": "NCB",
+                    "enum": ["NCB", "VNPAYQR", "VISA", "MASTERCARD"]
+                  },
+                  "language": {
+                    "type": "string",
+                    "description": "Ngôn ngữ giao diện cổng thanh toán",
+                    "example": "vn",
+                    "enum": ["vn", "en"]
+                  },
+                  "returnUrl": {
+                    "type": "string",
+                    "description": "URL nhận kết quả sau khi người dùng thanh toán trên cổng VNPAY",
+                    "example": "http://localhost:8081/vnpay/vnpay_return.jsp"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Khởi tạo thành công, trả về URL thanh toán VNPAY Sandbox",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": { "type": "string", "example": "00" },
+                    "message": { "type": "string", "example": "success" },
+                    "data": { "type": "string", "example": "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html?..." }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/vnpayquery": {
+      "post": {
+        "tags": ["VNPAY Payment Gateway"],
+        "summary": "Truy vấn kết quả giao dịch VNPAY (QueryDR)",
+        "description": "Kiểm tra kết quả giao dịch thanh toán đã gửi lên VNPAY Sandbox.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "required": ["order_id", "trans_date"],
+                "properties": {
+                  "order_id": {
+                    "type": "string",
+                    "description": "Mã tham chiếu giao dịch (vnp_TxnRef nhận được lúc tạo đơn)",
+                    "example": "40265227"
+                  },
+                  "trans_date": {
+                    "type": "string",
+                    "description": "Thời gian tạo giao dịch định dạng yyyyMMddHHmmss (vnp_CreateDate)",
+                    "example": "20261001101620"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Kết quả truy vấn giao dịch từ server VNPAY"
+          }
+        }
+      }
+    },
+    "/vnpayrefund": {
+      "post": {
+        "tags": ["VNPAY Payment Gateway"],
+        "summary": "Hoàn tiền giao dịch VNPAY (Refund)",
+        "description": "Gửi yêu cầu hoàn tiền toàn phần hoặc một phần giao dịch tới cổng VNPAY.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "required": ["order_id", "amount", "trans_date"],
+                "properties": {
+                  "order_id": {
+                    "type": "string",
+                    "description": "Mã đơn hàng (vnp_TxnRef)",
+                    "example": "40265227"
+                  },
+                  "amount": {
+                    "type": "integer",
+                    "description": "Số tiền hoàn (VNĐ)",
+                    "example": 50000
+                  },
+                  "trantype": {
+                    "type": "string",
+                    "description": "Loại hoàn tiền: 02 (Toàn phần), 03 (Một phần)",
+                    "example": "02",
+                    "enum": ["02", "03"]
+                  },
+                  "trans_date": {
+                    "type": "string",
+                    "description": "Thời gian tạo giao dịch ban đầu (yyyyMMddHHmmss)",
+                    "example": "20261001101620"
+                  },
+                  "transactionNo": {
+                    "type": "string",
+                    "description": "Mã giao dịch tại hệ thống VNPAY (vnp_TransactionNo nếu có)",
+                    "example": ""
+                  },
+                  "user": {
+                    "type": "string",
+                    "description": "Tên người thực hiện hoàn",
+                    "example": "TicketsCenter"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Kết quả xử lý hoàn tiền từ server VNPAY"
+          }
+        }
+      }
     }
   },
   "components": {

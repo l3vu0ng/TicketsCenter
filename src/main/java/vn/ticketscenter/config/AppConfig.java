@@ -58,6 +58,9 @@ public final class AppConfig {
         public static final String REFUND_STATE_DIRECTORY = "refund.simulated.state.directory";
         public static final String REFUND_SIMULATED_OUTCOME = "refund.simulated.outcome";
         public static final String REFUND_TIMEOUT_AFTER_SIDE_EFFECT = "refund.simulated.timeoutAfterSideEffect";
+        public static final String PAYOUT_STATE_DIRECTORY = "payout.simulated.state.directory";
+        public static final String PAYOUT_SIMULATED_OUTCOME = "payout.simulated.outcome";
+        public static final String PAYOUT_TIMEOUT_AFTER_SIDE_EFFECT = "payout.simulated.timeoutAfterSideEffect";
 
         // 3. Cổng Thanh Toán VNPAY Sandbox
         public static final String VNPAY_TMN_CODE = "vnpay.tmn.code";
@@ -71,6 +74,12 @@ public final class AppConfig {
         public static final String MAIL_PORT = "mail.smtp.port";
         public static final String MAIL_USER = "mail.smtp.user";
         public static final String MAIL_PASSWORD = "mail.smtp.password";
+
+        // 5. Cấu hình Redis (Idempotency & Caching)
+        public static final String REDIS_HOST = "redis.host";
+        public static final String REDIS_PORT = "redis.port";
+        public static final String REDIS_PASSWORD = "redis.password";
+        public static final String REDIS_TIMEOUT = "redis.timeout";
 
         private Keys() {
             // Không cho phép khởi tạo hằng số keys

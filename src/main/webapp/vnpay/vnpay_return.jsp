@@ -1,6 +1,6 @@
 <%@page import="java.net.URLEncoder"%>
 <%@page import="java.nio.charset.StandardCharsets"%>
-<%@page import="vn.ticketscenter.payment.service.Config"%>
+<%@page import="vn.ticketscenter.payment.service.PaymentService"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="java.util.Iterator"%>
 <%@page import="java.util.Collections"%>
@@ -42,7 +42,7 @@
             String vnp_SecureHash = request.getParameter("vnp_SecureHash");
             fields.remove("vnp_SecureHashType");
             fields.remove("vnp_SecureHash");
-            String signValue = Config.hashAllFields(fields);
+            String signValue = PaymentService.hashAllFields(fields);
 
             boolean isSignatureValid = signValue != null && signValue.equalsIgnoreCase(vnp_SecureHash);
             String responseCode = request.getParameter("vnp_ResponseCode");

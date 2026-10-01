@@ -75,3 +75,12 @@ mail.smtp.password=<your_smtp_password>
 refund.simulated.state.directory=data/refund-gateway
 refund.simulated.outcome=SUCCEEDED
 refund.simulated.timeoutAfterSideEffect=false
+payout.simulated.state.directory=data/payout-gateway
+payout.simulated.outcome=SUCCEEDED
+payout.simulated.timeoutAfterSideEffect=false
+
+# 5. Cấu hình Redis (Idempotency Key & Caching)
+redis.host=localhost
+redis.port=6379
+redis.password=
+redis.timeout=2000

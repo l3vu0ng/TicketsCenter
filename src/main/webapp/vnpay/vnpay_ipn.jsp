@@ -1,6 +1,6 @@
 <%@page import="java.net.URLEncoder"%>
 <%@page import="java.nio.charset.StandardCharsets"%>
-<%@page import="vn.ticketscenter.payment.service.Config"%>
+<%@page import="vn.ticketscenter.payment.service.PaymentService"%>
 <%@page contentType="application/json; charset=UTF-8"%>
 <%@page import="java.util.Enumeration"%>
 <%@page import="java.util.Map"%>
@@ -25,7 +25,7 @@
     fields.remove("vnp_SecureHashType");
     fields.remove("vnp_SecureHash");
 
-    String signValue = Config.hashAllFields(fields);
+    String signValue = PaymentService.hashAllFields(fields);
     if (signValue != null && signValue.equalsIgnoreCase(vnp_SecureHash)) {
         String txnRef = request.getParameter("vnp_TxnRef");
         String responseCode = request.getParameter("vnp_ResponseCode");

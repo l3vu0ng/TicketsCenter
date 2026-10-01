@@ -67,6 +67,10 @@ public final class PersistenceListener implements ServletContextListener {
         if (registry instanceof PersistenceRegistry persistenceRegistry) {
             persistenceRegistry.close();
         }
+        try {
+            vn.ticketscenter.config.redis.RedisClientProvider.getInstance().close();
+        } catch (Exception ignored) {
+        }
     }
 
     private static void runCancellation(EventCancellationJob job) {

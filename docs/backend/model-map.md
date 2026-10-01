@@ -26,7 +26,7 @@
 | 17 | `RefundRequest` | id, order, requester, reviewer?, reason, reasonType, status, requestedAt, decidedAt, rejectionReason; `approve()`, `reject()`, `complete()` | `tc_refund_requests` | D02–D03, D14–D16 |
 | 18 | `Refund` | id, request?, payment, purpose, amount, status, providerReference, createdAt, processedAt; `markSucceeded()`, `markFailed()`, `markUnknown()` | `tc_refunds` | D02–D03, D15–D16 |
 | 19 | `CommissionRule` | id, organization, ratePercent, fixedFee, effectiveFrom/effectiveTo; `calculateFee()` | `tc_commission_rules` | D02–D03, D06–D07, D17 |
-| 20 | `Settlement` | id, event, grossRevenue, totalRefund, totalCommission, netPayable, status, confirmedAt; `calculateTotals()`, `confirm()`, `markPaid()` | `tc_settlements` | D02–D03, D17 |
+| 20 | `Settlement` | id, event, grossRevenue, totalRefund, totalCommission, netPayable, status, confirmedAt; `recalculate()`, `confirm()`, `markPaid()` | `tc_settlements` | D02–D03, D17 |
 | 21 | `SettlementItem` | id, settlement, order, grossAmount, refundAmount, commissionAmount, netAmount; `validateAmounts()` | `tc_settlement_items` | D02–D03, D17 |
 | 22 | `Payout` | id, settlement, amount, reference, status, createdAt, paidAt; `markSucceeded()`, `markFailed()` | `tc_payouts` | D02–D03, D17 |
 | 23 | `AuditLog` | id, actorId?, action, aggregateType, aggregateId, detail, createdAt; append-only | `tc_audit_logs` | D02–D03, D06–D18 |
@@ -83,6 +83,8 @@ Các bảng `tc_otps`, `tc_coupon_redemptions`, `tc_refund_request_tickets`, `tc
 Ngày 16 không thêm domain entity: `EventCancellationJob` và ba view `vw_EventCancellationWork`, `vw_EventCancellationProgress`, `vw_EventCancellationExceptions` chỉ điều phối/trình chiếu trạng thái của Event, Hold, Order, Ticket, RefundRequest và Refund hiện có. SP13 sở hữu chuyển Event sang `CANCELLED`; SP17 điều phối SP07/SP10 cho từng Order.
 
 Ngày 15 không thêm domain entity: `SimulatedRefundGateway`, `RefundJob`, `vw_RefundWork` và `vw_FailedCompensationAttempts` là boundary kỹ thuật cho `Refund` hiện có. SP11 sở hữu kết quả và trả kho; adapter không sửa Ticket/Zone/Seat.
+
+Ngày 17 không thêm domain entity ngoài bốn lớp đã khóa. `SettlementRepository` gọi `usp_RecalculateSettlement`, `usp_ConfirmSettlement`, `usp_RecordPayout`, `fn_GetSettlementBlockers` và `vw_SettlementPayoutBalance`; `SimulatedPayoutGateway` chỉ mô phỏng external I/O và không sửa trực tiếp Settlement/Payout.
 
 ## 6. Quy ước mapping schema nền
 

@@ -134,6 +134,15 @@ Timeout sau commit không được diễn giải là thất bại. Caller đọc
 - `EventCancellationJob` đọc `vw_EventCancellationWork` theo `(eventId, workType, workId)`, gọi SP07 cho Hold không có Order và SP17 cho từng Order trong transaction riêng. Không lưu cursor trước commit; restart quét lại trạng thái còn thiếu và SP bảo đảm idempotency.
 - `vw_EventCancellationProgress` và `vw_EventCancellationExceptions` chỉ được cấp cho `tc_platform_admin`; `vw_EventCancellationWork` và cập nhật outbox chỉ cấp cho `tc_worker`. Không có endpoint public lộ buyer toàn hệ thống.
 
+### Đối soát và chi trả mô phỏng (Ngày 17)
+
+- `POST /api/admin/events/{eventId}/settlement/recalculate` gọi `dbo.usp_RecalculateSettlement`; số tiền trả về là chuỗi VND nguyên.
+- `GET /api/admin/events/{eventId}/settlement-blockers` đọc `dbo.fn_GetSettlementBlockers` để giải thích lý do chưa thể chốt.
+- `POST /api/admin/settlements/{settlementId}/confirm` gọi `dbo.usp_ConfirmSettlement`; gọi lại trả snapshot đã đóng băng.
+- `POST /api/admin/settlements/{settlementId}/payouts` chỉ nhận `{ "payoutId": "...", "amount": "179000" }`. Reference và outcome do adapter backend xác minh; browser không được gửi trạng thái.
+- `GET /api/admin/settlements/{settlementId}/payouts` đọc `dbo.vw_SettlementPayoutBalance`, tách `paidAmount`, `pendingAmount`, `remainingAmount` và `availableAmount`.
+- Tất cả endpoint trên yêu cầu platform ADMIN hiện hành. Timeout sau side effect trả `PAYOUT_RESULT_UNKNOWN`; retry cùng `payoutId` tra lại adapter và không tạo lần chi mới.
+
 ### Hoàn tiền và retry vận hành (Ngày 15)
 
 - `POST /api/admin/refund-requests/{requestId}/retry` và `POST /api/admin/payments/{paymentId}/compensation/retry` chỉ dành cho ADMIN, không nhận outcome provider từ body.

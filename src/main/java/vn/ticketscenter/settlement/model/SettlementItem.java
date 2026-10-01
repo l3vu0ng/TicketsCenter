@@ -37,4 +37,22 @@ public class SettlementItem {
     public java.util.UUID getId() {
         return id;
     }
+
+    public void validateAmounts() {
+        validateAmounts(grossAmount, refundAmount, commissionAmount, netAmount);
+    }
+
+    public static void validateAmounts(java.math.BigDecimal grossAmount,
+                                       java.math.BigDecimal refundAmount,
+                                       java.math.BigDecimal commissionAmount,
+                                       java.math.BigDecimal netAmount) {
+        if (grossAmount == null || refundAmount == null || commissionAmount == null || netAmount == null
+                || grossAmount.signum() < 0 || refundAmount.signum() < 0
+                || commissionAmount.signum() < 0 || netAmount.signum() < 0
+                || refundAmount.compareTo(grossAmount) > 0
+                || commissionAmount.compareTo(grossAmount.subtract(refundAmount)) > 0
+                || netAmount.compareTo(grossAmount.subtract(refundAmount).subtract(commissionAmount)) != 0) {
+            throw new IllegalArgumentException("settlement item amounts are inconsistent");
+        }
+    }
 }
