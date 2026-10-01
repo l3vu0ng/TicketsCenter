@@ -18,8 +18,9 @@ BEGIN TRY
     INSERT dbo.tc_organizations(id,name,contact_email) VALUES(@org,'Day 16 Org','day16@example.test');
     INSERT dbo.tc_event_categories(id,name,slug) VALUES(@category,'Day 16',CONCAT('day-16-',@category));
     INSERT dbo.tc_events(id,organization_id,category_id,title,venue_name,venue_address,sale_start,sale_end,start_time,end_time,status)
-    VALUES(@event,@org,@category,'Cancellation','Venue','Address',DATEADD(day,-1,@now),DATEADD(hour,1,@now),DATEADD(hour,2,@now),DATEADD(hour,3,@now),'PUBLISHED');
+    VALUES(@event,@org,@category,'Cancellation','Venue','Address',DATEADD(day,-1,@now),DATEADD(hour,1,@now),DATEADD(hour,2,@now),DATEADD(hour,3,@now),'DRAFT');
     INSERT dbo.tc_zones(id,event_id,name,type,price,capacity,sold_quantity) VALUES(@zone,@event,'Standing','STANDING',100,10,3);
+    UPDATE dbo.tc_events SET status='PUBLISHED' WHERE id=@event;
     INSERT dbo.tc_ticket_holds(id,user_id,event_id,status,expires_at) VALUES(@hold,@buyer,@event,'CONSUMED',DATEADD(minute,10,@now));
     INSERT dbo.tc_orders(id,user_id,event_id,hold_id,order_code,subtotal_amount,discount_amount,total_amount,status,paid_at)
     VALUES(@order,@buyer,@event,@hold,CONCAT('D16-',@order),300,0,300,'PAID',@now);
@@ -38,7 +39,7 @@ BEGIN TRY
     EXEC dbo.usp_CancelEvent @event,@admin;
     IF (SELECT status FROM dbo.tc_events WHERE id=@event)<>'CANCELLED' THROW 51960,'event was not cancelled',1;
     IF (SELECT COUNT(*) FROM dbo.tc_outbox WHERE idempotency_key=CONCAT('event-cancelled:',@event))<>1 THROW 51961,'cancellation work missing',1;
-    IF (SELECT COUNT(*) FROM dbo.tc_audit_logs WHERE aggregate_id=@event AND action='EVENT_STATUS_CHANGED')<>1 THROW 51962,'status audit missing',1;
+    IF (SELECT COUNT(*) FROM dbo.tc_audit_logs WHERE aggregate_id=@event AND action='EVENT_STATUS_CHANGED' AND detail LIKE '%"to":"CANCELLED"%')<>1 THROW 51962,'status audit missing',1;
     EXEC dbo.usp_CancelEvent @event,@admin;
     IF (SELECT COUNT(*) FROM dbo.tc_outbox WHERE idempotency_key=CONCAT('event-cancelled:',@event))<>1 THROW 51963,'repeat cancel duplicated work',1;
 
@@ -52,7 +53,8 @@ BEGIN TRY
     END CATCH;
 
     DECLARE @scan TABLE(result varchar(30),scanned_at datetime2(3),ticket_id uniqueidentifier);
-    INSERT @scan EXEC dbo.usp_CheckInTicket @event,@manager,CONCAT('D16-',@ticket2);
+    DECLARE @ticket2Code varchar(100)=CONCAT('D16-',@ticket2);
+    INSERT @scan EXEC dbo.usp_CheckInTicket @event,@manager,@ticket2Code;
     IF NOT EXISTS(SELECT 1 FROM @scan WHERE result='EVENT_CANCELLED') THROW 51965,'cancelled event accepted check-in',1;
 
     EXEC dbo.usp_ProcessCancelledOrder @event,@order;

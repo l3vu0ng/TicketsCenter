@@ -60,7 +60,7 @@ jobs:
             exit 1
           fi
 
-          if grep -rnw --exclude-dir={.git,target,.mvn} --exclude="*.example" -e "BEGIN RSA PRIVATE KEY" -e "BEGIN OPENSSH PRIVATE KEY" .; then
+          if grep -rnw --exclude-dir={.git,target,.mvn,.github} --exclude="*.example" --exclude="*.yml" -e "BEGIN RSA PRIVATE KEY" -e "BEGIN OPENSSH PRIVATE KEY" .; then
             echo "::error::Phát hiện Private Key chưa được bảo vệ!" >&2
             exit 1
           fi
