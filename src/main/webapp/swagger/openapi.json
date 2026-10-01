@@ -508,6 +508,12 @@
     "/api/admin/events/{eventId}/reject": {
       "post": {"tags": ["Events"], "summary": "Admin từ chối kèm lý do", "responses": {"200": {"description": "Đã từ chối"}}}
     },
+    "/api/admin/events/{eventId}/cancel": {
+      "post": {"tags": ["Events"], "summary": "Admin hủy sự kiện bằng SP13", "responses": {"200": {"description": "Đã hủy và tạo công việc xử lý"}, "403": {"description": "Cần ADMIN"}, "409": {"description": "Sự kiện đã bắt đầu hoặc sai trạng thái"}}}
+    },
+    "/api/admin/events/{eventId}/cancellation-progress": {
+      "get": {"tags": ["Events"], "summary": "Tiến độ hoàn do hủy sự kiện", "responses": {"200": {"description": "Số đơn pending/completed, nghĩa vụ hoàn và ngoại lệ"}, "403": {"description": "Cần ADMIN"}, "404": {"description": "Không tìm thấy sự kiện"}}}
+    },
     "/api/event-categories": {
       "get": {"tags": ["Events"], "summary": "Danh mục sự kiện", "responses": {"200": {"description": "Danh mục seed"}}}
     }

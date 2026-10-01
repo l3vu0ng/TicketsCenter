@@ -80,6 +80,8 @@ Không cascade-delete `Order`, `Payment`, `Ticket`, `Refund` hoặc `AuditLog` �
 
 Các bảng `tc_otps`, `tc_coupon_redemptions`, `tc_refund_request_tickets`, `tc_outbox`, session/role mapping và migration history là persistence kỹ thuật. Chúng không làm tăng số lớp nghiệp vụ. Repository/Service chỉ tạo khi use case cần; không tạo một bộ Controller–Service–Repository cho từng bảng.
 
+Ngày 16 không thêm domain entity: `EventCancellationJob` và ba view `vw_EventCancellationWork`, `vw_EventCancellationProgress`, `vw_EventCancellationExceptions` chỉ điều phối/trình chiếu trạng thái của Event, Hold, Order, Ticket, RefundRequest và Refund hiện có. SP13 sở hữu chuyển Event sang `CANCELLED`; SP17 điều phối SP07/SP10 cho từng Order.
+
 ## 6. Quy ước mapping schema nền
 
 - Tên vật lý của 23 entity là tên ở cột “Bảng dự kiến”; chi tiết cột/FK/nullability nằm trong [data dictionary](data-dictionary.md).

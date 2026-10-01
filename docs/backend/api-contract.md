@@ -127,6 +127,13 @@ Timeout sau commit không được diễn giải là thất bại. Caller đọc
 - Stored procedure khóa tồn kho, chuyển order `PAID`, hold `CONSUMED`, consume coupon, cập nhật `sold_quantity` và phân bổ tiền từng vé bằng `fn_AllocateTicketPaidAmounts`.
 - Mỗi vé dùng mã ngẫu nhiên 256-bit; chỉ hash SHA-256 lưu trong DB. `GET /api/me/tickets` trả vé của buyer; `GET /api/tickets/{ticketId}/qr` trả PNG QR, không trả secret hash.
 
+### Hủy sự kiện và tiến độ (Ngày 16)
+
+- `POST /api/admin/events/{eventId}/cancel` chỉ nhận `eventId` từ URL và actor từ session ADMIN; gọi `dbo.usp_CancelEvent`. Response trả snapshot tiến độ, không tuyên bố tiền đã hoàn.
+- `GET /api/admin/events/{eventId}/cancellation-progress` chỉ dành cho ADMIN. Response gồm `totalOrders`, `pendingOrders`, `completedOrders`, `exceptionCount`, `requestsCreated`, `refundsSucceeded`, `refundsPending` và danh sách ngoại lệ `USED_TICKET`/`REFUND_RESULT` với ID xử lý.
+- `EventCancellationJob` đọc `vw_EventCancellationWork` theo `(eventId, workType, workId)`, gọi SP07 cho Hold không có Order và SP17 cho từng Order trong transaction riêng. Không lưu cursor trước commit; restart quét lại trạng thái còn thiếu và SP bảo đảm idempotency.
+- `vw_EventCancellationProgress` và `vw_EventCancellationExceptions` chỉ được cấp cho `tc_platform_admin`; `vw_EventCancellationWork` và cập nhật outbox chỉ cấp cho `tc_worker`. Không có endpoint public lộ buyer toàn hệ thống.
+
 ### Đơn hàng và coupon (Ngày 09)
 
 - `POST /api/orders` nhận `{ "holdId": "..." }`; server gọi `dbo.usp_CreateOrderFromHold`, xác định buyer từ session và trả breakdown server-side.
