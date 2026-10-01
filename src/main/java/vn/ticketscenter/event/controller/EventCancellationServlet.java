@@ -1,7 +1,6 @@
 package vn.ticketscenter.event.controller;
 
 import jakarta.persistence.PersistenceException;
-import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -20,7 +19,6 @@ import java.util.Arrays;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
-@WebServlet(name = "EventCancellationServlet", urlPatterns = "/api/admin/events/*")
 public final class EventCancellationServlet extends HttpServlet {
     private final EventCancellationService service;
 
@@ -28,17 +26,25 @@ public final class EventCancellationServlet extends HttpServlet {
         service = null;
     }
 
-    EventCancellationServlet(EventCancellationService service) {
+    public EventCancellationServlet(EventCancellationService service) {
         this.service = service;
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        handle(request, response, true);
+        handlePost(request, response);
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        handleGet(request, response);
+    }
+
+    public void handlePost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        handle(request, response, true);
+    }
+
+    public void handleGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         handle(request, response, false);
     }
 
@@ -51,12 +57,13 @@ public final class EventCancellationServlet extends HttpServlet {
             String[] parts = Arrays.stream(request.getPathInfo() == null ? new String[0]
                             : request.getPathInfo().split("/"))
                     .filter(part -> !part.isBlank()).toArray(String[]::new);
-            if (parts.length != 2 || mutation != "cancel".equals(parts[1])
-                    || !mutation && !"cancellation-progress".equals(parts[1])) {
+            int offset = parts.length == 3 && "events".equals(parts[0]) ? 1 : 0;
+            if (parts.length - offset != 2 || mutation != "cancel".equals(parts[offset + 1])
+                    || !mutation && !"cancellation-progress".equals(parts[offset + 1])) {
                 HttpResponses.error(response, 404, "NOT_FOUND", "Endpoint hủy sự kiện không tồn tại");
                 return;
             }
-            UUID eventId = uuid(parts[0]);
+            UUID eventId = uuid(parts[offset]);
             CancellationProgress progress = mutation
                     ? cancellationService.cancel(account, eventId)
                     : cancellationService.progress(account, eventId);

@@ -31,6 +31,10 @@
     {
       "name": "Events",
       "description": "Bản nháp, khu/ghế, ảnh bìa, duyệt và catalog công khai"
+    },
+    {
+      "name": "Refunds",
+      "description": "Retry vận hành; kết quả provider không nhận từ browser"
     }
   ],
   "paths": {
@@ -567,6 +571,20 @@
     },
     "/api/admin/events/{eventId}/cancellation-progress": {
       "get": {"tags": ["Events"], "summary": "Tiến độ hoàn do hủy sự kiện", "responses": {"200": {"description": "Số đơn pending/completed, nghĩa vụ hoàn và ngoại lệ USED/FAILED/UNKNOWN"}, "403": {"description": "Cần ADMIN"}, "404": {"description": "Không tìm thấy sự kiện"}}}
+    },
+    "/api/admin/refund-requests/{requestId}/retry": {
+      "post": {
+        "tags": ["Refunds"], "summary": "Tạo attempt mới sau CUSTOMER_REFUND đã FAILED",
+        "parameters": [{"in": "path", "name": "requestId", "required": true, "schema": {"type": "string", "format": "uuid"}}],
+        "responses": {"200": {"description": "Attempt PENDING đã được tạo"}, "403": {"description": "Cần ADMIN"}, "409": {"description": "Không đủ điều kiện retry"}}
+      }
+    },
+    "/api/admin/payments/{paymentId}/compensation/retry": {
+      "post": {
+        "tags": ["Refunds"], "summary": "Tạo attempt mới sau PAYMENT_COMPENSATION đã FAILED",
+        "parameters": [{"in": "path", "name": "paymentId", "required": true, "schema": {"type": "string", "format": "uuid"}}],
+        "responses": {"200": {"description": "Attempt PENDING đã được tạo"}, "403": {"description": "Cần ADMIN"}, "409": {"description": "Không đủ điều kiện retry"}}
+      }
     },
     "/api/event-categories": {
       "get": {"tags": ["Events"], "summary": "Danh mục sự kiện", "responses": {"200": {"description": "Danh mục seed"}}}

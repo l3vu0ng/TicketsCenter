@@ -1,6 +1,6 @@
 package vn.ticketscenter.payment.controller;
 
-import vn.ticketscenter.payment.service.Config;
+import vn.ticketscenter.payment.service.PaymentService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -24,10 +24,10 @@ public class vnpayRefund extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String vnp_RequestId = Config.getRandomNumber(8);
+        String vnp_RequestId = PaymentService.getRandomNumber(8);
         String vnp_Version = "2.1.0";
         String vnp_Command = "refund";
-        String vnp_TmnCode = Config.getTmnCode();
+        String vnp_TmnCode = PaymentService.getTmnCode();
         String vnp_TransactionType = req.getParameter("trantype");
         if (vnp_TransactionType == null || vnp_TransactionType.isBlank()) {
             vnp_TransactionType = "02";
@@ -63,13 +63,13 @@ public class vnpayRefund extends HttpServlet {
         Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
         String vnp_CreateDate = formatter.format(cld.getTime());
-        String vnp_IpAddr = Config.getIpAddress(req);
+        String vnp_IpAddr = PaymentService.getIpAddress(req);
 
         String hashData = String.join("|", vnp_RequestId, vnp_Version, vnp_Command, vnp_TmnCode,
                 vnp_TransactionType, vnp_TxnRef, vnp_Amount, vnp_TransactionNo, vnp_TransactionDate,
                 vnp_CreateBy, vnp_CreateDate, vnp_IpAddr, vnp_OrderInfo);
 
-        String vnp_SecureHash = Config.hmacSHA512(Config.getSecretKey(), hashData);
+        String vnp_SecureHash = PaymentService.hmacSHA512(PaymentService.getSecretKey(), hashData);
 
         String jsonPayload = String.format(
                 "{\"vnp_RequestId\":\"%s\",\"vnp_Version\":\"%s\",\"vnp_Command\":\"%s\",\"vnp_TmnCode\":\"%s\"," +
@@ -82,7 +82,7 @@ public class vnpayRefund extends HttpServlet {
                 vnp_CreateDate, vnp_IpAddr, vnp_SecureHash
         );
 
-        URL url = URI.create(Config.getApiUrl()).toURL();
+        URL url = URI.create(PaymentService.getApiUrl()).toURL();
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("POST");
         con.setRequestProperty("Content-Type", "application/json");

@@ -1,6 +1,6 @@
 package vn.ticketscenter.payment.controller;
 
-import vn.ticketscenter.payment.service.Config;
+import vn.ticketscenter.payment.service.PaymentService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -39,9 +39,9 @@ public class ajaxServlet extends HttpServlet {
         }
 
         String bankCode = req.getParameter("bankCode");
-        String vnp_TxnRef = Config.getRandomNumber(8);
-        String vnp_IpAddr = Config.getIpAddress(req);
-        String vnp_TmnCode = Config.getTmnCode();
+        String vnp_TxnRef = PaymentService.getRandomNumber(8);
+        String vnp_IpAddr = PaymentService.getIpAddress(req);
+        String vnp_TmnCode = PaymentService.getTmnCode();
 
         Map<String, String> vnp_Params = new HashMap<>();
         vnp_Params.put("vnp_Version", vnp_Version);
@@ -66,7 +66,7 @@ public class ajaxServlet extends HttpServlet {
 
         String returnUrl = req.getParameter("returnUrl");
         if (returnUrl == null || returnUrl.isBlank()) {
-            returnUrl = Config.getReturnUrl();
+            returnUrl = PaymentService.getReturnUrl();
         }
         if (returnUrl == null || returnUrl.isBlank()) {
             returnUrl = req.getScheme() + "://" + req.getServerName() + ":" + req.getServerPort() + req.getContextPath() + "/vnpay/vnpay_return.jsp";
@@ -107,9 +107,9 @@ public class ajaxServlet extends HttpServlet {
             }
         }
         String queryUrl = query.toString();
-        String vnp_SecureHash = Config.hmacSHA512(Config.getSecretKey(), hashData.toString());
+        String vnp_SecureHash = PaymentService.hmacSHA512(PaymentService.getSecretKey(), hashData.toString());
         queryUrl += "&vnp_SecureHash=" + vnp_SecureHash;
-        String paymentUrl = Config.getPayUrl() + "?" + queryUrl;
+        String paymentUrl = PaymentService.getPayUrl() + "?" + queryUrl;
 
         resp.setContentType("application/json;charset=UTF-8");
         resp.getWriter().write("{\"code\":\"00\",\"message\":\"success\",\"data\":\"" + paymentUrl + "\"}");

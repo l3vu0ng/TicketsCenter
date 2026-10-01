@@ -134,6 +134,12 @@ Timeout sau commit không được diễn giải là thất bại. Caller đọc
 - `EventCancellationJob` đọc `vw_EventCancellationWork` theo `(eventId, workType, workId)`, gọi SP07 cho Hold không có Order và SP17 cho từng Order trong transaction riêng. Không lưu cursor trước commit; restart quét lại trạng thái còn thiếu và SP bảo đảm idempotency.
 - `vw_EventCancellationProgress` và `vw_EventCancellationExceptions` chỉ được cấp cho `tc_platform_admin`; `vw_EventCancellationWork` và cập nhật outbox chỉ cấp cho `tc_worker`. Không có endpoint public lộ buyer toàn hệ thống.
 
+### Hoàn tiền và retry vận hành (Ngày 15)
+
+- `POST /api/admin/refund-requests/{requestId}/retry` và `POST /api/admin/payments/{paymentId}/compensation/retry` chỉ dành cho ADMIN, không nhận outcome provider từ body.
+- CUSTOMER_REFUND retry gọi SP10 với `retry_failed=1`; compensation retry gọi SP09 bằng worker với `retry_failed_compensation=1`. Chỉ attempt `FAILED` được tạo lại; lịch sử cũ giữ nguyên.
+- `RefundJob` submit/query adapter ngoài transaction rồi gọi SP11 bằng `tc_worker`; `UNKNOWN` có reference được query, timeout không tự biến thành `FAILED`.
+
 ### Đơn hàng và coupon (Ngày 09)
 
 - `POST /api/orders` nhận `{ "holdId": "..." }`; server gọi `dbo.usp_CreateOrderFromHold`, xác định buyer từ session và trả breakdown server-side.

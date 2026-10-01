@@ -18,7 +18,7 @@ import java.util.Random;
 /**
  * Cấu hình và tiện ích tích hợp Cổng thanh toán VNPAY Sandbox cho TicketsCenter.
  */
-public class Config {
+public class PaymentService {
 
     public static String vnp_PayUrl = VnPayConfig.getPayUrl();
     public static String vnp_ReturnUrl = VnPayConfig.getReturnUrl();

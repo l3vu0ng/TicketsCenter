@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("ModularConfig Unit Test — Kiểm tra các cấu hình Server, VnPay và Mail riêng biệt")
-public class ModularConfigTest {
+public class ModularPaymentServiceTest {
 
     @Test
     @DisplayName("ServerConfig nạp chính xác cấu hình máy chủ web")

@@ -82,6 +82,8 @@ Các bảng `tc_otps`, `tc_coupon_redemptions`, `tc_refund_request_tickets`, `tc
 
 Ngày 16 không thêm domain entity: `EventCancellationJob` và ba view `vw_EventCancellationWork`, `vw_EventCancellationProgress`, `vw_EventCancellationExceptions` chỉ điều phối/trình chiếu trạng thái của Event, Hold, Order, Ticket, RefundRequest và Refund hiện có. SP13 sở hữu chuyển Event sang `CANCELLED`; SP17 điều phối SP07/SP10 cho từng Order.
 
+Ngày 15 không thêm domain entity: `SimulatedRefundGateway`, `RefundJob`, `vw_RefundWork` và `vw_FailedCompensationAttempts` là boundary kỹ thuật cho `Refund` hiện có. SP11 sở hữu kết quả và trả kho; adapter không sửa Ticket/Zone/Seat.
+
 ## 6. Quy ước mapping schema nền
 
 - Tên vật lý của 23 entity là tên ở cột “Bảng dự kiến”; chi tiết cột/FK/nullability nằm trong [data dictionary](data-dictionary.md).

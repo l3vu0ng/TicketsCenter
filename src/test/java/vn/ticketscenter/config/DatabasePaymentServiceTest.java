@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("DatabaseConfig Unit Test — Kiểm tra cấu hình Database tách biệt")
-public class DatabaseConfigTest {
+public class DatabasePaymentServiceTest {
 
     @Test
     @DisplayName("DatabaseConfig cung cấp đầy đủ thông số kết nối strongly-typed")

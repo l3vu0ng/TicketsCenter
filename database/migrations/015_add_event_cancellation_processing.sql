@@ -212,4 +212,6 @@ END;
 GRANT SELECT ON dbo.vw_EventCancellationProgress TO tc_platform_admin;
 GRANT SELECT ON dbo.vw_EventCancellationExceptions TO tc_platform_admin;
 GRANT SELECT ON dbo.vw_EventCancellationWork TO tc_worker;
-GRANT SELECT, UPDATE ON dbo.tc_outbox TO tc_worker;
+GRANT SELECT ON dbo.tc_outbox TO tc_worker;
+GRANT UPDATE (status, published_at, lease_owner, lease_until, attempts, available_at)
+ON OBJECT::dbo.tc_outbox TO tc_worker;

@@ -71,3 +71,7 @@ mail.smtp.host=smtp.gmail.com
 mail.smtp.port=587
 mail.smtp.user=no-reply@ticketscenter.vn
 mail.smtp.password=<your_smtp_password>
+# Simulated refund provider; never expose these controls through buyer requests.
+refund.simulated.state.directory=data/refund-gateway
+refund.simulated.outcome=SUCCEEDED
+refund.simulated.timeoutAfterSideEffect=false

@@ -15,7 +15,10 @@ import vn.ticketscenter.identity.service.AuthorizationService;
 import vn.ticketscenter.config.persistence.TransactionManager;
 import vn.ticketscenter.config.web.JsonObjectParser;
 import vn.ticketscenter.event.repository.EventRepository;
+import vn.ticketscenter.event.repository.EventCancellationRepository;
+import vn.ticketscenter.event.controller.EventCancellationServlet;
 import vn.ticketscenter.event.service.EventService;
+import vn.ticketscenter.event.service.EventCancellationService;
 
 import java.io.IOException;
 import java.util.Map;
@@ -57,6 +60,13 @@ public class AdminServlet extends HttpServlet {
         if (service == null) return;
 
         String pathInfo = req.getPathInfo();
+        String[] parts = pathInfo == null ? new String[0] : java.util.Arrays.stream(pathInfo.split("/"))
+                .filter(part -> !part.isBlank()).toArray(String[]::new);
+        if (parts.length == 3 && "events".equals(parts[0]) && "cancellation-progress".equals(parts[2])) {
+            EventCancellationServlet cancellation = resolveCancellationServlet(req, resp);
+            if (cancellation != null) cancellation.handleGet(req, resp);
+            return;
+        }
         if ("/dashboard".equals(pathInfo) || pathInfo == null || "/".equals(pathInfo)) {
             AdminDashboardSummary summary = service.getDashboardSummary(accountOpt.get());
             String json = "{\"totalUsers\":" + summary.totalUsers()
@@ -91,6 +101,11 @@ public class AdminServlet extends HttpServlet {
         String pathInfo = req.getPathInfo();
         String[] parts = pathInfo == null ? new String[0] : java.util.Arrays.stream(pathInfo.split("/"))
                 .filter(part -> !part.isBlank()).toArray(String[]::new);
+        if (parts.length == 3 && "events".equals(parts[0]) && "cancel".equals(parts[2])) {
+            EventCancellationServlet cancellation = resolveCancellationServlet(req, resp);
+            if (cancellation != null) cancellation.handlePost(req, resp);
+            return;
+        }
         if (parts.length == 3 && "events".equals(parts[0])) {
             try {
                 UUID eventId = UUID.fromString(parts[1]);
@@ -166,6 +181,18 @@ public class AdminServlet extends HttpServlet {
         }
         HttpResponses.error(resp, HttpServletResponse.SC_SERVICE_UNAVAILABLE,
                 "DEPENDENCY_UNAVAILABLE", "Event service is temporarily unavailable");
+        return null;
+    }
+
+    private EventCancellationServlet resolveCancellationServlet(HttpServletRequest req,
+                                                                HttpServletResponse resp) throws IOException {
+        Object configured = req.getServletContext().getAttribute(PersistenceListener.REGISTRY_ATTRIBUTE);
+        if (configured instanceof PersistenceRegistry registry) {
+            return new EventCancellationServlet(new EventCancellationService(
+                    registry.transactionManager(), new EventCancellationRepository()));
+        }
+        HttpResponses.error(resp, HttpServletResponse.SC_SERVICE_UNAVAILABLE,
+                "DEPENDENCY_UNAVAILABLE", "Event cancellation service is temporarily unavailable");
         return null;
     }
 

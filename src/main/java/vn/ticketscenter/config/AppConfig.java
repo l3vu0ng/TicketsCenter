@@ -55,6 +55,9 @@ public final class AppConfig {
         public static final String APP_ENV = "app.env";
         public static final String APP_SECRET_KEY = "app.secret.key";
         public static final String EVENT_IMAGE_DIRECTORY = "event.image.directory";
+        public static final String REFUND_STATE_DIRECTORY = "refund.simulated.state.directory";
+        public static final String REFUND_SIMULATED_OUTCOME = "refund.simulated.outcome";
+        public static final String REFUND_TIMEOUT_AFTER_SIDE_EFFECT = "refund.simulated.timeoutAfterSideEffect";
 
         // 3. Cổng Thanh Toán VNPAY Sandbox
         public static final String VNPAY_TMN_CODE = "vnpay.tmn.code";

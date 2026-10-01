@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("AppConfig Unit Test — Kiểm tra nạp cấu hình từ application.properties")
-public class AppConfigTest {
+public class AppPaymentServiceTest {
 
     @Test
     @DisplayName("AppConfig nạp thành công các thuộc tính từ application.properties")

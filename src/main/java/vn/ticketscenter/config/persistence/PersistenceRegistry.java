@@ -47,6 +47,10 @@ public final class PersistenceRegistry implements AutoCloseable {
         return new TransactionManager(factories);
     }
 
+    public boolean hasPrincipal(DatabasePrincipal principal) {
+        return factories.containsKey(principal);
+    }
+
     public boolean isReady() {
         if (factories.isEmpty()) return false;
         try {
