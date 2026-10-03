@@ -1,6 +1,10 @@
 const fs = require('fs');
 const path = require('path');
 
+const webappDir = path.resolve(__dirname, '../../src/main/webapp');
+const pagesDir = path.join(webappDir, 'pages');
+const framesDir = path.join(pagesDir, 'frames');
+
 const mappings = [
   { root: 'index.html', frame: 'UI-01-danh-sach-su-kien.html' },
   { root: 'event-detail.html', frame: 'UI-02-chi-tiet-chon-ve.html' },
@@ -30,16 +34,18 @@ const mappings = [
 
 let synced = 0;
 for (const m of mappings) {
-  const rootPath = path.join(__dirname, m.root);
+  const rootPath = m.root === 'index.html'
+    ? path.join(webappDir, m.root)
+    : path.join(pagesDir, m.root);
   if (fs.existsSync(rootPath)) {
     let content = fs.readFileSync(rootPath, 'utf8');
     // adjust relative css path for frames subdir
-    content = content.split('href="css/style.css"').join('href="../css/style.css"');
+    content = content.replace(/href="(?:\.\.\/)?assets\/css\/style\.css"/, 'href="../../assets/css/style.css"');
     // adjust links in frames so they navigate between frames
     for (const linkMap of mappings) {
       content = content.split(`href="${linkMap.root}"`).join(`href="${linkMap.frame}"`);
     }
-    const framePath = path.join(__dirname, 'frames', m.frame);
+    const framePath = path.join(framesDir, m.frame);
     fs.writeFileSync(framePath, content, 'utf8');
     synced++;
   }

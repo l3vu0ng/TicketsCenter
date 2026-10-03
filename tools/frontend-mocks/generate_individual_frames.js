@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const indexHtml = fs.readFileSync('prototype/index.html', 'utf8');
+const indexHtml = fs.readFileSync(path.resolve(__dirname, '../../src/main/webapp/index.html'), 'utf8');
 
 const frameDefs = [
   { id: 'ui-01', name: 'UI-01-danh-sach-su-kien', title: 'UI-01: Danh sách và tìm kiếm sự kiện' },
@@ -62,7 +62,7 @@ for (const def of frameDefs) {
   <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
   <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
   <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
-  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../../assets/css/style.css">
 </head>
 <body class="bg-slate-50 text-slate-900 antialiased min-h-screen flex flex-col">
   <!-- Top Navigation -->
@@ -87,8 +87,8 @@ for (const def of frameDefs) {
     TicketsCenter • ${def.title}
   </footer>
 
-  <script src="../js/data.js"></script>
-  <script src="../js/app.js"></script>
+  <script src="../../assets/js/data.js"></script>
+  <script src="../../assets/js/app.js"></script>
 </body>
 </html>`;
 
@@ -98,4 +98,4 @@ for (const def of frameDefs) {
   }
 }
 
-console.log(`Generated all ${frameDefs.length} standalone frame HTML files in prototype/frames/!`);
+console.log(`Generated all ${frameDefs.length} standalone frame HTML files in src/main/webapp/pages/frames/!`);

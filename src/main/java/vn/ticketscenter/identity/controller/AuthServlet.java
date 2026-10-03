@@ -16,6 +16,7 @@ import vn.ticketscenter.config.web.JsonObjectParser;
 
 import java.io.IOException;
 import java.time.Clock;
+import java.util.HashMap;
 import java.util.Map;
 
 @WebServlet(name = "AuthServlet", urlPatterns = {
@@ -68,16 +69,19 @@ public final class AuthServlet extends HttpServlet {
                 return;
             }
             if (path.endsWith("/auth/login")) {
-                String email = body.get("email");
-                limiter.checkLogin(email, clientIp);
-                var account = accounts.authenticate(email, body.get("password")).orElse(null);
+                String identifier = body.get("identifier");
+                if (identifier == null || identifier.isBlank()) {
+                    identifier = body.get("email");
+                }
+                limiter.checkLogin(identifier, clientIp);
+                var account = accounts.authenticate(identifier, body.get("password")).orElse(null);
                 if (account == null) {
-                    limiter.recordLoginFailure(email, clientIp);
+                    limiter.recordLoginFailure(identifier, clientIp);
                     HttpResponses.error(response, HttpServletResponse.SC_UNAUTHORIZED,
                             "INVALID_CREDENTIALS", "Email or password is invalid");
                     return;
                 }
-                limiter.recordLoginSuccess(email, clientIp);
+                limiter.recordLoginSuccess(identifier, clientIp);
                 sessions.login(request, account.id(), account.authVersion());
                 HttpResponses.data(response, "{\"authenticated\":true}");
                 return;
@@ -109,8 +113,16 @@ public final class AuthServlet extends HttpServlet {
     }
 
     private Map<String, String> credentials(HttpServletRequest request) throws IOException {
-        if (request.getContentType().startsWith("application/x-www-form-urlencoded")) {
-            return Map.of("email", value(request.getParameter("email")), "password", value(request.getParameter("password")));
+        String contentType = request.getContentType();
+        if (contentType != null && contentType.startsWith("application/x-www-form-urlencoded")) {
+            Map<String, String> map = new HashMap<>();
+            String email = request.getParameter("email");
+            String identifier = request.getParameter("identifier");
+            String password = request.getParameter("password");
+            if (email != null) map.put("email", email);
+            if (identifier != null) map.put("identifier", identifier);
+            if (password != null) map.put("password", password);
+            return map;
         }
         return JsonObjectParser.parse(request.getReader());
     }

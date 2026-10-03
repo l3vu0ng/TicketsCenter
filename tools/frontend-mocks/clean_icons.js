@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const rootDir = __dirname;
+const rootDir = path.resolve(__dirname, '../../src/main/webapp/pages');
 
 // 1. Clean organizer-events.html
 let orgEvents = fs.readFileSync(path.join(rootDir, 'organizer-events.html'), 'utf8');

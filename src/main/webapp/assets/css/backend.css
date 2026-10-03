@@ -1,0 +1,79 @@
+:root {
+    --tc-primary: #4f46e5;
+    --tc-primary-rgb: 79, 70, 229;
+    --tc-accent: #0284c7;
+    --tc-bg: #f8fafc;
+    --tc-surface: #ffffff;
+    --tc-border: #e2e8f0;
+    --tc-text: #0f172a;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--tc-bg);
+    color: var(--tc-text);
+    font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.navbar-brand-badge {
+    background: linear-gradient(135deg, var(--tc-primary), var(--tc-accent));
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+}
+
+.hero-section {
+    padding: 4.5rem 0 3.5rem;
+    background: radial-gradient(circle at 50% 0, rgba(79, 70, 229, 0.08), transparent 65%);
+}
+
+.hero-copy {
+    max-width: 700px;
+}
+
+.card-custom {
+    background: var(--tc-surface);
+    border: 1px solid var(--tc-border);
+    border-radius: 1rem;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+    transition: transform 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
+}
+
+.card-custom:hover {
+    transform: translateY(-3px);
+    border-color: rgba(var(--tc-primary-rgb), 0.3);
+    box-shadow: 0 12px 24px -6px rgba(var(--tc-primary-rgb), 0.1);
+}
+
+.pulse-indicator {
+    width: 10px;
+    height: 10px;
+    display: inline-block;
+    border-radius: 50%;
+    background: #16a34a;
+    animation: pulse-green 2s infinite;
+}
+
+.status-badge {
+    padding: 0.4rem 0.8rem;
+    border-radius: 2rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+@keyframes pulse-green {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.35); }
+    70% { box-shadow: 0 0 0 8px rgba(22, 163, 74, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .card-custom,
+    .pulse-indicator {
+        transition: none;
+        animation: none;
+    }
+}

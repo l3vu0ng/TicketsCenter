@@ -28,8 +28,8 @@
 
 | Mã màn hình | Tên màn hình trong SPEC.md | File HTML độc lập | Tính năng chính |
 |---|---|---|---|
-| **UI-01** | Danh sách & Tìm kiếm sự kiện | [`index.html`](index.html) | Bố cục 1:1 với ảnh mẫu CTicket, bộ lọc danh mục, Hero banner, thẻ sự kiện |
-| **UI-02** | Chi tiết sự kiện & Chọn vé | [`frames/UI-02-chi-tiet-chon-ve.html`](frames/UI-02-chi-tiet-chon-ve.html) | Sơ đồ rạp hát thực tế (Stage, Hàng A-B VIP, C-D Thường, Khu đứng GA, giỏ vé cố định) |
+| **UI-01** | Danh sách & Tìm kiếm sự kiện | [`src/main/webapp/index.html`](../src/main/webapp/index.html) | Bố cục 1:1 với ảnh mẫu CTicket, bộ lọc danh mục, Hero banner, thẻ sự kiện |
+| **UI-02** | Chi tiết sự kiện & Chọn vé | [`src/main/webapp/pages/frames/UI-02-chi-tiet-chon-ve.html`](../src/main/webapp/pages/frames/UI-02-chi-tiet-chon-ve.html) | Sơ đồ rạp hát thực tế (Stage, Hàng A-B VIP, C-D Thường, Khu đứng GA, giỏ vé cố định) |
 | **UI-03** | Đăng ký, Đăng nhập, OTP 6 số | [`frames/UI-03-dang-nhap-otp.html`](frames/UI-03-dang-nhap-otp.html) | Form xác thực tối giản, 6 ô số OTP, đếm lùi 60s, giới hạn 5 lần sai |
 | **UI-04** | Lượt giữ vé & Thanh toán | [`frames/UI-04-giu-ve-thanh-toan.html`](frames/UI-04-giu-ve-thanh-toan.html) | Đồng hồ đếm ngược 10 phút, kiểm tra coupon &le; 30% trần, cổng VNPAY / đơn 0đ |
 | **UI-05** | Kết quả thanh toán VNPAY | [`frames/UI-05-ket-qua-thanh-toan.html`](frames/UI-05-ket-qua-thanh-toan.html) | Hóa đơn giao dịch điện tử, trạng thái CAPTURED, UNKNOWN, bù trừ |
@@ -58,7 +58,7 @@
 ## 3. Cách xem và trải nghiệm
 
 1. **Xem trực tiếp trên trình duyệt**:
-   Mở file [`prototype/index.html`](index.html) bằng bất kỳ trình duyệt nào (Chrome, Edge, Firefox, Safari).
+   Mở `/index.html` của WAR sau khi chạy ứng dụng bằng bất kỳ trình duyệt nào (Chrome, Edge, Firefox, Safari). Landing backend được giữ tại `/backend/`.
 2. **Khám phá tự nhiên như người dùng thật**:
    - Nhấp vào thẻ sự kiện bất kỳ (ví dụ: *Bảo tàng Phụ nữ Việt Nam*) để vào màn hình **UI-02** (chọn ghế).
    - Chọn ghế VIP hoặc vé đứng -> bấm *"Tiến hành giữ vé & Thanh toán"* để sang màn hình **UI-04**.

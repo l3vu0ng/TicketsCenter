@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex">
+    <title>Không có quyền truy cập — TicketsCenter</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/error.css">
+</head>
+<body class="error-page">
+    <nav class="navbar-custom" aria-label="Điều hướng chính">
+        <div class="container d-flex align-items-center justify-content-between">
+            <a class="navbar-brand-custom" href="../index.html">TicketsCenter</a>
+            <span class="status-pill status-red">Lỗi 403</span>
+        </div>
+    </nav>
+
+    <main class="error-main">
+        <div class="container error-layout">
+            <section aria-labelledby="error-title">
+                <p class="error-kicker">Khu vực giới hạn quyền</p>
+                <h1 id="error-title" class="error-title">Bạn chưa được cấp quyền vào trang này.</h1>
+                <p class="error-description">
+                    Nội dung này chỉ dành cho tài khoản hoặc vai trò được cho phép. Nếu bạn cho rằng đây là nhầm lẫn, hãy đăng nhập bằng tài khoản phù hợp.
+                </p>
+                <div class="error-actions">
+                    <a class="btn-primary-custom" href="../pages/auth.html">Đăng nhập</a>
+                    <a class="btn-outline-custom" href="../index.html">Về trang chủ</a>
+                </div>
+            </section>
+
+            <aside class="error-panel" aria-label="Thông tin quyền truy cập">
+                <div class="error-panel-label">TicketsCenter / access</div>
+                <h2>Quyền truy cập bị từ chối</h2>
+                <p>Phiên đăng nhập hiện tại không có quyền xem tài nguyên này. Hệ thống không tiết lộ thêm dữ liệu của khu vực bảo vệ.</p>
+                <div class="error-meta">
+                    <span>status <strong>403 FORBIDDEN</strong></span>
+                    <span>action <strong>SIGN_IN_REQUIRED</strong></span>
+                </div>
+            </aside>
+        </div>
+    </main>
+</body>
+</html>

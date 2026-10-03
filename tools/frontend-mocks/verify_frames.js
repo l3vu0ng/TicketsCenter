@@ -29,14 +29,17 @@ const frames = [
 ];
 
 let errors = 0;
-const rootDir = path.join(__dirname);
-const framesDir = path.join(__dirname, 'frames');
-const indexHtml = fs.readFileSync(path.join(rootDir, 'index.html'), 'utf8');
+const webappDir = path.resolve(__dirname, '../../src/main/webapp');
+const rootDir = path.join(webappDir, 'pages');
+const framesDir = path.join(rootDir, 'frames');
+const indexHtml = fs.readFileSync(path.join(webappDir, 'index.html'), 'utf8');
 
 console.log('--- VERIFYING 24 FRAMES ARCHITECTURE ---');
 
 frames.forEach(f => {
-  const rootPath = path.join(rootDir, f.file);
+  const rootPath = f.id === 'UI-01'
+    ? path.join(webappDir, 'index.html')
+    : path.join(rootDir, f.file);
   if (!fs.existsSync(rootPath) || fs.statSync(rootPath).size < 100) {
     console.error(`[FAIL] Root file missing or empty: ${f.file}`);
     errors++;
@@ -46,7 +49,7 @@ frames.forEach(f => {
   const framePattern = new RegExp(`^${f.id}-.*\\.html$`, 'i');
   const frameFiles = fs.readdirSync(framesDir).filter(name => framePattern.test(name));
   if (frameFiles.length === 0) {
-    console.error(`[FAIL] Individual frame missing for ${f.id} in prototype/frames/`);
+    console.error(`[FAIL] Individual frame missing for ${f.id} in src/main/webapp/pages/frames/`);
     errors++;
   }
 

@@ -28,6 +28,26 @@
     box-sizing: border-box;
 }
 
+html {
+    scroll-behavior: smooth;
+}
+
+:focus-visible {
+    outline: 3px solid rgba(229, 9, 20, 0.35);
+    outline-offset: 3px;
+}
+
+.ticket-icon-button {
+    width: 42px;
+    height: 40px;
+}
+
+.carousel-control-icon {
+    width: 24px;
+    height: 24px;
+    filter: invert(1) grayscale(100%);
+}
+
 body {
     font-family: var(--font-main);
     background-color: var(--white);
