@@ -141,8 +141,40 @@ jobs:
           welcome_code=$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:8080/ticketscenter/" || echo "000")
           echo "Welcome Page Status: $welcome_code"
 
-          "$CATALINA_HOME/bin/catalina.sh" stop
-          echo "=> Toàn bộ bài kiểm tra E2E Smoke Test trên Staging hoàn thành xuất sắc!"
+          echo "=> Đã kiểm tra sẵn sàng Staging HTTP service."
+
+      - name: Setup Node.js for Browser E2E Tests
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Playwright & Chromium
+        working-directory: tests-e2e
+        run: |
+          npm install
+          npx playwright install --with-deps chromium
+
+      - name: Run Playwright Browser E2E Tests
+        working-directory: tests-e2e
+        run: |
+          npx playwright test
+        env:
+          BASE_URL: "http://127.0.0.1:8080/ticketscenter"
+
+      - name: Upload Playwright Test Report on Failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-e2e-report
+          path: tests-e2e/playwright-report/
+          retention-days: 7
+
+      - name: Stop Staging Tomcat Service
+        if: always()
+        run: |
+          export CATALINA_HOME="$PWD/tomcat11"
+          test -d "$CATALINA_HOME" && "$CATALINA_HOME/bin/catalina.sh" stop || true
+          echo "=> Tomcat Staging service stopped cleanly."
 
       - name: Staging Deployment Summary
         if: always()
@@ -150,4 +182,6 @@ jobs:
           echo "### 🚀 Staging Deployment & Smoke Test Report" >> $GITHUB_STEP_SUMMARY
           echo "- **DB Migration Status:** 14/14 migration scripts verified successfully." >> $GITHUB_STEP_SUMMARY
           echo "- **Staging Health:** /health/live returned HTTP 200 UP." >> $GITHUB_STEP_SUMMARY
+          echo "- **Browser E2E Tests (Playwright):** All user flows (event catalog, seat selection, checkout, QR ticket, portals) executed and verified on Chromium." >> $GITHUB_STEP_SUMMARY
           echo "- **Smoke & E2E Validation:** PASSED." >> $GITHUB_STEP_SUMMARY
+

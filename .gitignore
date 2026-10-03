@@ -48,3 +48,8 @@ build/
 # Properties files
 **/src/main/resources/*.properties
 !**/src/main/resources/*.properties.example
+
+# E2E Tests (Playwright)
+tests-e2e/node_modules/
+tests-e2e/playwright-report/
+tests-e2e/test-results/

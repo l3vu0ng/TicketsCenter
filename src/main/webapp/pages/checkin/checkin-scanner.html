@@ -83,7 +83,7 @@
             <label class="small text-uppercase fw-bold text-white-50 mb-2">Hoặc nhập mã vé bằng tay nếu màn hình mờ:</label>
             <div class="input-group">
                 <input type="text" id="manualCode" class="form-control rounded-0 bg-dark text-white border-secondary py-2" placeholder="VD: TC-A5-9921" value="TC-A5-9921">
-                <button class="btn btn-danger rounded-0 fw-bold px-4" onclick="checkTicket(document.getElementById('manualCode').value)">
+                <button type="button" class="btn btn-danger rounded-0 fw-bold px-4">
                     Kiểm tra
                 </button>
             </div>
@@ -187,5 +187,7 @@
         }
     </script>
 
+    <script src="../../assets/js/api/client.js"></script>
+    <script src="../../assets/js/app.js"></script>
 </body>
 </html>

@@ -94,10 +94,10 @@
                         <label class="filter-label">Mật khẩu</label>
                         <a href="javascript:void(0)" class="small text-danger text-decoration-none">Quên mật khẩu?</a>
                     </div>
-                    <input type="password" class="form-control rounded-0 border-secondary-subtle py-2" value="••••••••">
+                    <input type="password" class="form-control rounded-0 border-secondary-subtle py-2" placeholder="Nhập mật khẩu">
                 </div>
 
-                <button class="btn-primary-custom w-100 py-3 mb-4 fs-6" onclick="location.href='my-orders.html'">
+                <button type="button" class="btn-primary-custom w-100 py-3 mb-4 fs-6">
                     Đăng nhập 
                 </button>
 
@@ -137,7 +137,7 @@
                     <input type="password" class="form-control rounded-0 border-secondary-subtle py-2" placeholder="Tối thiểu 8 ký tự">
                 </div>
 
-                <button class="btn-primary-custom w-100 py-3 mb-3 fs-6" onclick="switchTab('otp')">
+                <button type="button" class="btn-primary-custom w-100 py-3 mb-3 fs-6">
                     Đăng ký tài khoản 
                 </button>
             </div>
@@ -148,15 +148,15 @@
                 <p class="small text-muted mb-4">Vui lòng nhập mã OTP gồm 6 chữ số đã gửi tới <strong>buyer@ticketscenter.vn</strong>.</p>
 
                 <div class="d-flex justify-content-center gap-2 mb-4">
-                    <input type="text" maxlength="1" class="otp-input" value="8">
-                    <input type="text" maxlength="1" class="otp-input" value="4">
-                    <input type="text" maxlength="1" class="otp-input" value="2">
-                    <input type="text" maxlength="1" class="otp-input" value="9">
-                    <input type="text" maxlength="1" class="otp-input" value="1">
-                    <input type="text" maxlength="1" class="otp-input" value="0">
+                    <input type="text" maxlength="1" class="otp-input">
+                    <input type="text" maxlength="1" class="otp-input">
+                    <input type="text" maxlength="1" class="otp-input">
+                    <input type="text" maxlength="1" class="otp-input">
+                    <input type="text" maxlength="1" class="otp-input">
+                    <input type="text" maxlength="1" class="otp-input">
                 </div>
 
-                <button class="btn-primary-custom w-100 py-3 mb-3 fs-6" onclick="location.href='UI-01-danh-sach-su-kien.html'">
+                <button type="button" class="btn-primary-custom w-100 py-3 mb-3 fs-6">
                     Xác nhận & Hoàn tất <i class="fa-solid fa-check ms-2"></i>
                 </button>
 
@@ -194,5 +194,7 @@
             }
         }
     </script>
+    <script src="../../assets/js/api/client.js"></script>
+    <script src="../../assets/js/app.js"></script>
 </body>
 </html>
