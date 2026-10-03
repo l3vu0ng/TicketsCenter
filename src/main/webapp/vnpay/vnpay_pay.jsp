@@ -9,10 +9,10 @@
         <meta name="author" content="TicketsCenter">
         <title>Tạo mới đơn hàng — TicketsCenter VNPAY</title>
         <!-- Bootstrap core CSS -->
-        <link href="${pageContext.request.contextPath}/assets/bootstrap.min.css" rel="stylesheet"/>
+        <link href="${pageContext.request.contextPath}/assets/css/bootstrap.min.css" rel="stylesheet"/>
         <!-- Custom styles for this template -->
-        <link href="${pageContext.request.contextPath}/assets/jumbotron-narrow.css" rel="stylesheet">      
-        <script src="${pageContext.request.contextPath}/assets/jquery-1.11.3.min.js"></script>
+        <link href="${pageContext.request.contextPath}/assets/css/jumbotron-narrow.css" rel="stylesheet">
+        <script src="${pageContext.request.contextPath}/assets/js/jquery-1.11.3.min.js"></script>
     </head>
 
     <body>
@@ -29,7 +29,7 @@
 
             <h3>Khởi tạo giao dịch thanh toán</h3>
             <div class="table-responsive">
-                <form action="${pageContext.request.contextPath}/vnpayajax" id="frmCreateOrder" method="post">        
+                <form action="${pageContext.request.contextPath}/vnpayajax" id="frmCreateOrder" method="post">
                     <input type="hidden" name="returnUrl" value="${pageContext.request.scheme}://${pageContext.request.serverName}:${pageContext.request.serverPort}${pageContext.request.contextPath}/vnpay/vnpay_return.jsp" />
                     <div class="form-group">
                         <label for="amount">Số tiền thanh toán (VND)</label>
@@ -83,7 +83,7 @@
                 <p>&copy; 2026 TicketsCenter — VNPAY Integration Suite</p>
             </footer>
         </div>
-          
+
         <link href="https://pay.vnpay.vn/lib/vnpay/vnpay.css" rel="stylesheet" />
         <script src="https://pay.vnpay.vn/lib/vnpay/vnpay.min.js"></script>
         <script type="text/javascript">
@@ -116,6 +116,6 @@
                 });
                 return false;
             });
-        </script>       
+        </script>
     </body>
 </html>

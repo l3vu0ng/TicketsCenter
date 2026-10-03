@@ -20,10 +20,10 @@
         <meta name="author" content="TicketsCenter">
         <title>Kết quả thanh toán — TicketsCenter</title>
         <!-- Bootstrap core CSS -->
-        <link href="${pageContext.request.contextPath}/assets/bootstrap.min.css" rel="stylesheet"/>
+        <link href="${pageContext.request.contextPath}/assets/css/bootstrap.min.css" rel="stylesheet"/>
         <!-- Custom styles for this template -->
-        <link href="${pageContext.request.contextPath}/assets/jumbotron-narrow.css" rel="stylesheet"> 
-        <script src="${pageContext.request.contextPath}/assets/jquery-1.11.3.min.js"></script>
+        <link href="${pageContext.request.contextPath}/assets/css/jumbotron-narrow.css" rel="stylesheet">
+        <script src="${pageContext.request.contextPath}/assets/js/jquery-1.11.3.min.js"></script>
     </head>
     <body>
         <%
@@ -140,6 +140,6 @@
             <footer class="footer">
                 <p>&copy; 2026 TicketsCenter — VNPAY Integration Suite</p>
             </footer>
-        </div>  
+        </div>
     </body>
 </html>

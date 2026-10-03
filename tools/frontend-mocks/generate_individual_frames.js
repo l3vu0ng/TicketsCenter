@@ -41,10 +41,13 @@ if (!headMatch || !footerMatch) {
 const headHtml = headMatch[0];
 const footerHtml = footerMatch[0];
 
-const framesDir = path.join(__dirname, 'frames');
-if (!fs.existsSync(framesDir)) {
-  fs.mkdirSync(framesDir, { recursive: true });
-}
+const pagesDir = path.resolve(__dirname, '../../src/main/webapp/pages');
+const categoryFor = number => {
+  if (number <= 8 || number === 24) return 'buyer';
+  if (number <= 14 || number === 17) return 'organizer';
+  if (number <= 16) return 'checkin';
+  return 'admin';
+};
 
 for (const def of frameDefs) {
   const regex = new RegExp(`<section id="${def.id}" class="page-frame(?: hidden)?">([\\s\\S]*?)<\\/section>`);
@@ -68,7 +71,7 @@ for (const def of frameDefs) {
   <!-- Top Navigation -->
   <header class="bg-slate-900 text-white px-4 py-2 flex items-center justify-between text-xs">
     <div class="flex items-center gap-2">
-      <a href="../index.html" class="font-bold font-display text-sm text-blue-400 hover:text-white flex items-center gap-1">
+      <a href="../../index.html" class="font-bold font-display text-sm text-blue-400 hover:text-white flex items-center gap-1">
         <i class="ph ph-arrow-left"></i> Quay lại Master Prototype
       </a>
       <span class="text-slate-500">|</span>
@@ -87,15 +90,17 @@ for (const def of frameDefs) {
     TicketsCenter • ${def.title}
   </footer>
 
-  <script src="../../assets/js/data.js"></script>
-  <script src="../../assets/js/app.js"></script>
+  <script src="../../assets/js/api/data.js"></script>
+  <script src="../../assets/js/main.js"></script>
 </body>
 </html>`;
 
-    fs.writeFileSync(path.join(framesDir, `${def.name}.html`), pageHtml, 'utf8');
+    const categoryDir = path.join(pagesDir, categoryFor(Number(def.name.slice(3, 5))));
+    fs.mkdirSync(categoryDir, { recursive: true });
+    fs.writeFileSync(path.join(categoryDir, `${def.name}.html`), pageHtml, 'utf8');
   } else {
     console.warn(`Could not extract section for ${def.id}`);
   }
 }
 
-console.log(`Generated all ${frameDefs.length} standalone frame HTML files in src/main/webapp/pages/frames/!`);
+console.log(`Generated all ${frameDefs.length} standalone frame HTML files in src/main/webapp/pages/{buyer,organizer,checkin,admin}/.`);

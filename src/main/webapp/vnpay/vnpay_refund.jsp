@@ -9,10 +9,10 @@
         <meta name="author" content="TicketsCenter">
         <title>Hoàn tiền giao dịch (Refund API) — TicketsCenter</title>
         <!-- Bootstrap core CSS -->
-        <link href="${pageContext.request.contextPath}/assets/bootstrap.min.css" rel="stylesheet"/>
-        <!-- Custom styles for this template -->   
-        <link href="${pageContext.request.contextPath}/assets/jumbotron-narrow.css" rel="stylesheet"> 
-        <script src="${pageContext.request.contextPath}/assets/jquery-1.11.3.min.js"></script>
+        <link href="${pageContext.request.contextPath}/assets/css/bootstrap.min.css" rel="stylesheet"/>
+        <!-- Custom styles for this template -->
+        <link href="${pageContext.request.contextPath}/assets/css/jumbotron-narrow.css" rel="stylesheet">
+        <script src="${pageContext.request.contextPath}/assets/js/jquery-1.11.3.min.js"></script>
     </head>
 
     <body>
@@ -56,7 +56,7 @@
                     <div class="form-group">
                         <button type="submit" class="btn btn-primary" id="btnRefund">Gửi yêu cầu hoàn tiền</button>
                     </div>
-                </form>   
+                </form>
 
                 <div id="refundResult" style="display: none; margin-top: 20px;">
                     <h4>Kết quả phản hồi từ VNPAY:</h4>
@@ -66,7 +66,7 @@
                 <footer class="footer">
                     <p>&copy; 2026 TicketsCenter — VNPAY Integration Suite</p>
                 </footer>
-            </div> 
+            </div>
         </div>
 
         <script type="text/javascript">
