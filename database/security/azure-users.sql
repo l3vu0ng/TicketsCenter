@@ -27,9 +27,18 @@ BEGIN
         SET @sql = N'CREATE USER ' + QUOTENAME(@user) + N' FROM EXTERNAL PROVIDER;';
         EXEC sys.sp_executesql @sql;
     END;
-    SET @sql = N'ALTER ROLE ' + QUOTENAME(@role) + N' ADD MEMBER ' + QUOTENAME(@user) + N';';
-    EXEC sys.sp_executesql @sql;
+    IF NOT EXISTS (SELECT 1 FROM sys.database_role_members rm
+                   JOIN sys.database_principals r ON r.principal_id = rm.role_principal_id
+                   JOIN sys.database_principals u ON u.principal_id = rm.member_principal_id
+                   WHERE r.name = @role AND u.name = @user)
+    BEGIN
+        SET @sql = N'ALTER ROLE ' + QUOTENAME(@role) + N' ADD MEMBER ' + QUOTENAME(@user) + N';';
+        EXEC sys.sp_executesql @sql;
+    END;
     FETCH NEXT FROM principal_cursor INTO @user, @role;
 END;
 CLOSE principal_cursor;
 DEALLOCATE principal_cursor;
+
+-- Azure SQL uses contained Entra users above.  Do not run local-logins.sql
+-- here; the migration principal is provisioned separately from runtime users.

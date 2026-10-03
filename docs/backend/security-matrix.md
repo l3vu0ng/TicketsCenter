@@ -38,6 +38,8 @@ Role database không tạo row-level security tự động. Service/SP vẫn ki�
 
 Các principal kỹ thuật không phải role HTTP, không xuất hiện trong session/menu và browser không được chọn chúng.
 
+`local-logins.sql` provisions only the six runtime identities and is idempotent; `azure-users.sql` provisions contained Entra users only. The migration identity is intentionally separate and neither script grants `db_owner` or `sysadmin` to a runtime identity.
+
 ## 4. Ma trận endpoint
 
 | Nhóm endpoint | Guest | User/Buyer | Manager | Check-in staff | Admin | Worker | DB principal |
@@ -79,6 +81,7 @@ Các principal kỹ thuật không phải role HTTP, không xuất hiện trong 
 - Check-in principal bị DENY dữ liệu tài chính kể cả gọi View/bảng trực tiếp.
 - Worker chỉ chạy SP được cấp; migration principal không được dùng cho HTTP runtime.
 - REVOKE được thử khi không còn nguồn grant khác; DENY tài chính check-in được thử riêng bằng `EXECUTE AS USER`/`REVERT`.
+- `database/tests/day-19.sql` creates temporary contained test users for R01–R04 and worker, asserts each allow/deny, then removes them. It also verifies REVOKE removes an otherwise un-inherited grant.
 
 ## 8. Ranh giới schema đã chốt
 

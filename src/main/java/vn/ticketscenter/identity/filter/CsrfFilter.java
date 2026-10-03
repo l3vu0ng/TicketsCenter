@@ -11,7 +11,7 @@ import vn.ticketscenter.identity.service.CsrfService;
 import java.io.IOException;
 import java.util.Set;
 
-@WebFilter(urlPatterns = "/api/*")
+@WebFilter(urlPatterns = {"/api/*", "/vnpayajax", "/vnpayajax/*"})
 public final class CsrfFilter implements Filter {
 
     private static final Set<String> SAFE_METHODS = Set.of("GET", "HEAD", "OPTIONS");

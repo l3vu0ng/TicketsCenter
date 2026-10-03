@@ -1,6 +1,6 @@
 # Ma trận truy vết SPEC → task → minh chứng
 
-Mọi mục dưới đây ở trạng thái **đã phân task, chưa triển khai/chưa nghiệm thu**. Đây là ma trận kế hoạch. Khi thực hiện, bổ sung link evidence và trạng thái PASS/FAIL/BLOCKED; không đổi ý nghĩa thành đã hoàn thành chỉ vì có tên object.
+Đây là ma trận truy vết. Trạng thái nghiệm thu cuối nằm trong [backend acceptance](../evidence/backend-acceptance.md); các mục không có evidence mới vẫn là BLOCKED, không được suy ra PASS chỉ vì có DDL hoặc test name.
 
 Nguồn: [SPEC](../references/SPEC.md). Lịch: [README](README.md). Mỗi task phải tuân [CONVENTIONS](CONVENTIONS.md). File bằng chứng ngày `docs/evidence/day-NN.md`; lớp integration `DayNNIT`; SQL test `database/tests/day-NN.sql`. Cuối cùng D21-T02 chạy lại catalog/behavior trên bản bàn giao.
 

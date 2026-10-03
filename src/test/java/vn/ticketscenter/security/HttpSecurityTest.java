@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
 import vn.ticketscenter.identity.filter.CsrfFilter;
+import vn.ticketscenter.payment.controller.ajaxServlet;
 import vn.ticketscenter.config.web.RequestValidationFilter;
 
 import java.lang.reflect.Proxy;
@@ -42,6 +43,13 @@ class HttpSecurityTest {
         new RequestValidationFilter().doFilter(request, response(status), chain(called));
 
         assertTrue(called[0]);
+    }
+
+    @Test
+    void retiredPaymentEndpointCannotUseClientControlledAmountOrRedirect() throws Exception {
+        int[] status = {200};
+        new ajaxServlet().service(request("POST", 0, "application/x-www-form-urlencoded"), response(status));
+        assertEquals(410, status[0]);
     }
 
     private HttpServletRequest request(String method, long length, String contentType) {

@@ -38,9 +38,10 @@ BEGIN TRY
     INSERT dbo.tc_events(id,organization_id,category_id,commission_rule_id,title,venue_name,venue_address,
                          sale_start,sale_end,start_time,end_time,status)
     VALUES(@event,@org,@category,@rule,'Settled Event','Venue','Address',DATEADD(day,-5,@now),
-           DATEADD(day,-4,@now),DATEADD(day,-2,@now),DATEADD(day,-1,@now),'PUBLISHED');
+           DATEADD(day,-4,@now),DATEADD(day,-2,@now),DATEADD(day,-1,@now),'DRAFT');
     INSERT dbo.tc_zones(id,event_id,name,type,price,capacity,sold_quantity)
     VALUES(@zone,@event,'Standing','STANDING',100000,10,3);
+    UPDATE dbo.tc_events SET status='PUBLISHED' WHERE id=@event;
 
     INSERT dbo.tc_ticket_holds(id,user_id,event_id,status,expires_at) VALUES
         (@hold1,@buyer,@event,'CONSUMED',DATEADD(minute,10,@now)),
@@ -108,9 +109,10 @@ BEGIN TRY
     INSERT dbo.tc_events(id,organization_id,category_id,commission_rule_id,title,venue_name,venue_address,
                          sale_start,sale_end,start_time,end_time,status)
     VALUES(@zeroEvent,@org,@category,@rule,'Zero Net','Venue','Address',DATEADD(day,-5,@now),
-           DATEADD(day,-4,@now),DATEADD(day,-2,@now),DATEADD(day,-1,@now),'PUBLISHED');
+           DATEADD(day,-4,@now),DATEADD(day,-2,@now),DATEADD(day,-1,@now),'DRAFT');
     INSERT dbo.tc_zones(id,event_id,name,type,price,capacity,sold_quantity)
     VALUES(@zeroZone,@zeroEvent,'Standing','STANDING',100000,1,1);
+    UPDATE dbo.tc_events SET status='PUBLISHED' WHERE id=@zeroEvent;
     INSERT dbo.tc_ticket_holds(id,user_id,event_id,status,expires_at)
     VALUES(@zeroHold,@buyer,@zeroEvent,'CONSUMED',DATEADD(minute,10,@now));
     INSERT dbo.tc_orders(id,user_id,event_id,hold_id,order_code,subtotal_amount,discount_amount,total_amount,status,paid_at)

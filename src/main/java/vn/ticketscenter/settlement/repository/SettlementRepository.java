@@ -27,7 +27,7 @@ public class SettlementRepository {
         query.execute();
         Object[] row = first(query);
         entityManager.clear();
-        return new SettlementSnapshot((UUID) row[0], (String) row[1], money(row[2]), money(row[3]),
+        return new SettlementSnapshot(vn.ticketscenter.config.util.InputParser.asUuid(row[0]), (String) row[1], money(row[2]), money(row[3]),
                 money(row[4]), money(row[5]));
     }
 
@@ -71,7 +71,7 @@ public class SettlementRepository {
                         ORDER BY blocker_type, blocker_id
                         """).setParameter("eventId", eventId).getResultList();
         return rows.stream().map(row -> new SettlementBlocker(
-                (String) row[0], (UUID) row[1], (UUID) row[2])).toList();
+                (String) row[0], vn.ticketscenter.config.util.InputParser.asUuid(row[1]), vn.ticketscenter.config.util.InputParser.asUuid(row[2]))).toList();
     }
 
     public PayoutBalance balance(EntityManager entityManager, UUID settlementId) {
@@ -93,7 +93,7 @@ public class SettlementRepository {
     }
 
     private static PayoutBalance balance(Object[] row) {
-        return new PayoutBalance((UUID) row[0], (UUID) row[1], money(row[2]), money(row[3]),
+        return new PayoutBalance(vn.ticketscenter.config.util.InputParser.asUuid(row[0]), vn.ticketscenter.config.util.InputParser.asUuid(row[1]), money(row[2]), money(row[3]),
                 money(row[4]), money(row[5]), (String) row[6], instant(row[7]), money(row[8]),
                 money(row[9]), money(row[10]), money(row[11]));
     }

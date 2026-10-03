@@ -13,6 +13,7 @@ import java.util.UUID;
 public final class EventCancellationService {
     private final TransactionManager transactions;
     private final EventCancellationRepository repository;
+    private final PublicEventCache publicEventCache = new PublicEventCache();
 
     public EventCancellationService(TransactionManager transactions, EventCancellationRepository repository) {
         this.transactions = Objects.requireNonNull(transactions);
@@ -22,10 +23,12 @@ public final class EventCancellationService {
     public CancellationProgress cancel(AuthenticatedAccount account, UUID eventId) {
         AuthorizationService.requireAdmin(account);
         Objects.requireNonNull(eventId, "eventId is required");
-        return transactions.execute(DatabasePrincipal.ADMIN, entityManager -> {
+        CancellationProgress progress = transactions.execute(DatabasePrincipal.ADMIN, entityManager -> {
             repository.cancel(entityManager, eventId, account.id());
             return repository.progress(entityManager, eventId);
         });
+        publicEventCache.invalidate(eventId);
+        return progress;
     }
 
     public CancellationProgress progress(AuthenticatedAccount account, UUID eventId) {

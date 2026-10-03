@@ -30,6 +30,7 @@ public final class EventService {
 
     private final TransactionManager transactions;
     private final EventRepository events;
+    private final PublicEventCache publicEventCache = new PublicEventCache();
 
     public EventService(TransactionManager transactions, EventRepository events) {
         this.transactions = Objects.requireNonNull(transactions);
@@ -97,10 +98,12 @@ public final class EventService {
 
     public void publish(AuthenticatedAccount account, UUID eventId, UUID commissionRuleId) {
         AuthorizationService.requireAdmin(account);
+        UUID id = requireId(eventId);
         transactions.execute(DatabasePrincipal.ADMIN, entityManager -> {
-            events.publish(entityManager, requireId(eventId), account.id(), requireId(commissionRuleId));
+            events.publish(entityManager, id, account.id(), requireId(commissionRuleId));
             return null;
         });
+        publicEventCache.invalidate(id);
     }
 
     public void reject(AuthenticatedAccount account, UUID eventId, String reason) {

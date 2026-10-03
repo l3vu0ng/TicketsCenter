@@ -249,15 +249,18 @@ public class EventRepository {
 
     public List<ZoneView> findPublicZones(EntityManager entityManager, UUID eventId) {
         @SuppressWarnings("unchecked") List<Object[]> rows = entityManager.createNativeQuery("""
-                        SELECT zone_id, name, type, price, capacity, held_quantity, sold_quantity, available_quantity
-                        FROM dbo.vw_ZoneInventory
-                        WHERE event_id = :eventId AND EXISTS (
-                            SELECT 1 FROM dbo.tc_events WHERE id = :eventId AND status = 'PUBLISHED')
+                        SELECT availability.zone_id, availability.name, availability.type, availability.price,
+                               availability.capacity, availability.held_quantity, availability.sold_quantity,
+                               availability.available_quantity
+                        FROM dbo.vw_ZoneInventory inventory
+                        CROSS APPLY dbo.fn_GetZoneAvailability(inventory.zone_id) availability
+                        WHERE availability.event_id = :eventId AND EXISTS (
+                            SELECT 1 FROM dbo.vw_PublicEvents WHERE event_id = :eventId)
                         ORDER BY name, zone_id
                         """)
                 .setParameter("eventId", eventId).getResultList();
         return rows.stream().map(row -> {
-            UUID zoneId = (UUID) row[0];
+            UUID zoneId = uuid(row[0]);
             return new ZoneView(zoneId, (String) row[1], (String) row[2], (BigDecimal) row[3],
                     ((Number) row[4]).intValue(), ((Number) row[5]).intValue(),
                     ((Number) row[6]).intValue(), ((Number) row[7]).intValue(), findSeats(entityManager, zoneId));
@@ -275,7 +278,7 @@ public class EventRepository {
                         SELECT organization_id, status FROM dbo.tc_events WITH (UPDLOCK, HOLDLOCK) WHERE id = :eventId
                         """).setParameter("eventId", eventId).getResultList();
         if (rows.isEmpty()) throw new NoSuchElementException("event not found");
-        UUID organizationId = (UUID) rows.getFirst()[0];
+        UUID organizationId = uuid(rows.getFirst()[0]);
         requireManager(entityManager, actorId, organizationId);
         String status = (String) rows.getFirst()[1];
         if (!"DRAFT".equals(status) && !"REJECTED".equals(status)) {
@@ -320,15 +323,21 @@ public class EventRepository {
                         SELECT id, row_name, seat_number, status FROM dbo.tc_seats
                         WHERE zone_id = :zoneId ORDER BY row_name, seat_number, id
                         """).setParameter("zoneId", zoneId).getResultList();
-        return rows.stream().map(row -> new SeatSummaryDto((UUID) row[0], (String) row[1],
+        return rows.stream().map(row -> new SeatSummaryDto(uuid(row[0]), (String) row[1],
                 row[2].toString(), EventEnums.SeatStatus.valueOf((String) row[3]))).toList();
     }
 
     private EventView eventView(Object[] row) {
-        return new EventView((UUID) row[0], (UUID) row[1], (UUID) row[2], (String) row[3],
+        return new EventView(uuid(row[0]), uuid(row[1]), uuid(row[2]), (String) row[3],
                 (String) row[4], (String) row[5], (String) row[6], (String) row[7], (String) row[8],
                 instant(row[9]), instant(row[10]), instant(row[11]), instant(row[12]),
                 (String) row[13], (String) row[14], (BigDecimal) row[15]);
+    }
+
+    private static UUID uuid(Object value) {
+        if (value == null) return null;
+        if (value instanceof UUID u) return u;
+        return UUID.fromString(value.toString());
     }
 
     private Instant instant(Object value) {

@@ -11,6 +11,8 @@ import vn.ticketscenter.identity.dto.OrganizationDtos.MembershipView;
 import vn.ticketscenter.identity.dto.OrganizationDtos.OrganizationRequestCommand;
 import vn.ticketscenter.identity.dto.OrganizationDtos.OrganizationRequestView;
 import vn.ticketscenter.identity.dto.OrganizationDtos.Page;
+import vn.ticketscenter.identity.dto.OrganizationDtos.ProfileView;
+import vn.ticketscenter.identity.dto.OrganizationDtos.OrganizationOverview;
 import vn.ticketscenter.identity.model.IdentityEnums.OrganizationRole;
 import vn.ticketscenter.identity.repository.OrganizationRepository;
 
@@ -93,6 +95,21 @@ public final class OrganizationService {
                 entityManager -> organizations.findMemberships(entityManager, account.id()));
     }
 
+    public ProfileView getProfile(AccountService.AuthenticatedAccount account) {
+        requireAccount(account);
+        return transactions.execute(DatabasePrincipal.BUYER,
+                entityManager -> organizations.findProfile(entityManager, account.id()));
+    }
+
+    public OrganizationOverview getOverview(AccountService.AuthenticatedAccount account, UUID organizationId) {
+        requireAccount(account);
+        UUID validOrganizationId = requireId(organizationId);
+        return transactions.execute(DatabasePrincipal.MANAGER, entityManager -> {
+            requireManager(entityManager, account.id(), validOrganizationId);
+            return organizations.findOverview(entityManager, validOrganizationId);
+        });
+    }
+
     public List<MemberView> getMembers(AccountService.AuthenticatedAccount account, UUID organizationId) {
         requireAccount(account);
         UUID validOrganizationId = requireId(organizationId);
@@ -135,7 +152,7 @@ public final class OrganizationService {
         AuthorizationService.requireAdmin(account);
         CommissionRuleCommand valid = validateCommissionRule(command);
         return transactions.execute(DatabasePrincipal.ADMIN,
-                entityManager -> organizations.createCommissionRule(entityManager, requireId(organizationId), valid));
+                entityManager -> organizations.createCommissionRule(entityManager, account.id(), requireId(organizationId), valid));
     }
 
     private void mutateMember(

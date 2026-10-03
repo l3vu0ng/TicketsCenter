@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import vn.ticketscenter.admin.dto.AdminDtos.AdminDashboardSummary;
+import vn.ticketscenter.admin.dto.AdminDtos.AdminOverview;
 import vn.ticketscenter.admin.service.AdminService;
 import vn.ticketscenter.identity.service.SessionService;
 import vn.ticketscenter.config.persistence.PersistenceListener;
@@ -65,6 +66,14 @@ public class AdminServlet extends HttpServlet {
         if (parts.length == 3 && "events".equals(parts[0]) && "cancellation-progress".equals(parts[2])) {
             EventCancellationServlet cancellation = resolveCancellationServlet(req, resp);
             if (cancellation != null) cancellation.handleGet(req, resp);
+            return;
+        }
+        if ("/overview".equals(pathInfo)) {
+            AdminOverview overview = service.getOverview(accountOpt.get());
+            HttpResponses.data(resp, "{\"pendingOrganizationRequests\":" + overview.pendingOrganizationRequests()
+                    + ",\"pendingEvents\":" + overview.pendingEvents()
+                    + ",\"pendingRefundRequests\":" + overview.pendingRefundRequests()
+                    + ",\"pendingSettlements\":" + overview.pendingSettlements() + "}");
             return;
         }
         if ("/dashboard".equals(pathInfo) || pathInfo == null || "/".equals(pathInfo)) {

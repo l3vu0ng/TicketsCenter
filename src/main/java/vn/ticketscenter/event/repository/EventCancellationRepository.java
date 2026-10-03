@@ -38,9 +38,9 @@ public class EventCancellationRepository {
                         """).setParameter("eventId", eventId).getResultList();
         List<CancellationException> exceptions = exceptionRows.stream()
                 .map(value -> new CancellationException(
-                        (String) value[0], (UUID) value[1], (UUID) value[2], (String) value[3]))
+                        (String) value[0], vn.ticketscenter.config.util.InputParser.asUuid(value[1]), vn.ticketscenter.config.util.InputParser.asUuid(value[2]), (String) value[3]))
                 .toList();
-        return new CancellationProgress((UUID) row[0], (String) row[1], number(row[2]), number(row[3]),
+        return new CancellationProgress(vn.ticketscenter.config.util.InputParser.asUuid(row[0]), (String) row[1], number(row[2]), number(row[3]),
                 number(row[4]), number(row[5]), number(row[6]), number(row[7]), number(row[8]), exceptions);
     }
 
@@ -52,7 +52,7 @@ public class EventCancellationRepository {
                         OFFSET 0 ROWS FETCH NEXT :limit ROWS ONLY
                         """).setParameter("limit", limit).getResultList();
         return rows.stream().map(row -> new CancellationWork(
-                (UUID) row[0], (String) row[1], (UUID) row[2])).toList();
+                vn.ticketscenter.config.util.InputParser.asUuid(row[0]), (String) row[1], vn.ticketscenter.config.util.InputParser.asUuid(row[2]))).toList();
     }
 
     public void process(EntityManager entityManager, CancellationWork work) {

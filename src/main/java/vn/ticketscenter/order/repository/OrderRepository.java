@@ -19,7 +19,7 @@ public class OrderRepository {
         @SuppressWarnings("unchecked") List<Object[]> rows = query.getResultList();
         if (rows.isEmpty()) throw new IllegalStateException("order creation returned no result");
         Object[] row = rows.getFirst();
-        return new OrderResult((UUID) row[0], (String) row[1], (BigDecimal) row[2],
+        return new OrderResult(vn.ticketscenter.config.util.InputParser.asUuid(row[0]), (String) row[1], (BigDecimal) row[2],
                 (BigDecimal) row[3], (BigDecimal) row[4], "PENDING_PAYMENT", null);
     }
 
@@ -35,6 +35,6 @@ public class OrderRepository {
         if (rows.isEmpty()) throw new IllegalStateException("coupon update returned no result");
         Object[] row = rows.getFirst();
         return new OrderResult(orderId, null, (BigDecimal) row[0], (BigDecimal) row[1],
-                (BigDecimal) row[2], "PENDING_PAYMENT", (UUID) row[3]);
+                (BigDecimal) row[2], "PENDING_PAYMENT", vn.ticketscenter.config.util.InputParser.asUuid(row[3]));
     }
 }

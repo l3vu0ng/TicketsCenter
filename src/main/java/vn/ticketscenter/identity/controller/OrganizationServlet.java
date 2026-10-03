@@ -15,6 +15,8 @@ import vn.ticketscenter.identity.dto.OrganizationDtos.MembershipView;
 import vn.ticketscenter.identity.dto.OrganizationDtos.OrganizationRequestCommand;
 import vn.ticketscenter.identity.dto.OrganizationDtos.OrganizationRequestView;
 import vn.ticketscenter.identity.dto.OrganizationDtos.Page;
+import vn.ticketscenter.identity.dto.OrganizationDtos.OrganizationOverview;
+import vn.ticketscenter.report.controller.ReportServlet;
 import vn.ticketscenter.identity.filter.AuthenticationFilter;
 import vn.ticketscenter.identity.repository.OrganizationRepository;
 import vn.ticketscenter.identity.service.AccountService.AuthenticatedAccount;
@@ -63,6 +65,14 @@ public final class OrganizationServlet extends HttpServlet {
                 return;
             }
             String[] parts = parts(path);
+            if (parts.length == 3 && "organizations".equals(parts[0]) && "reports".equals(parts[2])) {
+                new ReportServlet().handleGet(request, response, uuid(parts[1]));
+                return;
+            }
+            if (parts.length == 3 && "organizations".equals(parts[0]) && "overview".equals(parts[2])) {
+                HttpResponses.data(response, overviewJson(service.getOverview(account, uuid(parts[1]))));
+                return;
+            }
             if (parts.length == 3 && "organizations".equals(parts[0]) && "events".equals(parts[2])) {
                 EventService events = resolveEventService(request, response);
                 if (events == null) return;
@@ -183,6 +193,13 @@ public final class OrganizationServlet extends HttpServlet {
                 "{\"organizationId\":" + json(value.organizationId()) + ",\"organizationName\":" + json(value.organizationName())
                         + ",\"role\":" + json(value.role()) + ",\"active\":" + value.active() + "}")
                 .reduce((a, b) -> a + "," + b).orElse("") + "]}";
+    }
+
+    static String overviewJson(OrganizationOverview value) {
+        return "{\"eventCount\":" + value.eventCount() + ",\"paidOrderCount\":" + value.paidOrderCount()
+                + ",\"activeTickets\":" + value.activeTickets() + ",\"usedTickets\":" + value.usedTickets()
+                + ",\"grossRevenue\":" + json(value.grossRevenue()) + ",\"totalRefund\":" + json(value.totalRefund())
+                + ",\"totalCommission\":" + json(value.totalCommission()) + ",\"netPayable\":" + json(value.netPayable()) + "}";
     }
 
     static void handle(HttpServletResponse response, RuntimeException exception) throws IOException {

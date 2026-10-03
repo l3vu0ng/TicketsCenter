@@ -98,3 +98,9 @@ Ngày 17 không thêm domain entity ngoài bốn lớp đã khóa. `SettlementRe
 ## 7. Chính sách ghi và xóa
 
 Schema nền chỉ chốt cấu trúc và mapping; chưa tạo một Repository cho từng bảng. Các đường ghi về sau đi qua Service/SP của use case. Runtime không có DDL, không hard-delete lịch sử tài chính/audit và không đổi principal giữa transaction. Migration lỗi được rollback toàn batch; schema đã dùng chung chỉ sửa bằng migration forward-fix mới.
+
+## 8. Kiểm kê Ngày 18
+
+- 23/23 class trong bảng mục 1 có JPA mapping và nằm trong `persistence.xml`; `ModelMappingTest` và `PersistenceMetadataTest` kiểm danh sách này.
+- Hành vi tiền/trạng thái được gọi qua Model hoặc SP owner và có test use case đến ngày 17. `AuditLog` cố ý không có mutation API vì TR10 và quyền database buộc append-only.
+- Không thêm Model cho report, CSV, overview hoặc profile. Chúng là projection đọc trên 23 Model hiện có.

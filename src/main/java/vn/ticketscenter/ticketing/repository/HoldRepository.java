@@ -22,7 +22,7 @@ public class HoldRepository {
                 .setParameter("selections", selectionsJson(items));
         query.execute();
         Object[] row = (Object[]) query.getResultList().getFirst();
-        UUID holdId = (UUID) row[0];
+        UUID holdId = vn.ticketscenter.config.util.InputParser.asUuid(row[0]);
         long total = ((Number) entityManager.createNativeQuery(
                 "SELECT COALESCE(SUM(unit_price * quantity), 0) FROM dbo.tc_ticket_hold_items WHERE hold_id = :holdId")
                 .setParameter("holdId", holdId).getSingleResult()).longValue();
@@ -38,7 +38,7 @@ public class HoldRepository {
                 .setParameter("hold_id", holdId).setParameter("actor_id", actorId).setParameter("reason", "USER_CANCEL");
         query.execute();
         Object[] row = (Object[]) query.getResultList().getFirst();
-        return new HoldResponseDto((UUID) row[0], null, TicketingEnums.TicketHoldStatus.valueOf(row[1].toString()), null, 0);
+        return new HoldResponseDto(vn.ticketscenter.config.util.InputParser.asUuid(row[0]), null, TicketingEnums.TicketHoldStatus.valueOf(row[1].toString()), null, 0);
     }
 
     private static String selectionsJson(List<HoldItemRequest> items) {

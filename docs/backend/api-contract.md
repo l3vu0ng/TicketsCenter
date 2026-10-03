@@ -113,6 +113,14 @@ Không endpoint browser nào được tên `/mark-paid`, `/mark-refunded`, `/mar
 | Settlement/Payout | `eventId`/`settlementId`/`payoutId` |
 
 Timeout sau commit không được diễn giải là thất bại. Caller đọc trạng thái đã lưu rồi mới quyết định trả kết quả hoặc retry hữu hạn.
+
+## 6. Báo cáo, audit và hồ sơ (Ngày 18)
+
+- `GET /api/organizations/{id}/reports` yêu cầu membership `MANAGER` active của đúng tổ chức. `GET /api/admin/reports` yêu cầu `ADMIN`; admin có thể lọc `organizationId`.
+- Filter chung là `eventId`, `organizationId` nếu admin, `from`, `to`, `page`, `pageSize`, `sort`. Thời gian là UTC và nửa khoảng `[from,to)`, tối đa 366 ngày; `pageSize` tối đa 100. `eventId` lọc bảng V04; thẻ cohort/cash-flow dùng F05/F10 theo tổ chức và khoảng thời gian vì hai function có hạt dữ liệu theo tổ chức.
+- `GET /api/reports/export` dùng cùng `ReportService` và filter. CSV UTF-8 BOM, batch 100 dòng, trần 10.000 dòng; text không tin cậy được quote và chống Excel formula, tiền server-generated giữ kiểu số nguyên.
+- `GET /api/admin/audit-logs` và `/{id}` chỉ dành cho `ADMIN`, lọc `action`, `aggregateType`, `from`, `to`. API chỉ trả detail đã allowlist cho quyết định; provider reference không được trả.
+- `GET /api/admin/overview`, `GET /api/organizations/{id}/overview`, `GET /api/me/profile` là API đọc. Profile trả email, trạng thái xác minh, platform roles và memberships; không trả `passwordHash`, OTP hay auth secret.
 # Ghi nhận schema nền
 
 ### Giữ vé và thu hồi (Ngày 08)
@@ -155,5 +163,9 @@ Timeout sau commit không được diễn giải là thất bại. Caller đọc
 - `POST /api/orders/{orderId}/coupon` nhận `couponCode`; mã rỗng/blank là thao tác gỡ mã. Server gọi `dbo.usp_ApplyOrderCoupon`, không nhận tổng tiền hoặc discount từ client.
 - `OrderItem.unitPrice`, tên khu và nhãn ghế được snapshot từ HoldItem. Coupon chỉ áp dụng cho order của buyer, `PENDING_PAYMENT`, Hold còn hiệu lực và không có Payment `PENDING`/`UNKNOWN`.
 - Discount dùng `fn_CalculateCouponDiscount`: floor đồng nguyên, tối đa 30% subtotal; quota dùng `vw_CouponUsage`/`fn_GetCouponEligibility` và redemption `RESERVED` nguyên tử.
+
+### Payment legacy (Ngày 19)
+
+- `POST /vnpayajax` đã bị retired (410). Endpoint cũ nhận `amount` và `returnUrl` từ browser, nên không được phép mở lại. Payment initiation chỉ được thêm lại cùng SP ownership/amount server-side và callback verifier.
 
 Migration schema/constraint không tạo endpoint, Stored Procedure hoặc UDF mới. Các Servlet/Service sau chỉ được gọi object SQL khi object đó xuất hiện trong migration chức năng và được bổ sung vào hợp đồng này; không tạo API giả chỉ để kiểm kê bảng.

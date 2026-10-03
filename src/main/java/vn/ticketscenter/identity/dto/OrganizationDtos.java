@@ -23,6 +23,13 @@ public final class OrganizationDtos {
 
     public record MembershipView(UUID organizationId, String organizationName, String role, boolean active) {}
 
+    public record ProfileView(UUID id, String email, String fullName, String phone, boolean emailVerified,
+                              List<String> platformRoles, List<MembershipView> memberships) {}
+
+    public record OrganizationOverview(long eventCount, long paidOrderCount, long activeTickets,
+                                       long usedTickets, BigDecimal grossRevenue, BigDecimal totalRefund,
+                                       BigDecimal totalCommission, BigDecimal netPayable) {}
+
     public record CommissionRuleCommand(
             BigDecimal ratePercent, BigDecimal fixedFee, Instant effectiveFrom, Instant effectiveTo) {}
 

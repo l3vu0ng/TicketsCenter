@@ -12,6 +12,8 @@ import vn.ticketscenter.identity.dto.OrganizationDtos.MembershipView;
 import vn.ticketscenter.identity.dto.OrganizationDtos.OrganizationRequestCommand;
 import vn.ticketscenter.identity.dto.OrganizationDtos.OrganizationRequestView;
 import vn.ticketscenter.identity.dto.OrganizationDtos.Page;
+import vn.ticketscenter.identity.dto.OrganizationDtos.ProfileView;
+import vn.ticketscenter.identity.dto.OrganizationDtos.OrganizationOverview;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -104,7 +106,7 @@ public class OrganizationRepository {
         query.execute();
         @SuppressWarnings("unchecked") List<Object[]> rows = query.getResultList();
         if (rows.isEmpty()) throw new IllegalStateException("organization approval returned no result");
-        return (UUID) rows.getFirst()[0];
+        return uuid(rows.getFirst()[0]);
     }
 
     public boolean isActiveManager(EntityManager entityManager, UUID actorId, UUID organizationId) {
@@ -139,7 +141,33 @@ public class OrganizationRepository {
                         """)
                 .setParameter("userId", userId).getResultList();
         return rows.stream().map(row -> new MembershipView(
-                (UUID) row[0], (String) row[1], (String) row[2], (Boolean) row[3])).toList();
+                uuid(row[0]), (String) row[1], (String) row[2], (Boolean) row[3])).toList();
+    }
+
+    public ProfileView findProfile(EntityManager entityManager, UUID userId) {
+        Object[] row = (Object[]) entityManager.createNativeQuery("""
+                        SELECT id, email, full_name, phone,
+                                CASE WHEN email_verified_at IS NULL THEN 0 ELSE 1 END
+                        FROM dbo.tc_users WHERE id = :userId
+                        """).setParameter("userId", userId).getSingleResult();
+        @SuppressWarnings("unchecked") List<String> roles = entityManager.createNativeQuery("""
+                        SELECT role FROM dbo.tc_user_platform_roles WHERE user_id = :userId ORDER BY role
+                        """, String.class).setParameter("userId", userId).getResultList();
+        boolean verified = row[4] instanceof Boolean value ? value : ((Number) row[4]).intValue() == 1;
+        return new ProfileView(uuid(row[0]), (String) row[1], (String) row[2], (String) row[3], verified,
+                roles, findMemberships(entityManager, userId));
+    }
+
+    public OrganizationOverview findOverview(EntityManager entityManager, UUID organizationId) {
+        Object[] row = (Object[]) entityManager.createNativeQuery("""
+                SELECT COUNT_BIG(*), COALESCE(SUM(paid_order_count),0), COALESCE(SUM(active_tickets),0),
+                       COALESCE(SUM(used_tickets),0), COALESCE(SUM(gross_revenue),0),
+                       COALESCE(SUM(total_refund),0), COALESCE(SUM(total_commission),0), COALESCE(SUM(net_payable),0)
+                FROM dbo.vw_EventSalesReport WHERE organization_id = :organizationId
+                """).setParameter("organizationId", organizationId).getSingleResult();
+        return new OrganizationOverview(((Number) row[0]).longValue(), ((Number) row[1]).longValue(),
+                ((Number) row[2]).longValue(), ((Number) row[3]).longValue(), money(row[4]), money(row[5]),
+                money(row[6]), money(row[7]));
     }
 
     public void upsertMember(
@@ -168,6 +196,8 @@ public class OrganizationRepository {
                     .setParameter("role", command.role())
                     .executeUpdate();
         }
+        auditMembership(entityManager, actorId, organizationId, userId,
+                updated == 0 ? "MEMBERSHIP_ADDED" : "MEMBERSHIP_REACTIVATED");
     }
 
     public boolean updateMember(
@@ -184,7 +214,11 @@ public class OrganizationRepository {
         query.setParameter("organizationId", organizationId).setParameter("userId", userId);
         if (role != null) query.setParameter("role", role);
         if (active != null) query.setParameter("active", active);
-        return query.executeUpdate() == 1;
+        boolean updated = query.executeUpdate() == 1;
+        if (updated) auditMembership(entityManager, actorId, organizationId, userId,
+                role == null ? (Boolean.TRUE.equals(active) ? "MEMBERSHIP_ACTIVATED" : "MEMBERSHIP_DEACTIVATED")
+                        : "MEMBERSHIP_ROLE_CHANGED");
+        return updated;
     }
 
     public List<CommissionRuleView> findCommissionRules(EntityManager entityManager, UUID organizationId) {
@@ -195,11 +229,11 @@ public class OrganizationRepository {
                         """)
                 .setParameter("organizationId", organizationId).getResultList();
         return rows.stream().map(row -> new CommissionRuleView(
-                (UUID) row[0], (UUID) row[1], (BigDecimal) row[2], (BigDecimal) row[3],
+                uuid(row[0]), uuid(row[1]), (BigDecimal) row[2], (BigDecimal) row[3],
                 instant(row[4]), instant(row[5]))).toList();
     }
 
-    public UUID createCommissionRule(EntityManager entityManager, UUID organizationId, CommissionRuleCommand command) {
+    public UUID createCommissionRule(EntityManager entityManager, UUID actorId, UUID organizationId, CommissionRuleCommand command) {
         lockOrganization(entityManager, organizationId);
         UUID id = UUID.randomUUID();
         entityManager.createNativeQuery("""
@@ -211,7 +245,28 @@ public class OrganizationRepository {
                 .setParameter("rate", command.ratePercent()).setParameter("fixed", command.fixedFee())
                 .setParameter("effectiveFrom", command.effectiveFrom())
                 .setParameter("effectiveTo", command.effectiveTo()).executeUpdate();
+        entityManager.createNativeQuery("""
+                        INSERT dbo.tc_audit_logs(actor_id,action,aggregate_type,aggregate_id,detail)
+                        VALUES (:actorId,'COMMISSION_RULE_CREATED','COMMISSION_RULE',:ruleId,
+                                CONCAT('{"organizationId":"',:organizationId,'"}'))
+                        """).setParameter("actorId", actorId).setParameter("ruleId", id)
+                .setParameter("organizationId", organizationId).executeUpdate();
         return id;
+    }
+
+    private void auditMembership(EntityManager entityManager, UUID actorId, UUID organizationId, UUID userId, String action) {
+        UUID membershipId = (UUID) entityManager.createNativeQuery("""
+                        SELECT id FROM dbo.tc_organization_memberships
+                        WHERE organization_id=:organizationId AND user_id=:userId
+                        """, UUID.class).setParameter("organizationId", organizationId)
+                .setParameter("userId", userId).getSingleResult();
+        entityManager.createNativeQuery("""
+                        INSERT dbo.tc_audit_logs(actor_id,action,aggregate_type,aggregate_id,detail)
+                        VALUES (:actorId,:action,'ORGANIZATION_MEMBERSHIP',:membershipId,
+                                CONCAT('{"organizationId":"',:organizationId,'","userId":"',:userId,'"}'))
+                        """).setParameter("actorId", actorId).setParameter("action", action)
+                .setParameter("membershipId", membershipId).setParameter("organizationId", organizationId)
+                .setParameter("userId", userId).executeUpdate();
     }
 
     private void lockOrganization(EntityManager entityManager, UUID organizationId) {
@@ -254,20 +309,30 @@ public class OrganizationRepository {
 
     private OrganizationRequestView requestView(Object[] row) {
         return new OrganizationRequestView(
-                (UUID) row[0], (UUID) row[1], (UUID) row[2], (UUID) row[3], (String) row[4],
+                uuid(row[0]), uuid(row[1]), uuid(row[2]), uuid(row[3]), (String) row[4],
                 (String) row[5], (String) row[6], (String) row[7], (String) row[8],
                 instant(row[9]), instant(row[10]), (String) row[11]);
     }
 
     private MemberView memberView(Object[] row) {
         return new MemberView(
-                (UUID) row[0], (UUID) row[1], (UUID) row[2], (String) row[3], (String) row[4],
+                uuid(row[0]), uuid(row[1]), uuid(row[2]), (String) row[3], (String) row[4],
                 (String) row[5], (Boolean) row[6], (String) row[7], instant(row[8]));
+    }
+
+    private static UUID uuid(Object value) {
+        if (value == null) return null;
+        if (value instanceof UUID u) return u;
+        return UUID.fromString(value.toString());
     }
 
     private Instant instant(Object value) {
         if (value == null) return null;
         if (value instanceof Instant instant) return instant;
         return ((Timestamp) value).toInstant();
+    }
+
+    private static BigDecimal money(Object value) {
+        return value instanceof BigDecimal amount ? amount : new BigDecimal(value.toString());
     }
 }

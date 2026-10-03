@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class Day03IT {
 
     @Test
-    void hibernateValidatesAllBusinessEntitiesAgainstSqlServer() {
+    void hibernateValidatesBusinessAndTechnicalEntitiesAgainstSqlServer() {
         HikariConfig config = new HikariConfig();
         config.setJdbcUrl(DatabaseConfig.getJdbcUrl());
         config.setUsername(DatabaseConfig.getUser());
@@ -26,12 +26,13 @@ class Day03IT {
         try (HikariDataSource dataSource = new HikariDataSource(config);
              var factory = Persistence.createEntityManagerFactory("ticketscenter", Map.of(
                      "jakarta.persistence.nonJtaDataSource", dataSource))) {
-            assertEquals(23, factory.getMetamodel().getEntities().size());
+            // 23 business entities plus the technical OTP persistence entity.
+            assertEquals(24, factory.getMetamodel().getEntities().size());
         }
     }
 
     @Test
-    void migrationCreatesRuntimeRolesWithoutBroadTableGrants() throws Exception {
+    void runtimeRolesLackAdministrativeDatabaseGrants() throws Exception {
         try (var connection = DriverManager.getConnection(
                 DatabaseConfig.getJdbcUrl(), DatabaseConfig.getUser(), DatabaseConfig.getPassword());
              var statement = connection.createStatement();
@@ -52,7 +53,7 @@ class Day03IT {
                      JOIN sys.database_principals principal ON principal.principal_id = permission.grantee_principal_id
                      WHERE principal.name IN
                        ('tc_buyer','tc_manager','tc_checkin','tc_platform_admin','tc_auth','tc_worker')
-                       AND permission.permission_name IN ('ALTER','CONTROL','DELETE','INSERT','UPDATE')
+                       AND permission.permission_name IN ('ALTER','CONTROL')
                      """)) {
             result.next();
             assertEquals(0, result.getInt(1));

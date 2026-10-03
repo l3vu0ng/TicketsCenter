@@ -23,7 +23,7 @@ class FeaturePackageStructureTest {
 
             assertEquals(Set.of(
                     "admin", "audit", "config", "event", "fulfillment",
-                    "identity", "order", "payment", "settlement", "ticketing"
+                    "identity", "order", "payment", "report", "settlement", "ticketing"
             ), packages);
         }
 

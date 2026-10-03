@@ -8,6 +8,12 @@ public final class InputParser {
     private InputParser() {
     }
 
+    public static UUID asUuid(Object value) {
+        if (value == null) return null;
+        if (value instanceof UUID u) return u;
+        return UUID.fromString(value.toString());
+    }
+
     public static UUID uuid(String value, String field) {
         try {
             return UUID.fromString(value);

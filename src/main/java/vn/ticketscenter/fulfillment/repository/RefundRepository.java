@@ -21,7 +21,7 @@ public class RefundRepository {
                 OFFSET 0 ROWS FETCH NEXT :limit ROWS ONLY
                 """).setParameter("limit", limit).getResultList();
         return rows.stream().map(row -> new RefundWork(
-                (UUID) row[0], (BigDecimal) row[1], (String) row[2], (String) row[3])).toList();
+                vn.ticketscenter.config.util.InputParser.asUuid(row[0]), (BigDecimal) row[1], (String) row[2], (String) row[3])).toList();
     }
 
     public void apply(EntityManager entityManager, UUID refundId, RefundGateway.Result result) {
@@ -36,7 +36,7 @@ public class RefundRepository {
     }
 
     public void retryCustomer(EntityManager entityManager, UUID requestId, UUID actorId) {
-        entityManager.createStoredProcedureQuery("dbo.usp_ReviewRefundRequest")
+        entityManager.createStoredProcedureQuery("dbo.usp_DecideRefundRequest")
                 .registerStoredProcedureParameter("request_id", UUID.class, ParameterMode.IN)
                 .registerStoredProcedureParameter("actor_id", UUID.class, ParameterMode.IN)
                 .registerStoredProcedureParameter("decision", String.class, ParameterMode.IN)

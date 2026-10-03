@@ -14,4 +14,11 @@ public final class AdminDtos {
             long totalEvents,
             long totalOrders
     ) {}
+
+    public record AdminOverview(
+            long pendingOrganizationRequests,
+            long pendingEvents,
+            long pendingRefundRequests,
+            long pendingSettlements
+    ) {}
 }

@@ -1,6 +1,7 @@
 package vn.ticketscenter.admin.service;
 
 import vn.ticketscenter.admin.dto.AdminDtos.AdminDashboardSummary;
+import vn.ticketscenter.admin.dto.AdminDtos.AdminOverview;
 import vn.ticketscenter.identity.service.AccountService;
 import vn.ticketscenter.identity.service.AuthorizationService;
 import vn.ticketscenter.config.persistence.DatabasePrincipal;
@@ -34,6 +35,19 @@ public class AdminService {
 
             return new AdminDashboardSummary(totalUsers, totalOrgs, totalEvents, totalOrders);
         });
+    }
+
+    public AdminOverview getOverview(AccountService.AuthenticatedAccount account) {
+        AuthorizationService.requireAdmin(account);
+        return transactions.execute(DatabasePrincipal.ADMIN, entityManager -> new AdminOverview(
+                count(entityManager, "SELECT COUNT_BIG(*) FROM dbo.tc_organization_requests WHERE status = 'PENDING'"),
+                count(entityManager, "SELECT COUNT_BIG(*) FROM dbo.tc_events WHERE status = 'PENDING_APPROVAL'"),
+                count(entityManager, "SELECT COUNT_BIG(*) FROM dbo.tc_refund_requests WHERE status IN ('PENDING','APPROVED')"),
+                count(entityManager, """
+                        SELECT COUNT_BIG(*) FROM dbo.tc_events e
+                        LEFT JOIN dbo.tc_settlements s ON s.event_id = e.id
+                        WHERE e.end_time <= SYSUTCDATETIME() AND (s.id IS NULL OR s.status = 'DRAFT')
+                        """)));
     }
 
     /**
@@ -87,5 +101,9 @@ public class AdminService {
                     .executeUpdate();
             return true;
         });
+    }
+
+    private static long count(jakarta.persistence.EntityManager entityManager, String sql) {
+        return ((Number) entityManager.createNativeQuery(sql).getSingleResult()).longValue();
     }
 }

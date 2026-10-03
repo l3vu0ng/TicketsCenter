@@ -23,6 +23,7 @@ import vn.ticketscenter.event.dto.EventDtos.ZoneView;
 import vn.ticketscenter.event.integration.storage.LocalImageStorage;
 import vn.ticketscenter.event.repository.EventRepository;
 import vn.ticketscenter.event.service.EventService;
+import vn.ticketscenter.event.service.PublicEventCache;
 import vn.ticketscenter.identity.filter.AuthenticationFilter;
 import vn.ticketscenter.identity.service.AccountService.AuthenticatedAccount;
 
@@ -41,6 +42,7 @@ import java.util.UUID;
 public final class EventServlet extends HttpServlet {
     private final EventService eventService;
     private final LocalImageStorage imageStorage;
+    private final PublicEventCache publicEventCache = new PublicEventCache();
 
     public EventServlet() {
         this.eventService = null;
@@ -77,11 +79,15 @@ public final class EventServlet extends HttpServlet {
             }
             String[] parts = parts(path);
             if (parts.length == 2 && "events".equals(parts[0])) {
-                HttpResponses.data(response, eventJson(service.getPublic(uuid(parts[1]))));
+                UUID eventId = uuid(parts[1]);
+                HttpResponses.data(response, cached(publicEventCache.eventKey(eventId),
+                        () -> eventJson(service.getPublic(eventId))));
                 return;
             }
             if (parts.length == 3 && "events".equals(parts[0]) && "zones".equals(parts[2])) {
-                HttpResponses.data(response, zonesJson(service.getPublicZones(uuid(parts[1]))));
+                UUID eventId = uuid(parts[1]);
+                HttpResponses.data(response, cached(publicEventCache.zonesKey(eventId),
+                        () -> zonesJson(service.getPublicZones(eventId))));
                 return;
             }
             HttpResponses.error(response, 404, "NOT_FOUND", "Endpoint sự kiện không tồn tại");
@@ -214,6 +220,14 @@ public final class EventServlet extends HttpServlet {
                         + ",\"status\":" + json(seat.status()) + "}")
                         .reduce((a, b) -> a + "," + b).orElse("") + "]}")
                 .reduce((a, b) -> a + "," + b).orElse("") + "]}";
+    }
+
+    private String cached(String key, java.util.function.Supplier<String> databaseRead) {
+        String cached = publicEventCache.get(key);
+        if (cached != null) return cached;
+        String value = databaseRead.get();
+        publicEventCache.put(key, value);
+        return value;
     }
 
     private static void handle(HttpServletResponse response, RuntimeException exception) throws IOException {

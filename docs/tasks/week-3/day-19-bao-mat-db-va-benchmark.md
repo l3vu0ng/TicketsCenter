@@ -30,11 +30,11 @@
 
 **Cách thực hiện:**
 
-- [ ] 1. Đối chiếu grants SPEC §14.10; check-in DENY financial views/UDF/bảng gốc, không SELECT V06; không một runtime nào là db_owner/sysadmin.
+- [x] 1. Đối chiếu grants SPEC §14.10; check-in DENY financial views/UDF/bảng gốc, không SELECT V06; không một runtime nào là db_owner/sysadmin.
 - [ ] 2. Buyer SP09 chỉ free branch, worker SP10/SP17 chỉ cancelled path; gọi trực tiếp với actor/status sai để chứng minh DB guard.
-- [ ] 3. Minh họa GRANT quyền thử trên test User rồi REVOKE khi không còn nguồn cấp khác; DENY riêng check-in và thử inherited/public grants.
+- [x] 3. Minh họa GRANT quyền thử trên test User rồi REVOKE khi không còn nguồn cấp khác; DENY riêng check-in và thử inherited/public grants.
 - [ ] 4. Kiểm ownership chain/module permission đủ cho SP chạy mà không cấp DML rộng; HTTP row authorization vẫn cần dù DB role đúng.
-- [ ] 5. Azure script chỉ contained users/roles phù hợp, không chạy nguyên Login server script; ghi tách quyền DDL/migration.
+- [x] 5. Azure script chỉ contained users/roles phù hợp, không chạy nguyên Login server script; ghi tách quyền DDL/migration.
 
 **Kiểm chứng bắt buộc:**
 
@@ -81,7 +81,7 @@
 **Cách thực hiện:**
 
 - [ ] 1. Tạo seed tái lập cho nhiều org/Event, lịch sử Order/Payment/Refund lớn, ít active/pending và một org có nhiều bản ghi.
-- [ ] 2. Viết 15 query đúng caller SPEC: catalog/zone/history/jobs/revenue/refunds/coupon/request/ticket/payout/audit/rule/internal event.
+- [x] 2. Viết 15 query đúng caller SPEC: catalog/zone/history/jobs/revenue/refunds/coupon/request/ticket/payout/audit/rule/internal event.
 - [ ] 3. Đo trước trên schema chưa có 15 performance indexes; unique/filtered unique bảo vệ nghiệp vụ vẫn giữ nguyên.
 - [ ] 4. Thu actual plan, STATISTICS IO/TIME, count kết quả và số lần chạy; warm-up và lặp điều kiện tương đương, lưu median.
 - [ ] 5. Không DROP index trên dev/demo; nếu benchmark có index sẵn cần database riêng hoặc xác nhận exact destructive target trước thao tác.
@@ -105,7 +105,7 @@
 
 **Cách thực hiện:**
 
-- [ ] 1. Chạy inventory V/SP/F/TR và method map; thiếu caller thì thêm vào use case thật của SPEC, không tạo endpoint chỉ để tăng số lượng.
+- [x] 1. Chạy inventory V/SP/F/TR và method map; thiếu caller thì thêm vào use case thật của SPEC, không tạo endpoint chỉ để tăng số lượng.
 - [ ] 2. Luân phiên requests buyer/manager/check-in/admin trên connection tái sử dụng, assert database principal và actor audit.
 - [ ] 3. Kiểm lifetime transaction, EntityManager close và pool tổng bằng metric; role config mới không tự tăng 5 connections mỗi role.
 - [ ] 4. Review tất cả đường ghi dùng cùng locking.md, nhất là JPA CRUD membership/coupon/layout với trigger và SP.
