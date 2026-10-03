@@ -827,6 +827,254 @@ footer {
     background: #fafafa;
 }
 
+/* ==========================================================================
+   8. RESPONSIVE FOUNDATION
+   Shared overrides for the standalone mock pages and page frames.
+   ========================================================================== */
+body {
+    overflow-x: hidden;
+}
+
+img,
+svg,
+video {
+    max-width: 100%;
+}
+
+.table-responsive {
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+}
+
+.table-responsive > .table-custom {
+    min-width: 680px;
+}
+
+@media (max-width: 1199.98px) {
+    .dashboard-content {
+        padding: 28px 24px;
+    }
+
+    .search-wrapper {
+        max-width: 460px;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .navbar-custom > .container,
+    .navbar-custom > .container-fluid {
+        flex-wrap: wrap !important;
+        gap: 12px;
+    }
+
+    .navbar-custom > .container-fluid > :last-child {
+        flex: 1 0 100%;
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
+
+    .navbar-custom > .container-fluid > :last-child > .d-flex:first-child {
+        min-width: 0;
+        flex: 1 1 auto;
+    }
+
+    .navbar-custom > .container-fluid select {
+        width: 100% !important;
+        min-width: 0;
+    }
+
+    .navbar-custom .search-wrapper {
+        order: 3;
+        flex: 1 0 100%;
+        max-width: none;
+        margin: 0;
+    }
+
+    .navbar-custom .search-btn {
+        padding: 0 16px;
+    }
+
+    .navbar-brand-custom {
+        font-size: 1.3rem;
+    }
+
+    .hero-banner .carousel-item img {
+        height: clamp(220px, 48vw, 320px);
+    }
+
+    .category-nav {
+        gap: 20px;
+        margin-bottom: 24px;
+    }
+
+    .panel-box {
+        padding: 20px;
+    }
+
+    .panel-header {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .dashboard-layout {
+        display: block;
+        min-height: 0;
+    }
+
+    .dashboard-sidebar {
+        width: 100%;
+        border-right: 0;
+        border-bottom: 1px solid var(--gray-border);
+        padding: 16px 12px;
+        overflow-x: auto;
+    }
+
+    .sidebar-menu {
+        display: flex;
+        gap: 8px;
+        min-width: max-content;
+        margin-bottom: 12px;
+    }
+
+    .sidebar-menu li a {
+        border-left: 0;
+        border-bottom: 3px solid transparent;
+        padding: 9px 10px;
+        white-space: nowrap;
+    }
+
+    .sidebar-menu li a.active {
+        border-bottom-color: var(--primary);
+    }
+
+    .dashboard-content {
+        padding: 24px 16px;
+    }
+
+    .admin-navbar {
+        padding: 12px 16px;
+    }
+
+    .admin-navbar > .container-fluid {
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .admin-navbar > .container-fluid > :last-child {
+        width: 100%;
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
+
+    .modern-filter-bar {
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .event-title {
+        font-size: 0.96rem;
+    }
+
+    .error-page .container {
+        width: 100%;
+    }
+
+    .auth-container {
+        width: calc(100vw - 32px) !important;
+        max-width: none !important;
+        margin: 32px auto !important;
+        padding: 24px !important;
+    }
+
+    .otp-input {
+        width: clamp(38px, 12vw, 48px) !important;
+        height: clamp(48px, 14vw, 56px) !important;
+    }
+
+    .seat-grid {
+        gap: 6px !important;
+        width: 100%;
+    }
+
+    .ticket-left,
+    .ticket-right {
+        padding: 24px !important;
+    }
+
+    .ticket-left {
+        border-right: 0 !important;
+        border-bottom: 1px dashed var(--gray-border);
+    }
+
+    .qr-placeholder {
+        width: clamp(128px, 42vw, 144px) !important;
+        height: clamp(128px, 42vw, 144px) !important;
+    }
+
+    .panel-box[style*="max-width"],
+    .mx-auto[style*="max-width"] {
+        max-width: calc(100vw - 32px) !important;
+    }
+
+    input[style*="width: 220px"],
+    select[style*="width: 110px"] {
+        width: 100% !important;
+        max-width: none !important;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .scanner-header {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .scanner-header > :nth-child(2) {
+        order: -1;
+        flex: 1 0 100%;
+    }
+
+    .scanner-header > :first-child,
+    .scanner-header > :last-child {
+        flex: 1 1 auto;
+    }
+
+    .scanner-header > :last-child {
+        text-align: right;
+    }
+}
+
+@media (max-width: 420px) {
+    .search-wrapper {
+        height: 40px;
+    }
+
+    .location-box {
+        padding: 0 8px;
+    }
+
+    .location-select {
+        max-width: 92px;
+        overflow: hidden;
+    }
+
+    .search-btn {
+        padding: 0 12px !important;
+        font-size: 0.78rem;
+    }
+
+    .btn-primary-custom,
+    .btn-outline-custom,
+    .btn-dark-custom {
+        width: 100%;
+    }
+
+    .error-actions {
+        flex-direction: column;
+    }
+}
+
 .footer-title {
     font-weight: 700;
     font-size: 0.92rem;
